@@ -1,0 +1,69 @@
+<!-- Topbar -->
+<div class="topbar-page">
+  <h1>👥 {{ 'AIDANT.MY_PATIENTS' | translate }}</h1>
+  <div class="search-box">
+    <span class="search-icon">🔍</span>
+    <input type="text" [placeholder]="'AIDANT.SEARCH_PATIENT' | translate"
+           [(ngModel)]="searchQuery" (input)="filterPatients()" maxlength="100">
+  </div>
+</div>
+
+<!-- Content -->
+<div class="content-area">
+
+  <!-- Patients List -->
+  <div class="patients-grid">
+    <div class="patient-card" *ngFor="let patient of filteredPatients"
+         [class.selected]="selectedPatient?.id === patient.id"
+         (click)="selectPatient(patient)">
+      <div class="patient-card-header">
+        <div class="avatar" [class.avatar-inactive]="!patient.actif">{{ getPatientInitials(patient) }}</div>
+        <div class="patient-card-info">
+          <h3>{{ patient.nomComplet }}</h3>
+          <p>{{ getAge(patient.dateNaissance) }} {{ 'COMMON.YEARS_OLD' | translate }}</p>
+        </div>
+        <span class="badge" [ngClass]="patient.actif ? 'badge-success' : 'badge-warning'">
+          {{ patient.actif ? ('AIDANT.ACTIVE' | translate) : ('AIDANT.INACTIVE' | translate) }}
+        </span>
+      </div>
+
+      <div class="patient-card-body">
+        <div class="info-row">
+          <span class="info-label">📍 {{ 'AIDANT.ADDRESS' | translate }}</span>
+          <span class="info-value">{{ patient.adresse || '—' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">📞 {{ 'AIDANT.PHONE' | translate }}</span>
+          <span class="info-value">{{ patient.numeroDeTelephone || '—' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">🩺 {{ 'AIDANT.CONDITION' | translate }}</span>
+          <span class="info-value">{{ patient.antecedents || '—' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">⚠️ {{ 'AIDANT.ALLERGIES' | translate }}</span>
+          <span class="info-value">{{ patient.allergies || ('AIDANT.NONE' | translate) }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">📅 {{ 'AIDANT.LAST_VISIT' | translate }}</span>
+          <span class="info-value">{{ formatDate(patient.derniereVisite) }}</span>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="patient-card-actions" *ngIf="selectedPatient?.id === patient.id">
+        <button class="btn btn-sm btn-primary" (click)="callPatient(patient.numeroDeTelephone); $event.stopPropagation()">
+          📞 {{ 'AIDANT.CALL' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="filteredPatients.length === 0">
+    <span class="empty-icon">👥</span>
+    <p *ngIf="!searchQuery">{{ 'AIDANT.NO_PATIENT' | translate }}</p>
+    <p *ngIf="searchQuery">{{ 'AIDANT.NO_RESULTS' | translate }}</p>
+  </div>
+
+</div>

@@ -1,0 +1,24 @@
+<div class="topbar">
+  <div class="topbar-spacer"></div>
+  <div class="topbar-search">
+    <i class="pi pi-search search-icon"></i>
+    <input
+      type="text"
+      class="search-input"
+      placeholder="Search for patients, caregivers, or staff..."
+      [(ngModel)]="searchValue"
+    />
+  </div>
+
+  <div class="topbar-actions">
+    <button type="button" class="icon-btn" title="Notifications">
+      <i class="pi pi-bell"></i>
+    </button>
+    <button type="button" class="icon-btn" title="Help">
+      <i class="pi pi-question-circle"></i>
+    </button>
+    <button type="button" class="add-user-btn" (click)="onAddUser()">Add New User</button>
+  </div>
+</div>
+
+<app-user-create-dialog #createDialog />

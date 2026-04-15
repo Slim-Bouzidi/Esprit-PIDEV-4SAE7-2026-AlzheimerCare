@@ -1,0 +1,402 @@
+<header class="topbar-page">
+  <h1>{{ 'SOIGNANT_REPORTS.TITLE' | translate }}</h1>
+  <button class="btn-outline" (click)="logout()">{{ 'COMMON.LOGOUT' | translate }}</button>
+</header>
+<main class="content-area">
+
+  <!-- ═══ RAPPORTS DU MÉDECIN (BDD réelle) ═══ -->
+  <section class="card card-medecin-rapports">
+    <div class="card-header">
+      <h2>🩺 {{ 'SOIGNANT_REPORTS.DOCTOR_DB_REPORTS' | translate }}</h2>
+      <span class="badge-count" *ngIf="rapportsMedecin.length > 0">{{ rapportsMedecin.length }}</span>
+    </div>
+    <p class="section-desc">{{ 'SOIGNANT_REPORTS.DOCTOR_DB_REPORTS_DESC' | translate }}</p>
+
+    <!-- Loading -->
+    <div *ngIf="loadingRapportsMedecin" class="loading-msg">
+      ⏳ {{ 'COMMON.LOADING' | translate }}...
+    </div>
+
+    <!-- Cartes des rapports -->
+    <div class="rapports-grid" *ngIf="!loadingRapportsMedecin && rapportsMedecin.length > 0">
+      <div *ngFor="let r of rapportsMedecin" class="rapport-card rapport-medecin-card" (click)="consulterRapportMedecin(r)">
+        <div class="rapport-header">
+          <div class="doctor-info">
+            <span class="doctor-icon">🩺</span> {{ r.soignant?.nomComplet || r.soignant?.nom || 'Médecin' }}
+          </div>
+          <span class="rapport-date">{{ r.dateGeneration | date:'dd/MM/yyyy' }}</span>
+        </div>
+
+        <div class="patient-name">{{ r.patient?.nomComplet || '—' }}</div>
+
+        <div class="rapport-card-titre" *ngIf="r.titre">{{ r.titre }}</div>
+
+        <div class="rapport-card-meta">
+          <span class="badge-type">{{ getTypeLabel(r.typeRapport) }}</span>
+          <span class="badge-statut-soignant statut-envoye">{{ getStatutLabel(r.statut) }}</span>
+        </div>
+
+        <p class="rapport-period" *ngIf="r.periodeDebut && r.periodeFin">
+          📅 {{ r.periodeDebut | date:'dd/MM/yyyy' }} → {{ r.periodeFin | date:'dd/MM/yyyy' }}
+        </p>
+
+        <p class="rapport-preview" *ngIf="r.contenuTexte">{{ r.contenuTexte }}</p>
+
+        <div class="rapport-footer">
+          <div class="rapport-card-actions">
+            <button class="btn-card-action btn-card-view" (click)="$event.stopPropagation(); consulterRapportMedecin(r)">👁️ Consulter</button>
+            <button class="btn-card-action btn-card-download" (click)="$event.stopPropagation(); downloadRapportMedecin(r)">⬇️ {{ 'SOIGNANT_REPORTS.DOWNLOAD' | translate }}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p *ngIf="!loadingRapportsMedecin && rapportsMedecin.length === 0" class="empty-msg">
+      {{ 'SOIGNANT_REPORTS.NO_DOCTOR_DB_REPORT' | translate }}
+    </p>
+  </section>
+
+  <!-- ═══ RAPPORTS HEBDOMADAIRES ═══ -->
+  <section class="card card-hebdo-rapports">
+    <div class="card-header">
+      <h2>📊 Rapports Hebdomadaires</h2>
+      <span class="badge-count" *ngIf="rapportsHebdo.length > 0">{{ rapportsHebdo.length }}</span>
+    </div>
+    <p class="section-desc">Rapports consolidés à partir des fiches de transmission quotidiennes — l'envoi au médecin s'effectue depuis la page <strong>Fiches</strong></p>
+
+    <div *ngIf="loadingHebdo" class="loading-msg">⏳ {{ 'COMMON.LOADING' | translate }}...</div>
+
+    <div class="rapports-grid" *ngIf="!loadingHebdo && rapportsHebdo.length > 0">
+      <div *ngFor="let rh of rapportsHebdo" class="rapport-card rapport-hebdo-card" (click)="openHebdoDetail(rh)">
+        <div class="rapport-header">
+          <div class="doctor-info">
+            <span class="doctor-icon">📊</span> Rapport #{{ rh.id }}
+          </div>
+          <span class="rapport-date">{{ rh.dateCreation | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+
+        <div class="patient-name">{{ rh.patientNom || rh.patient?.nomComplet || '—' }}</div>
+
+        <p class="rapport-period" *ngIf="rh.dateDebut && rh.dateFin">
+          📅 {{ rh.dateDebut | date:'dd/MM/yyyy' }} → {{ rh.dateFin | date:'dd/MM/yyyy' }}
+        </p>
+
+        <div class="rapport-card-meta">
+          <span class="badge-type">Hebdomadaire</span>
+          <span class="badge-statut-soignant statut-consulte" *ngIf="rh.consulteParMedecin">👁️ Consulté</span>
+          <span class="badge-statut-soignant statut-envoye" *ngIf="rh.envoyeAuMedecin && !rh.consulteParMedecin">✅ Envoyé</span>
+          <span class="badge-statut-soignant statut-attente" *ngIf="!rh.envoyeAuMedecin">⏳ En attente</span>
+        </div>
+
+        <div class="rapport-hebdo-indicators" *ngIf="rh.tauxObservanceMedicaments != null">
+          <div class="hebdo-indicator">
+            <span class="hebdo-ind-value">{{ rh.tauxObservanceMedicaments }}%</span>
+            <span class="hebdo-ind-label">Médicaments</span>
+          </div>
+          <div class="hebdo-indicator" *ngIf="rh.tauxObservanceRepas != null">
+            <span class="hebdo-ind-value">{{ rh.tauxObservanceRepas }}%</span>
+            <span class="hebdo-ind-label">Repas</span>
+          </div>
+          <div class="hebdo-indicator" *ngIf="rh.tauxObservanceRendezVous != null">
+            <span class="hebdo-ind-value">{{ rh.tauxObservanceRendezVous }}%</span>
+            <span class="hebdo-ind-label">RDV</span>
+          </div>
+        </div>
+
+        <div class="rapport-footer">
+          <div class="rapport-card-actions">
+            <button class="btn-card-action btn-card-view" (click)="$event.stopPropagation(); openHebdoDetail(rh)">👁️ Consulter</button>
+            <span class="badge-statut-soignant statut-envoye" *ngIf="rh.envoyeAuMedecin" style="margin-left: 8px;">
+              ✅ Envoyé au médecin
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p *ngIf="!loadingHebdo && rapportsHebdo.length === 0" class="empty-msg">
+      Aucun rapport hebdomadaire disponible. Les rapports sont générés automatiquement à partir des fiches de transmission.
+    </p>
+  </section>
+
+</main>
+
+<!-- ═══ MODAL CONSULTATION RAPPORT MÉDECIN (BDD) — vue clinique lecture seule ═══ -->
+<div class="modal-overlay modal-clinical-overlay" *ngIf="selectedRapportMedecin" (click)="fermerRapportMedecin()">
+  <div class="modal-content modal-clinical-soignant" (click)="$event.stopPropagation()">
+    <!-- Header hospital -->
+    <div class="clinical-doc-header-soignant">
+      <div class="doc-header-left-s">
+        <span class="doc-institution-s">AXE Alzheimer e-Health</span>
+        <span class="doc-type-label-s">{{ 'SOIGNANT_REPORTS.CLINICAL_REPORT' | translate }}</span>
+      </div>
+      <div class="doc-header-right-s">
+        <span class="doc-ref-s">Réf. #{{ selectedRapportMedecin.id }}</span>
+        <span class="doc-date-s">{{ selectedRapportMedecin.dateGeneration | date:'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+      <button class="modal-close-s" (click)="fermerRapportMedecin()">×</button>
+    </div>
+
+    <div class="modal-body clinical-body-s">
+
+      <!-- Section A : Synthèse clinique -->
+      <section class="clinical-section-s section-summary-s">
+        <h3 class="clinical-section-title-s">
+          <span class="section-letter-s">A</span>
+          {{ 'SOIGNANT_REPORTS.EXECUTIVE_SUMMARY' | translate }}
+        </h3>
+        <div class="summary-grid-s">
+          <div class="summary-item-s">
+            <span class="summary-label-s">{{ 'SOIGNANT_REPORTS.PATIENT_LABEL' | translate }}</span>
+            <span class="summary-value-s summary-value-lg-s">{{ selectedRapportMedecin.patient?.nomComplet || '—' }}</span>
+          </div>
+          <div class="summary-item-s">
+            <span class="summary-label-s">{{ 'SOIGNANT_REPORTS.PERIOD_LABEL' | translate }}</span>
+            <span class="summary-value-s" *ngIf="selectedRapportMedecin.periodeDebut">
+              {{ selectedRapportMedecin.periodeDebut | date:'dd/MM/yyyy' }} → {{ selectedRapportMedecin.periodeFin | date:'dd/MM/yyyy' }}
+            </span>
+            <span class="summary-value-s" *ngIf="!selectedRapportMedecin.periodeDebut">—</span>
+          </div>
+          <div class="summary-item-s">
+            <span class="summary-label-s">{{ 'SOIGNANT_REPORTS.TYPE_LABEL' | translate }}</span>
+            <span class="summary-value-s">{{ getTypeLabel(selectedRapportMedecin.typeRapport) }}</span>
+          </div>
+          <div class="summary-item-s">
+            <span class="summary-label-s">{{ 'SOIGNANT_REPORTS.STATUS_LABEL' | translate }}</span>
+            <span class="badge-statut-soignant"
+                  [class.statut-genere]="selectedRapportMedecin.statut === 'GENERE'"
+                  [class.statut-envoye]="selectedRapportMedecin.statut === 'ENVOYE'"
+                  [class.statut-archive]="selectedRapportMedecin.statut === 'ARCHIVE'">
+              {{ getStatutLabel(selectedRapportMedecin.statut) }}
+            </span>
+          </div>
+          <div class="summary-item-s">
+            <span class="summary-label-s">{{ 'SOIGNANT_REPORTS.DOCTOR_LABEL' | translate }}</span>
+            <span class="summary-value-s">{{ selectedRapportMedecin.soignant?.nomComplet || selectedRapportMedecin.soignant?.nom || '—' }}</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section B : Indicateurs cliniques -->
+      <section class="clinical-section-s section-indicators-s" *ngIf="hasIndicators(selectedRapportMedecin)">
+        <h3 class="clinical-section-title-s">
+          <span class="section-letter-s">B</span>
+          {{ 'SOIGNANT_REPORTS.CLINICAL_INDICATORS' | translate }}
+        </h3>
+        <div class="indicators-grid-s">
+          <div class="indicator-card-s" *ngIf="selectedRapportMedecin.tauxObservance != null">
+            <span class="indicator-value-s" [class.indicator-alert-s]="selectedRapportMedecin.tauxObservance! < 70"
+                  [class.indicator-ok-s]="selectedRapportMedecin.tauxObservance! >= 70">
+              {{ selectedRapportMedecin.tauxObservance }}%
+            </span>
+            <span class="indicator-label-s">Observance</span>
+          </div>
+          <div class="indicator-card-s" *ngIf="selectedRapportMedecin.qualiteSommeil != null">
+            <span class="indicator-value-s" [class.indicator-alert-s]="selectedRapportMedecin.qualiteSommeil! < 5"
+                  [class.indicator-ok-s]="selectedRapportMedecin.qualiteSommeil! >= 5">
+              {{ selectedRapportMedecin.qualiteSommeil }}/10
+            </span>
+            <span class="indicator-label-s">Sommeil</span>
+          </div>
+          <div class="indicator-card-s" *ngIf="selectedRapportMedecin.nbAlertes != null">
+            <span class="indicator-value-s" [class.indicator-alert-s]="selectedRapportMedecin.nbAlertes! > 0">
+              {{ selectedRapportMedecin.nbAlertes }}
+            </span>
+            <span class="indicator-label-s">Alertes</span>
+          </div>
+          <div class="indicator-card-s" *ngIf="selectedRapportMedecin.nbInterventions != null">
+            <span class="indicator-value-s">{{ selectedRapportMedecin.nbInterventions }}</span>
+            <span class="indicator-label-s">Interventions</span>
+          </div>
+          <div class="indicator-card-s" *ngIf="selectedRapportMedecin.nbComportementsAnormaux != null">
+            <span class="indicator-value-s" [class.indicator-alert-s]="selectedRapportMedecin.nbComportementsAnormaux! > 0">
+              {{ selectedRapportMedecin.nbComportementsAnormaux }}
+            </span>
+            <span class="indicator-label-s">Comp. anormaux</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section C : Protocole thérapeutique -->
+      <section class="clinical-section-s" *ngIf="selectedRapportMedecin.contenuTexte">
+        <h3 class="clinical-section-title-s">
+          <span class="section-letter-s">C</span>
+          {{ 'SOIGNANT_REPORTS.THERAPEUTIC_PROTOCOL' | translate }}
+        </h3>
+        <div class="clinical-note-block-s">
+          <pre class="clinical-note-s">{{ selectedRapportMedecin.contenuTexte }}</pre>
+        </div>
+      </section>
+
+      <!-- Section D : Directives médicales -->
+      <section class="clinical-section-s" *ngIf="selectedRapportMedecin.directives">
+        <h3 class="clinical-section-title-s">
+          <span class="section-letter-s">D</span>
+          {{ 'SOIGNANT_REPORTS.PHYSICIAN_DIRECTIVES' | translate }}
+        </h3>
+        <div class="clinical-note-block-s clinical-note-directive-s">
+          <pre class="clinical-note-s">{{ selectedRapportMedecin.directives }}</pre>
+        </div>
+      </section>
+
+      <!-- Section E : Recommandations -->
+      <section class="clinical-section-s" *ngIf="selectedRapportMedecin.recommandations">
+        <h3 class="clinical-section-title-s">
+          <span class="section-letter-s">E</span>
+          {{ 'SOIGNANT_REPORTS.RECOMMENDATIONS_SECTION' | translate }}
+        </h3>
+        <div class="clinical-note-block-s clinical-note-reco-s">
+          <pre class="clinical-note-s">{{ selectedRapportMedecin.recommandations }}</pre>
+        </div>
+      </section>
+
+      <!-- Section soignant/aidant simplifiée -->
+      <section class="clinical-section-s section-caregiver-s" *ngIf="selectedRapportMedecin.directives || selectedRapportMedecin.recommandations">
+        <h3 class="clinical-section-title-s caregiver-title-s">
+          <span class="section-letter-s section-letter-caregiver-s">★</span>
+          {{ 'SOIGNANT_REPORTS.CAREGIVER_SECTION' | translate }}
+        </h3>
+        <p class="caregiver-notice-s">{{ 'SOIGNANT_REPORTS.CAREGIVER_NOTICE' | translate }}</p>
+        <div class="caregiver-content-s">
+          <div class="caregiver-block-s" *ngIf="selectedRapportMedecin.directives">
+            <h4>{{ 'SOIGNANT_REPORTS.CAREGIVER_TODO' | translate }}</h4>
+            <pre class="caregiver-text-s">{{ selectedRapportMedecin.directives }}</pre>
+          </div>
+          <div class="caregiver-block-s" *ngIf="selectedRapportMedecin.recommandations">
+            <h4>{{ 'SOIGNANT_REPORTS.CAREGIVER_WATCH' | translate }}</h4>
+            <pre class="caregiver-text-s">{{ selectedRapportMedecin.recommandations }}</pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- Traçabilité -->
+      <section class="clinical-section-s section-traceability-s">
+        <h3 class="clinical-section-title-s">
+          <span class="section-letter-s">F</span>
+          {{ 'SOIGNANT_REPORTS.TRACEABILITY' | translate }}
+        </h3>
+        <div class="traceability-grid-s">
+          <div class="trace-item-s">
+            <span class="trace-label-s">{{ 'SOIGNANT_REPORTS.AUTHOR' | translate }}</span>
+            <span class="trace-value-s">{{ selectedRapportMedecin.soignant?.nomComplet || selectedRapportMedecin.soignant?.nom || '—' }}</span>
+          </div>
+          <div class="trace-item-s">
+            <span class="trace-label-s">Source</span>
+            <span class="trace-value-s">AXE Alzheimer e-Health — Module Médecin</span>
+          </div>
+          <div class="trace-item-s">
+            <span class="trace-label-s">{{ 'SOIGNANT_REPORTS.DATE_LABEL' | translate }}</span>
+            <span class="trace-value-s">{{ selectedRapportMedecin.dateGeneration | date:'dd/MM/yyyy HH:mm:ss' }}</span>
+          </div>
+          <div class="trace-item-s">
+            <span class="trace-label-s">Format</span>
+            <span class="trace-value-s">{{ selectedRapportMedecin.formatExport || 'PDF' }}</span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-outline" (click)="fermerRapportMedecin()">{{ 'COMMON.CLOSE' | translate }}</button>
+      <button class="btn-primary" (click)="downloadRapportMedecin(selectedRapportMedecin)">⬇️ {{ 'SOIGNANT_REPORTS.DOWNLOAD' | translate }}</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL DÉTAIL RAPPORT HEBDOMADAIRE ═══ -->
+<div class="modal-overlay modal-hebdo-overlay" *ngIf="selectedHebdo" (click)="closeHebdoDetail()">
+  <div class="modal-content modal-hebdo-content" (click)="$event.stopPropagation()">
+    <div class="modal-header modal-header-hebdo">
+      <h3>📊 Rapport Hebdomadaire #{{ selectedHebdo.id }}</h3>
+      <button class="btn-close" (click)="closeHebdoDetail()">×</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="hebdo-detail-grid">
+        <div class="detail-row">
+          <div class="detail-label">Patient</div>
+          <div class="detail-value">{{ selectedHebdo.patientNom || selectedHebdo.patient?.nomComplet || '—' }}</div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-label">Période</div>
+          <div class="detail-value">
+            <span *ngIf="selectedHebdo.dateDebut && selectedHebdo.dateFin">
+              {{ selectedHebdo.dateDebut | date:'dd/MM/yyyy' }} → {{ selectedHebdo.dateFin | date:'dd/MM/yyyy' }}
+            </span>
+            <span *ngIf="!selectedHebdo.dateDebut">—</span>
+          </div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-label">Statut</div>
+          <div class="detail-value">
+            <span class="badge-statut-soignant statut-consulte" *ngIf="selectedHebdo.consulteParMedecin">👁️ Consulté par le médecin</span>
+            <span class="badge-statut-soignant statut-envoye" *ngIf="selectedHebdo.envoyeAuMedecin && !selectedHebdo.consulteParMedecin">✅ Envoyé au médecin</span>
+            <span class="badge-statut-soignant statut-attente" *ngIf="!selectedHebdo.envoyeAuMedecin">⏳ En attente d'envoi</span>
+          </div>
+        </div>
+        <div class="detail-row" *ngIf="selectedHebdo.dateEnvoi">
+          <div class="detail-label">Date d'envoi</div>
+          <div class="detail-value">{{ selectedHebdo.dateEnvoi | date:'dd/MM/yyyy HH:mm' }}</div>
+        </div>
+        <div class="detail-row" *ngIf="selectedHebdo.dateConsultation">
+          <div class="detail-label">Consulté le</div>
+          <div class="detail-value">{{ selectedHebdo.dateConsultation | date:'dd/MM/yyyy HH:mm' }}</div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-label">Date de création</div>
+          <div class="detail-value">{{ selectedHebdo.dateCreation | date:'dd/MM/yyyy HH:mm' }}</div>
+        </div>
+      </div>
+
+      <!-- Indicators -->
+      <div class="hebdo-modal-indicators" *ngIf="selectedHebdo.tauxObservanceMedicaments != null">
+        <h4>📈 Indicateurs d'observance</h4>
+        <div class="hebdo-indicators-grid">
+          <div class="hebdo-ind-card">
+            <span class="hebdo-ind-big" [class.ind-alert]="selectedHebdo.tauxObservanceMedicaments < 70"
+                  [class.ind-ok]="selectedHebdo.tauxObservanceMedicaments >= 70">
+              {{ selectedHebdo.tauxObservanceMedicaments }}%
+            </span>
+            <span class="hebdo-ind-name">Médicaments</span>
+          </div>
+          <div class="hebdo-ind-card" *ngIf="selectedHebdo.tauxObservanceRepas != null">
+            <span class="hebdo-ind-big" [class.ind-alert]="selectedHebdo.tauxObservanceRepas < 70"
+                  [class.ind-ok]="selectedHebdo.tauxObservanceRepas >= 70">
+              {{ selectedHebdo.tauxObservanceRepas }}%
+            </span>
+            <span class="hebdo-ind-name">Repas</span>
+          </div>
+          <div class="hebdo-ind-card" *ngIf="selectedHebdo.tauxObservanceRendezVous != null">
+            <span class="hebdo-ind-big" [class.ind-alert]="selectedHebdo.tauxObservanceRendezVous < 70"
+                  [class.ind-ok]="selectedHebdo.tauxObservanceRendezVous >= 70">
+              {{ selectedHebdo.tauxObservanceRendezVous }}%
+            </span>
+            <span class="hebdo-ind-name">Rendez-vous</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Observations -->
+      <div class="hebdo-section" *ngIf="selectedHebdo.observationsGenerales">
+        <h4>📝 Observations générales</h4>
+        <p class="hebdo-text">{{ selectedHebdo.observationsGenerales }}</p>
+      </div>
+
+      <!-- Incidents -->
+      <div class="hebdo-section" *ngIf="selectedHebdo.incidentsNotables">
+        <h4>⚠️ Incidents notables</h4>
+        <p class="hebdo-text hebdo-text-alert">{{ selectedHebdo.incidentsNotables }}</p>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-outline" (click)="closeHebdoDetail()">Fermer</button>
+      <span class="badge-statut-soignant statut-envoye" *ngIf="selectedHebdo.envoyeAuMedecin" style="font-size: 14px; padding: 8px 16px;">
+        ✅ Envoyé au médecin
+      </span>
+      <span class="badge-statut-soignant statut-attente" *ngIf="!selectedHebdo.envoyeAuMedecin" style="font-size: 14px; padding: 8px 16px;">
+        ⏳ En attente d'envoi (depuis la page Fiches)
+      </span>
+    </div>
+  </div>
+</div>

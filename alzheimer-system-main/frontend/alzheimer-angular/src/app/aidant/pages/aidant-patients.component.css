@@ -1,0 +1,119 @@
+/* ===== Patients page ===== */
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #f1f5f9;
+  border-radius: 8px;
+  padding: 0.4rem 0.75rem;
+}
+
+.search-box input {
+  border: none;
+  background: none;
+  outline: none;
+  font-size: 0.85rem;
+  width: 200px;
+  color: var(--aidant-text);
+}
+
+.search-icon { font-size: 0.9rem; }
+
+/* Grid */
+.patients-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 1.25rem;
+}
+
+.patient-card {
+  background: #fff;
+  border-radius: var(--aidant-radius);
+  border: 2px solid var(--aidant-border);
+  padding: 1.25rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.patient-card:hover {
+  border-color: #c4b5fd;
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.08);
+}
+
+.patient-card.selected {
+  border-color: var(--aidant-primary);
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.15);
+}
+
+.patient-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.patient-card-info h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--aidant-text);
+}
+
+.patient-card-info p {
+  margin: 0.15rem 0 0;
+  font-size: 0.8rem;
+  color: var(--aidant-text-muted);
+}
+
+.patient-card-info {
+  flex: 1;
+}
+
+/* Info rows */
+.patient-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.info-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.info-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--aidant-text-muted);
+  min-width: 120px;
+  flex-shrink: 0;
+}
+
+.info-value {
+  font-size: 0.8rem;
+  color: var(--aidant-text);
+}
+
+/* Actions */
+.patient-card-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.avatar-inactive {
+  opacity: 0.5;
+}
+
+@media (max-width: 500px) {
+  .patients-grid {
+    grid-template-columns: 1fr;
+  }
+  .search-box input {
+    width: 140px;
+  }
+}

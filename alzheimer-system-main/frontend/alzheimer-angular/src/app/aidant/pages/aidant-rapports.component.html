@@ -1,0 +1,105 @@
+<!-- Topbar -->
+<div class="topbar-page">
+  <h1>📝 {{ 'AIDANT.REPORTS' | translate }}</h1>
+  <div class="search-box">
+    <span class="search-icon">🔍</span>
+    <input type="text" [placeholder]="'AIDANT.SEARCH_REPORT' | translate"
+           [(ngModel)]="searchQuery" (input)="filterRapports()" maxlength="100">
+  </div>
+</div>
+
+<!-- Content -->
+<div class="content-area">
+
+  <!-- Filter tabs -->
+  <div class="filter-bar">
+    <button class="filter-tab" [class.active]="activeFilter === 'all'" (click)="setFilter('all')">{{ 'AIDANT.FILTER_ALL' | translate }}</button>
+    <button class="filter-tab" [class.active]="activeFilter === 'HEBDOMADAIRE'" (click)="setFilter('HEBDOMADAIRE')">{{ 'AIDANT.FILTER_WEEKLY' | translate }}</button>
+    <button class="filter-tab" [class.active]="activeFilter === 'MENSUEL'" (click)="setFilter('MENSUEL')">{{ 'AIDANT.FILTER_MONTHLY' | translate }}</button>
+    <button class="filter-tab" [class.active]="activeFilter === 'CONSULTATION'" (click)="setFilter('CONSULTATION')">{{ 'AIDANT.FILTER_CONSULTATION' | translate }}</button>
+  </div>
+
+  <div class="reports-layout" [class.has-detail]="selectedRapport">
+    <!-- Reports list -->
+    <div class="reports-list">
+      <div class="report-card" *ngFor="let rapport of filteredRapports"
+           [class.selected]="selectedRapport?.id === rapport.id"
+           (click)="selectRapport(rapport)">
+        <div class="report-card-header">
+          <span class="badge" [ngClass]="getTypeClass(rapport.typeRapport)">{{ getTypeLabel(rapport.typeRapport) }}</span>
+          <span class="report-date">{{ formatDateShort(rapport.dateGeneration) }}</span>
+        </div>
+        <h3>{{ rapport.titre }}</h3>
+        <p class="report-preview">{{ rapport.contenuTexte }}</p>
+        <div class="report-card-footer">
+          <span class="badge" [ngClass]="rapport.statut === 'NOUVEAU' ? 'badge-danger' : 'badge-success'">
+            {{ getStatutLabel(rapport.statut) }}
+          </span>
+          <div class="report-stats">
+            <span *ngIf="rapport.tauxObservance" title="Observance">💊 {{ rapport.tauxObservance }}%</span>
+            <span *ngIf="rapport.nbAlertes" title="Alertes">⚠️ {{ rapport.nbAlertes }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="empty-state" *ngIf="filteredRapports.length === 0">
+        <span class="empty-icon">📝</span>
+        <p *ngIf="!searchQuery && activeFilter === 'all'">{{ 'AIDANT.NO_REPORT' | translate }}</p>
+        <p *ngIf="searchQuery || activeFilter !== 'all'">{{ 'AIDANT.NO_RESULTS' | translate }}</p>
+        <button class="btn btn-sm btn-outline" *ngIf="searchQuery || activeFilter !== 'all'" (click)="searchQuery = ''; activeFilter = 'all'; filterRapports()">
+          {{ 'AIDANT.CLEAR_FILTERS' | translate }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Detail panel -->
+    <div class="report-detail" *ngIf="selectedRapport">
+      <div class="detail-header">
+        <div>
+          <span class="badge" [ngClass]="getTypeClass(selectedRapport.typeRapport)">{{ getTypeLabel(selectedRapport.typeRapport) }}</span>
+          <h2>{{ selectedRapport.titre }}</h2>
+          <p class="detail-date">{{ formatDate(selectedRapport.dateGeneration) }}</p>
+        </div>
+        <button class="btn-close" (click)="closeDetail()">✕</button>
+      </div>
+
+      <!-- Stats -->
+      <div class="detail-stats">
+        <div class="detail-stat" *ngIf="selectedRapport.tauxObservance !== undefined">
+          <span class="detail-stat-label">💊 {{ 'AIDANT.MEDICATION_ADHERENCE' | translate }}</span>
+          <div class="detail-stat-value">
+            <span>{{ selectedRapport.tauxObservance }}%</span>
+            <div class="progress-bar" style="width: 100px;">
+              <div class="progress-fill" [class]="getObservanceClass(selectedRapport.tauxObservance)"
+                   [style.width.%]="selectedRapport.tauxObservance"></div>
+            </div>
+          </div>
+        </div>
+        <div class="detail-stat" *ngIf="selectedRapport.qualiteSommeil !== undefined">
+          <span class="detail-stat-label">😴 {{ 'AIDANT.SLEEP_QUALITY' | translate }}</span>
+          <span class="detail-stat-value">{{ selectedRapport.qualiteSommeil }}/10</span>
+        </div>
+        <div class="detail-stat" *ngIf="selectedRapport.nbAlertes !== undefined">
+          <span class="detail-stat-label">⚠️ {{ 'AIDANT.ALERTS' | translate }}</span>
+          <span class="detail-stat-value">{{ selectedRapport.nbAlertes }}</span>
+        </div>
+        <div class="detail-stat" *ngIf="selectedRapport.nbInterventions !== undefined">
+          <span class="detail-stat-label">🩺 {{ 'AIDANT.INTERVENTIONS' | translate }}</span>
+          <span class="detail-stat-value">{{ selectedRapport.nbInterventions }}</span>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="detail-section">
+        <h3>📋 {{ 'AIDANT.REPORT_CONTENT' | translate }}</h3>
+        <p>{{ selectedRapport.contenuTexte }}</p>
+      </div>
+
+      <div class="detail-section" *ngIf="selectedRapport.recommandations">
+        <h3>💡 {{ 'AIDANT.RECOMMENDATIONS' | translate }}</h3>
+        <p>{{ selectedRapport.recommandations }}</p>
+      </div>
+    </div>
+  </div>
+
+</div>

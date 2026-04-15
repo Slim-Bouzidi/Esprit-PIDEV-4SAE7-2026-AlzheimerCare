@@ -1,0 +1,104 @@
+services:
+
+  # ───────────────────── Infrastructure ─────────────────────
+
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - alzheimer-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # ───────────────────── Discovery Server ─────────────────────
+
+  discovery-server:
+    build:
+      context: ../backend/discovery-server
+      dockerfile: Dockerfile
+    container_name: discovery-server
+    ports:
+      - "8761:8761"
+    environment:
+      SPRING_APPLICATION_NAME: discovery-server
+      SERVER_PORT: 8761
+      EUREKA_CLIENT_REGISTER-WITH-EUREKA: "false"
+      EUREKA_CLIENT_FETCH-REGISTRY: "false"
+    networks:
+      - alzheimer-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8761/ || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 40s
+
+  # ───────────────────── API Gateway ─────────────────────
+
+  api-gateway:
+    build:
+      context: ../backend/api-gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    ports:
+      - "8090:8080"
+    environment:
+      SPRING_APPLICATION_NAME: api-gateway
+      SERVER_PORT: 8080
+      EUREKA_CLIENT_SERVICE-URL_DEFAULTZONE: http://discovery-server:8761/eureka
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.MySQL8Dialect
+      # Route - assistance-quotidienne (toutes les routes)
+      SPRING_CLOUD_GATEWAY_ROUTES_0_ID: assistance-quotidienne
+      SPRING_CLOUD_GATEWAY_ROUTES_0_URI: lb://assistance-quotidienne
+      SPRING_CLOUD_GATEWAY_ROUTES_0_PREDICATES_0: Path=/api/**
+      SPRING_CLOUD_GATEWAY_ROUTES_0_FILTERS_0: DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST
+      # Global default filter
+      SPRING_CLOUD_GATEWAY_DEFAULT-FILTERS_0: DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+    networks:
+      - alzheimer-network
+
+  # ───────────────────── Assistance Quotidienne ─────────────────────
+
+  assistance-quotidienne:
+    build:
+      context: "../backend/assistance quotidienne"
+      dockerfile: Dockerfile
+    container_name: assistance-quotidienne
+    ports:
+      - "8098:8088"
+    environment:
+      SPRING_APPLICATION_NAME: assistance-quotidienne
+      SERVER_PORT: 8088
+      EUREKA_CLIENT_SERVICE-URL_DEFAULTZONE: http://discovery-server:8761/eureka
+      SPRING_DATASOURCE_URL: jdbc:mysql://host.docker.internal:3306/assistancequotidiennedb?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 
+      SPRING_DATASOURCE_DRIVER-CLASS-NAME: com.mysql.cj.jdbc.Driver
+      SPRING_JPA_SHOW-SQL: "true"
+      SPRING_JPA_HIBERNATE_DDL-AUTO: update
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.MySQL8Dialect
+      SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL: "true"
+      SPRING_JPA_PROPERTIES_HIBERNATE_GLOBALLY_QUOTED_IDENTIFIERS: "true"
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+    networks:
+      - alzheimer-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+networks:
+  alzheimer-network:
+    driver: bridge

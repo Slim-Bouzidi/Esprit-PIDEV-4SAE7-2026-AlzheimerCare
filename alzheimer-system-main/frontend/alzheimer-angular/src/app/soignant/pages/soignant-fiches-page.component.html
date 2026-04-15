@@ -1,0 +1,436 @@
+<!-- ═══ TOPBAR ═══ -->
+<header class="topbar-page">
+  <h1>📋 Gestion des Fiches de Transmission</h1>
+  <div class="topbar-actions">
+    <button class="btn-primary" (click)="goToAgenda()">
+      ＋ Nouvelle fiche
+    </button>
+  </div>
+</header>
+
+<!-- ═══ MAIN CONTENT ═══ -->
+<main class="content-area">
+
+  <!-- Stats cards -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <span class="stat-icon">📄</span>
+      <div class="stat-info">
+        <span class="stat-value">{{ totalFiches }}</span>
+        <span class="stat-label">Total fiches</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">✅</span>
+      <div class="stat-info">
+        <span class="stat-value">{{ fichesEnvoyees }}</span>
+        <span class="stat-label">Envoyées</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">📝</span>
+      <div class="stat-info">
+        <span class="stat-value">{{ fichesBrouillon }}</span>
+        <span class="stat-label">Brouillons</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">🔏</span>
+      <div class="stat-info">
+        <span class="stat-value">{{ fichesSignees }}</span>
+        <span class="stat-label">Signées</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <section class="card card-filters">
+    <div class="filters-row">
+      <div class="filter-group">
+        <label>🔍 Recherche</label>
+        <input type="text" class="filter-input" placeholder="Nom, prénom, n° fiche..."
+               [(ngModel)]="searchQuery" (ngModelChange)="applyFilters()">
+      </div>
+      <div class="filter-group">
+        <label>📊 Statut</label>
+        <select class="filter-select" [(ngModel)]="filterStatut" (ngModelChange)="applyFilters()">
+          <option value="all">Tous</option>
+          <option value="envoye">Envoyée</option>
+          <option value="brouillon">Brouillon</option>
+          <option value="valide">Validée</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>👤 Patient</label>
+        <select class="filter-select" [(ngModel)]="filterPatientId" (ngModelChange)="applyFilters()">
+          <option [ngValue]="null">Tous les patients</option>
+          <option *ngFor="let p of patients" [ngValue]="p.id">{{ p.nomComplet }}</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>📅 Du</label>
+        <input type="date" class="filter-input" [(ngModel)]="filterDateDebut" (ngModelChange)="applyFilters()">
+      </div>
+      <div class="filter-group">
+        <label>📅 Au</label>
+        <input type="date" class="filter-input" [(ngModel)]="filterDateFin" (ngModelChange)="applyFilters()">
+      </div>
+      <div class="filter-group filter-actions">
+        <button class="btn-outline btn-reset" (click)="resetFilters()">↻ Réinitialiser</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Table -->
+  <section class="card card-table">
+    <div class="card-header">
+      <h2>📋 Fiches de Transmission</h2>
+      <span class="badge-count">{{ filteredFiches.length }} / {{ totalFiches }}</span>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="loading" class="loading-state">
+      <div class="spinner-lg"></div>
+      <p>Chargement des fiches...</p>
+    </div>
+
+    <!-- Table -->
+    <div class="table-responsive" *ngIf="!loading && filteredFiches.length > 0">
+      <table class="fiches-table">
+        <thead>
+          <tr>
+
+            <th>Patient</th>
+            <th>Date</th>
+            <th>Statut</th>
+            <th>Signature</th>
+            <th>Commentaire</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let fiche of pagedFiches" [class.row-brouillon]="!fiche.statut || fiche.statut === 'brouillon'">
+
+            <td class="col-patient">
+              <strong>{{ getPatientName(fiche) }}</strong>
+            </td>
+            <td class="col-date">
+              {{ getFicheDate(fiche) | date:'dd/MM/yyyy' }}
+              <span class="sub-date">{{ getFicheDate(fiche) | date:'HH:mm' }}</span>
+            </td>
+            <td class="col-statut">
+              <span class="badge-statut" [ngClass]="getStatutClass(fiche.statut)">
+                {{ getStatutLabel(fiche.statut) }}
+              </span>
+            </td>
+            <td class="col-signature">
+              <span *ngIf="isSigned(fiche)" class="signed">✓ Signée</span>
+              <span *ngIf="!isSigned(fiche)" class="not-signed">—</span>
+            </td>
+            <td class="col-comment">
+              <span class="comment-preview" *ngIf="fiche.commentaireLibre">{{ fiche.commentaireLibre | slice:0:50 }}{{ fiche.commentaireLibre.length > 50 ? '...' : '' }}</span>
+              <span class="no-comment" *ngIf="!fiche.commentaireLibre">—</span>
+            </td>
+            <td class="col-actions">
+              <div class="action-btns">
+                <button class="btn-icon" title="Consulter" (click)="openDetail(fiche)">👁️</button>
+                <button class="btn-icon" title="Modifier" (click)="openEdit(fiche)">✏️</button>
+                <button class="btn-icon btn-icon-pdf" title="Télécharger PDF" (click)="downloadPdf(fiche.id)">📄</button>
+                <button class="btn-send-action" 
+                        [class.btn-sent]="fiche.statut === 'envoye'"
+                        [disabled]="fiche.statut === 'envoye'"
+                        (click)="confirmSendToDoctor(fiche)">
+                  <span *ngIf="fiche.statut !== 'envoye'">📤 Envoyer</span>
+                  <span *ngIf="fiche.statut === 'envoye'">✅ Envoyé</span>
+                </button>
+                <button class="btn-icon btn-icon-danger" title="Supprimer" (click)="confirmDelete(fiche)">🗑️</button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-bar" *ngIf="!loading && filteredFiches.length > 0">
+      <div class="pagination-info">
+        Affichage {{ rangeStart }}–{{ rangeEnd }} / {{ totalFiltered }}
+      </div>
+
+      <div class="pagination-controls">
+        <label class="page-size-label">
+          Par page
+          <select class="page-size-select" [(ngModel)]="pageSize" (ngModelChange)="onPageSizeChange()">
+            <option *ngFor="let s of pageSizeOptions" [ngValue]="s">{{ s }}</option>
+          </select>
+        </label>
+
+        <button class="btn-outline btn-page" (click)="prevPage()" [disabled]="currentPage <= 1">◀</button>
+        <span class="page-indicator">Page {{ currentPage }} / {{ totalPages }}</span>
+        <button class="btn-outline btn-page" (click)="nextPage()" [disabled]="currentPage >= totalPages">▶</button>
+      </div>
+    </div>
+
+    <!-- Empty -->
+    <div *ngIf="!loading && filteredFiches.length === 0" class="empty-state">
+      <span class="empty-icon">📭</span>
+      <p *ngIf="searchQuery || filterStatut !== 'all' || filterPatientId">Aucune fiche ne correspond aux filtres.</p>
+      <p *ngIf="!searchQuery && filterStatut === 'all' && !filterPatientId">Aucune fiche de transmission enregistrée.</p>
+      <button class="btn-primary" (click)="goToAgenda()">Créer une fiche depuis l'agenda</button>
+    </div>
+  </section>
+</main>
+
+<!-- ═══ MODAL DETAIL ═══ -->
+<div class="modal-overlay" *ngIf="selectedFiche" (click)="closeDetail()">
+  <div class="modal-content modal-detail" (click)="$event.stopPropagation()">
+    <div class="modal-header modal-header-detail">
+      <div>
+        <h3>📋 Fiche de Transmission #{{ selectedFiche.id }}</h3>
+        <span class="modal-subtitle">{{ getPatientName(selectedFiche) }} — {{ getFicheDate(selectedFiche) | date:'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+      <button class="btn-close-modal" (click)="closeDetail()">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Patient info -->
+      <section class="detail-section">
+        <h4>👤 Informations patient</h4>
+        <div class="detail-grid">
+          <div class="detail-item"><span class="detail-label">Patient</span><span class="detail-value">{{ getPatientName(selectedFiche) }}</span></div>
+          <div class="detail-item"><span class="detail-label">Date fiche</span><span class="detail-value">{{ getFicheDate(selectedFiche) | date:'dd/MM/yyyy HH:mm' }}</span></div>
+          <div class="detail-item"><span class="detail-label">Statut</span><span class="badge-statut" [ngClass]="getStatutClass(selectedFiche.statut)">{{ getStatutLabel(selectedFiche.statut) }}</span></div>
+          <div class="detail-item"><span class="detail-label">Signature</span><span>{{ isSigned(selectedFiche) ? '✓ Signée' : 'Non signée' }}</span></div>
+        </div>
+      </section>
+
+      <!-- Medications -->
+      <section class="detail-section" *ngIf="getMedicaments(selectedFiche).length > 0">
+        <h4>💊 Observance médicamenteuse</h4>
+        <table class="detail-table">
+          <thead>
+            <tr><th>Médicament</th><th>Dosage</th><th>Moment</th><th>Pris</th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let med of getMedicaments(selectedFiche)">
+              <td>{{ med.nom || med.medicament || '—' }}</td>
+              <td>{{ med.dosage || '—' }}</td>
+              <td>{{ med.moment || med.momentPrise || '—' }}</td>
+              <td>
+                <span class="badge-pris" [class.pris-oui]="med.pris" [class.pris-non]="!med.pris">
+                  {{ med.pris ? '✓ Oui' : '✗ Non' }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Alimentation -->
+      <section class="detail-section" *ngIf="getAlimentation(selectedFiche) as alim">
+        <h4>🍽️ Alimentation & Hydratation</h4>
+        <div class="detail-grid" *ngIf="alim">
+          <div class="detail-item" *ngIf="alim.appetit"><span class="detail-label">Appétit</span><span class="detail-value">{{ alim.appetit }}</span></div>
+          <div class="detail-item" *ngIf="alim.hydratation"><span class="detail-label">Hydratation</span><span class="detail-value">{{ alim.hydratation }}</span></div>
+          <div class="detail-item" *ngIf="alim.petitDejeuner"><span class="detail-label">Petit-déjeuner</span><span class="detail-value">{{ alim.petitDejeuner }}</span></div>
+          <div class="detail-item" *ngIf="alim.dejeuner"><span class="detail-label">Déjeuner</span><span class="detail-value">{{ alim.dejeuner }}</span></div>
+          <div class="detail-item" *ngIf="alim.diner"><span class="detail-label">Dîner</span><span class="detail-value">{{ alim.diner }}</span></div>
+          <div class="detail-item" *ngIf="alim.commentaire"><span class="detail-label">Commentaire</span><span class="detail-value">{{ alim.commentaire }}</span></div>
+        </div>
+      </section>
+
+      <!-- Vie sociale -->
+      <section class="detail-section" *ngIf="getVieSociale(selectedFiche) as vie">
+        <h4>🤝 Vie sociale</h4>
+        <div class="detail-grid" *ngIf="vie">
+          <div class="detail-item" *ngIf="vie.interactionSociale"><span class="detail-label">Interaction sociale</span><span class="detail-value">{{ vie.interactionSociale }}</span></div>
+          <div class="detail-item" *ngIf="vie.hygiene"><span class="detail-label">Hygiène</span><span class="detail-value">{{ vie.hygiene }}</span></div>
+          <div class="detail-item" *ngIf="vie.sommeil"><span class="detail-label">Sommeil</span><span class="detail-value">{{ vie.sommeil }}</span></div>
+          <div class="detail-item" *ngIf="vie.humeur"><span class="detail-label">Humeur</span><span class="detail-value">{{ vie.humeur }}</span></div>
+          <div class="detail-item" *ngIf="vie.commentaire"><span class="detail-label">Commentaire</span><span class="detail-value">{{ vie.commentaire }}</span></div>
+        </div>
+      </section>
+
+      <!-- Directives -->
+      <section class="detail-section" *ngIf="getDirectives(selectedFiche).length > 0">
+        <h4>📝 Suivi des directives</h4>
+        <table class="detail-table">
+          <thead>
+            <tr><th>Directive</th><th>Statut</th><th>Commentaire</th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let dir of getDirectives(selectedFiche)">
+              <td>{{ dir.libelle || dir.directive || '—' }}</td>
+              <td>
+                <span class="badge-dir" [ngClass]="'dir-' + (dir.statut || 'en_cours')">
+                  {{ dir.statut === 'fait' ? 'Fait' : dir.statut === 'non_fait' ? 'Non fait' : 'En cours' }}
+                </span>
+              </td>
+              <td>{{ dir.commentaire || '—' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Commentaire libre -->
+      <section class="detail-section" *ngIf="selectedFiche.commentaireLibre">
+        <h4>💬 Commentaire libre</h4>
+        <div class="comment-block">{{ selectedFiche.commentaireLibre }}</div>
+      </section>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-outline" (click)="closeDetail()">Fermer</button>
+      <button class="btn-icon-action" (click)="downloadPdf(selectedFiche.id)">📄 Télécharger PDF</button>
+      <button class="btn-send-doctor" *ngIf="selectedFiche.statut !== 'envoye'" (click)="confirmSendToDoctor(selectedFiche)">📤 Send to Doctor</button>
+      <span class="sent-confirmed" *ngIf="selectedFiche.statut === 'envoye'">✅ Envoyé au médecin</span>
+      <button class="btn-primary" (click)="openEdit(selectedFiche)">✏️ Modifier</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL EDIT ═══ -->
+<div class="modal-overlay" *ngIf="editFiche" (click)="closeEdit()">
+  <div class="modal-content modal-edit" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>✏️ Modifier la fiche #{{ editFiche.id }}</h3>
+      <button class="btn-close-modal" (click)="closeEdit()">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="validation-summary" *ngIf="formErrors['statut'] || formErrors['commentaireLibre']">
+        ⚠️ Veuillez corriger les erreurs ci-dessous.
+      </div>
+
+      <div class="form-group" [class.field-error]="formErrors['statut']">
+        <label>Statut</label>
+        <select [(ngModel)]="editFiche.statut" class="form-control" name="statut">
+          <option value="brouillon">Brouillon</option>
+          <option value="envoye">Envoyée</option>
+          <option value="valide">Validée</option>
+        </select>
+        <div class="error-message" *ngIf="formErrors['statut']">{{ formErrors['statut'] }}</div>
+      </div>
+
+      <div class="form-group" [class.field-error]="formErrors['commentaireLibre']">
+        <label>Commentaire libre</label>
+        <textarea [(ngModel)]="editFiche.commentaireLibre" class="form-control form-textarea" rows="4"
+                  name="commentaireLibre" maxlength="2000"
+                  placeholder="Ajouter ou modifier le commentaire..."></textarea>
+        <div class="error-message" *ngIf="formErrors['commentaireLibre']">{{ formErrors['commentaireLibre'] }}</div>
+      </div>
+
+      <div class="form-group">
+        <label>Signature soignant</label>
+        <div class="toggle-group">
+          <label class="toggle-label">
+            <input type="checkbox" [(ngModel)]="editFiche.signatureSoignant" name="signatureSoignant">
+            <span>{{ editFiche.signatureSoignant ? 'Signée ✓' : 'Non signée' }}</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-outline" (click)="closeEdit()">Annuler</button>
+      <button class="btn-primary" (click)="saveEdit()" [disabled]="editSaving">
+        {{ editSaving ? 'Sauvegarde...' : '💾 Sauvegarder' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL DELETE CONFIRM ═══ -->
+<div class="modal-overlay modal-overlay-danger" *ngIf="deleteTarget" (click)="cancelDelete()">
+  <div class="modal-content modal-delete" (click)="$event.stopPropagation()">
+    <div class="modal-header modal-header-danger">
+      <h3>🗑️ Confirmer la suppression</h3>
+      <button class="btn-close-modal" (click)="cancelDelete()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="delete-msg">
+        Êtes-vous sûr de vouloir supprimer la fiche <strong>#{{ deleteTarget.id }}</strong>
+        de <strong>{{ getPatientName(deleteTarget) }}</strong> ?
+      </p>
+      <p class="delete-warning">⚠️ Cette action est irréversible. Le rapport et la notification associés ne seront pas supprimés.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline" (click)="cancelDelete()">Annuler</button>
+      <button class="btn-danger" (click)="executeDelete()">🗑️ Supprimer définitivement</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL SEND TO DOCTOR CONFIRM ═══ -->
+<div class="modal-overlay modal-overlay-send" *ngIf="sendTarget" (click)="cancelSend()">
+  <div class="modal-content modal-send" (click)="$event.stopPropagation()">
+    <div class="modal-header modal-header-send">
+      <h3>📤 Envoyer au médecin</h3>
+      <button class="btn-close-modal" (click)="cancelSend()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="send-summary">
+        <div class="send-summary-row">
+          <span class="send-label">Fiche :</span>
+          <span class="send-value">#{{ sendTarget.id }}</span>
+        </div>
+        <div class="send-summary-row">
+          <span class="send-label">Patient :</span>
+          <span class="send-value">{{ getPatientName(sendTarget) }}</span>
+        </div>
+        <div class="send-summary-row">
+          <span class="send-label">Date :</span>
+          <span class="send-value">{{ sendTarget.dateFiche | date:'dd/MM/yyyy' }}</span>
+        </div>
+        <div class="send-summary-row">
+          <span class="send-label">Statut :</span>
+          <span class="send-value badge-status badge-{{ sendTarget.statut }}">{{ sendTarget.statut }}</span>
+        </div>
+        <div class="send-summary-row">
+          <span class="send-label">Signature :</span>
+          <span class="send-value" [class.signed]="sendTarget.signatureSoignant">
+            {{ sendTarget.signatureSoignant ? '✅ Signée' : '❌ Non signée' }}
+          </span>
+        </div>
+      </div>
+
+      <div class="send-info-box">
+        <p>📋 <strong>Le rapport PDF sera envoyé au médecin référent du patient.</strong></p>
+        <p>Le médecin recevra une notification et pourra consulter le rapport dans sa section "Rapports patients".</p>
+      </div>
+
+      <div class="send-warning" *ngIf="!sendTarget.signatureSoignant">
+        <p>⚠️ <strong>Attention :</strong> Cette fiche n'est pas signée. Vous devez d'abord la signer avant de pouvoir l'envoyer au médecin.</p>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline" (click)="cancelSend()" [disabled]="sending">Annuler</button>
+      <button class="btn-send-confirm" (click)="executeSendToDoctor()"
+              [disabled]="sending || !sendTarget.signatureSoignant">
+        <span *ngIf="!sending">📤 Confirmer l'envoi</span>
+        <span *ngIf="sending" class="sending-spinner">⏳ Envoi en cours...</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TOAST SUCCESS ═══ -->
+<div class="toast-notification toast-success" *ngIf="sendSuccess" (click)="dismissSendSuccess()">
+  <div class="toast-icon">✅</div>
+  <div class="toast-content">
+    <strong>Rapport envoyé avec succès !</strong>
+    <p>La fiche #{{ sendSuccess.ficheId }} de {{ sendSuccess.patientName }} a été transmise au médecin référent.</p>
+    <small>Le médecin a été notifié automatiquement.</small>
+  </div>
+  <button class="toast-close" (click)="dismissSendSuccess()">✕</button>
+</div>
+
+<!-- ═══ TOAST ERROR ═══ -->
+<div class="toast-notification toast-error" *ngIf="sendError" (click)="sendError = null">
+  <div class="toast-icon">❌</div>
+  <div class="toast-content">
+    <strong>Erreur d'envoi</strong>
+    <p>{{ sendError }}</p>
+  </div>
+  <button class="toast-close" (click)="sendError = null">✕</button>
+</div>

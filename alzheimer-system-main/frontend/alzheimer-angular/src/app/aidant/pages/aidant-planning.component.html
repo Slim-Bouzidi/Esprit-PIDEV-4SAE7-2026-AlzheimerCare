@@ -1,0 +1,88 @@
+<!-- Topbar -->
+<div class="topbar-page">
+  <h1>📅 {{ 'AIDANT.PLANNING' | translate }}</h1>
+  <span class="topbar-date">{{ todayFormatted }}</span>
+</div>
+
+<!-- Content -->
+<div class="content-area">
+
+  <div class="two-columns planning-layout">
+    <!-- Left: Calendar -->
+    <div>
+      <div class="card calendar-card">
+        <div class="card-header">
+          <h2>{{ currentMonth }}</h2>
+          <div class="calendar-nav">
+            <button class="btn-nav" (click)="prevMonth()">‹</button>
+            <button class="btn-nav btn-today" (click)="goToToday()">{{ 'AIDANT.TODAY' | translate }}</button>
+            <button class="btn-nav" (click)="nextMonth()">›</button>
+          </div>
+        </div>
+
+        <div class="calendar-grid">
+          <div class="day-name" *ngFor="let name of dayNames">{{ name }}</div>
+          <div class="day-cell" *ngFor="let day of calendarDays"
+               [class.other-month]="!day.isCurrentMonth"
+               [class.today]="day.isToday"
+               [class.selected]="day.isSelected"
+               [class.has-rdv]="day.hasAppointment"
+               [class.weekend]="day.isWeekend"
+               (click)="selectDay(day)">
+            <span class="day-num">{{ day.date }}</span>
+            <span class="rdv-dot" *ngIf="day.hasAppointment"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Selected day details -->
+      <div class="card" style="margin-top: 1.25rem;" *ngIf="selectedDate">
+        <div class="card-header">
+          <h2>📋 {{ selectedDate | date:'EEEE dd MMMM':'':'fr-FR' }}</h2>
+        </div>
+        <div *ngIf="selectedDayAppointments.length > 0">
+          <div class="rdv-detail" *ngFor="let rdv of selectedDayAppointments">
+            <div class="rdv-detail-time">{{ formatTime(rdv.dateHeure) }}</div>
+            <div class="rdv-detail-info">
+              <h4>{{ rdv.motif || getTypeLabel(rdv.type || '') }}</h4>
+              <p>📍 {{ rdv.lieu || '—' }}</p>
+              <span class="badge" [ngClass]="getStatutClass(rdv.statut || '')">{{ getStatutLabel(rdv.statut || '') }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="empty-state" *ngIf="selectedDayAppointments.length === 0">
+          <span class="empty-icon">☀️</span>
+          <p>{{ 'AIDANT.NO_APPOINTMENT_DAY' | translate }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Upcoming appointments -->
+    <div>
+      <div class="card">
+        <div class="card-header">
+          <h2>⏰ {{ 'AIDANT.UPCOMING_APPOINTMENTS' | translate }}</h2>
+        </div>
+        <div *ngIf="upcomingAppointments.length > 0">
+          <div class="list-item" *ngFor="let rdv of upcomingAppointments">
+            <div class="list-item-left">
+              <div class="list-item-icon" [ngClass]="rdv.type === 'URGENCE' ? 'alert-danger' : ''">
+                {{ rdv.type === 'CONSULTATION' ? '🩺' : rdv.type === 'SUIVI' ? '📋' : rdv.type === 'URGENCE' ? '🚨' : '📅' }}
+              </div>
+              <div class="list-item-info">
+                <h4>{{ rdv.motif || getTypeLabel(rdv.type || '') }}</h4>
+                <p>{{ formatDateShort(rdv.dateHeure) }} {{ 'AIDANT.AT' | translate }} {{ formatTime(rdv.dateHeure) }} · {{ rdv.lieu || '—' }}</p>
+              </div>
+            </div>
+            <span class="badge" [ngClass]="getStatutClass(rdv.statut || '')">{{ getStatutLabel(rdv.statut || '') }}</span>
+          </div>
+        </div>
+        <div class="empty-state" *ngIf="upcomingAppointments.length === 0">
+          <span class="empty-icon">📅</span>
+          <p>{{ 'AIDANT.NO_UPCOMING_APPOINTMENT' | translate }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,146 @@
+:root {
+  --med-blue: #1976d2;
+  --med-blue-light: #e3f0ff;
+  --med-grey: #f5f7fa;
+  --med-grey-dark: #b0b8c1;
+  --med-white: #fff;
+  --med-red: #d32f2f;
+  --med-green: #388e3c;
+  --med-border: #e0e6ed;
+  --med-font: 'Segoe UI', 'Roboto', Arial, sans-serif;
+}
+
+.report-section-pro {
+  background: var(--med-white);
+  border-radius: 14px;
+  box-shadow: 0 2px 16px #0001;
+  border: 1.5px solid var(--med-border);
+  padding: 2.5rem 3rem;
+  margin-bottom: 2.5rem;
+  font-family: var(--med-font);
+  color: #222;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (max-width: 900px) {
+  .report-section-pro {
+    padding: 1.2rem 0.7rem;
+  }
+}
+
+.report-header-info {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  border-bottom: 2px solid var(--med-blue-light);
+  padding-bottom: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+.report-header-info h2 {
+  color: var(--med-blue);
+  font-size: 2em;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.report-date {
+  color: #888;
+  font-size: 1.1em;
+  margin-top: 0.2em;
+}
+
+.report-patient-info,
+.report-medical-record,
+.report-treatment,
+.report-emergency,
+.report-recommendations {
+  background: var(--med-grey);
+  border-radius: 10px;
+  border: 1px solid var(--med-border);
+  padding: 1.3em 1.5em;
+  margin-bottom: 1.5em;
+}
+
+.report-section-title {
+  color: var(--med-blue);
+  font-size: 1.25em;
+  font-weight: 600;
+  margin-bottom: 0.7em;
+  letter-spacing: 0.2px;
+  border-left: 4px solid var(--med-blue);
+  padding-left: 0.5em;
+}
+
+.report-critical {
+  color: var(--med-red);
+  font-weight: 700;
+  background: #fff5f5;
+  border-left: 4px solid var(--med-red);
+  padding-left: 0.5em;
+  margin-bottom: 1em;
+}
+
+.report-treatment-list li {
+  margin-bottom: 0.4em;
+  font-weight: 500;
+}
+
+.report-emergency-contact {
+  background: #f9f9ff;
+  border-left: 4px solid var(--med-blue);
+  padding: 0.7em 1em;
+  margin-bottom: 0.7em;
+  border-radius: 7px;
+}
+
+.report-recommendations {
+  background: #e8f5e9;
+  border-left: 4px solid var(--med-green);
+  color: #205c2c;
+}
+
+.report-label {
+  color: var(--med-grey-dark);
+  font-weight: 600;
+  margin-right: 0.5em;
+}
+
+.report-value {
+  color: #222;
+  font-weight: 500;
+}
+
+@media print {
+  body, .report-section-pro {
+    background: var(--med-white) !important;
+    color: #111 !important;
+    box-shadow: none !important;
+  }
+  .report-section-pro {
+    border: 1px solid #bbb !important;
+    padding: 1.5rem 1.2rem !important;
+  }
+  .report-header-info, .report-section-title {
+    color: #000 !important;
+    border-color: #1976d2 !important;
+  }
+  .report-critical, .report-recommendations, .report-emergency-contact {
+    background: none !important;
+    color: #000 !important;
+    border-color: #1976d2 !important;
+  }
+}
+
+/* Utilitaires */
+.mt-2 { margin-top: 2em; }
+.mb-2 { margin-bottom: 2em; }
+.p-1 { padding: 1em; }
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.fw-bold { font-weight: bold; }
+.fs-1-2 { font-size: 1.2em; }
+.fs-1-5 { font-size: 1.5em; }

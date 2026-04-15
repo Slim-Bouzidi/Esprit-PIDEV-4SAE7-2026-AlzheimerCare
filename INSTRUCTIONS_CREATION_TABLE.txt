@@ -1,0 +1,57 @@
+═══════════════════════════════════════════════════════════════
+  INSTRUCTIONS - CRÉATION TABLE RAPPORT DANS PHPMYADMIN
+═══════════════════════════════════════════════════════════════
+
+ÉTAPE 1 : OUVRIR PHPMYADMIN
+-----------------------------
+1. Ouvrez XAMPP Control Panel
+2. Cliquez sur le bouton "Admin" à côté de MySQL
+3. phpMyAdmin s'ouvre dans votre navigateur
+
+ÉTAPE 2 : SÉLECTIONNER LA BASE DE DONNÉES
+------------------------------------------
+1. Dans le menu de gauche, cliquez sur "assistancequotidiennedb"
+2. La base de données est maintenant sélectionnée
+
+ÉTAPE 3 : OUVRIR L'ONGLET SQL
+------------------------------
+1. En haut de la page, cliquez sur l'onglet "SQL"
+2. Une zone de texte apparaît pour écrire du SQL
+
+ÉTAPE 4 : COPIER LE SCRIPT SQL
+-------------------------------
+1. Ouvrez le fichier "create_table_rapport.sql"
+2. Sélectionnez TOUT le contenu (Ctrl+A)
+3. Copiez (Ctrl+C)
+
+ÉTAPE 5 : COLLER ET EXÉCUTER
+-----------------------------
+1. Dans phpMyAdmin, collez le script dans la zone SQL (Ctrl+V)
+2. Cliquez sur le bouton "Exécuter" en bas à droite
+3. Vous devriez voir un message de succès en vert
+
+ÉTAPE 6 : VÉRIFIER LA CRÉATION
+-------------------------------
+1. Dans l'onglet SQL, effacez le contenu
+2. Tapez : DESCRIBE rapport;
+3. Cliquez sur "Exécuter"
+4. Vous devriez voir toutes les colonnes de la table
+
+ÉTAPE 7 : TESTER L'APPLICATION
+-------------------------------
+1. Ouvrez votre navigateur : http://localhost:4200
+2. Connectez-vous en tant que Médecin
+3. Allez dans "Créer un rapport de suivi"
+4. Remplissez le formulaire et soumettez
+5. Le rapport devrait être créé sans erreur !
+
+═══════════════════════════════════════════════════════════════
+  SI VOUS VOYEZ UNE ERREUR
+═══════════════════════════════════════════════════════════════
+
+Si vous voyez une erreur lors de l'exécution du script SQL :
+- Copiez le message d'erreur
+- Partagez-le avec moi
+- Je vous aiderai à résoudre le problème
+
+═══════════════════════════════════════════════════════════════

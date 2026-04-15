@@ -1,0 +1,682 @@
+<div class="dashboard-layout">
+    <!-- Sidebar -->
+    <app-sidebar [role]="'DOCTEUR'" [userName]="userName" [userRole]="'Médecin Référent'"></app-sidebar>
+
+    <!-- Main Content Wrapper -->
+    <div class="main-wrapper">
+        <!-- Topbar -->
+        <header class="topbar">
+            <h1 class="page-title-small">{{ 'DOCTOR.PATIENT_MANAGEMENT' | translate }}</h1>
+
+            <div class="topbar-actions">
+                <app-notification-bell></app-notification-bell>
+                <button class="btn btn-logout" (click)="logout()">
+                    <span>Déconnexion</span>
+                    <span class="icon">🚪</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Patients Content -->
+        <main class="content-area patients-content">
+
+            <!-- Action Bar -->
+            <div class="action-bar">
+                <div class="search-container">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" [placeholder]="'DOCTOR.SEARCH_BY_NAME' | translate" class="search-input"
+                        (input)="filterPatients($event)">
+                </div>
+                <button class="btn btn-primary" (click)="addPatient()">
+                    <span>+</span> {{ 'DOCTOR.NEW_PATIENT' | translate }}
+                </button>
+            </div>
+
+            <!-- Add Patient Dialog -->
+            <div class="modal-overlay" *ngIf="showAddPatientDialog" (click)="addPatient()"></div>
+            <div class="modal-dialog" *ngIf="showAddPatientDialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>{{ 'DOCTOR.NEW_PATIENT' | translate }}</h2>
+                        <button class="modal-close" (click)="addPatient()">✕</button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="validation-summary" *ngIf="formErrors && (formErrors['nomComplet'] || formErrors['dateNaissance'] || formErrors['numeroDeTelephone'] || formErrors['adresse'] || formErrors['antecedents'] || formErrors['allergies'])">
+                            ⚠️ Veuillez corriger les erreurs ci-dessous.
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group" style="flex: 1;" [class.field-error]="formErrors['nomComplet']">
+                                <label>Nom Complet *</label>
+                                <input type="text" [(ngModel)]="newPatient.nomComplet" name="nomComplet" placeholder="Nom complet du patient" required maxlength="100">
+                                <div class="error-message" *ngIf="formErrors['nomComplet']">{{ formErrors['nomComplet'] }}</div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group" [class.field-error]="formErrors['dateNaissance']">
+                                <label>Date de Naissance</label>
+                                <input type="date" [(ngModel)]="newPatient.dateNaissance" name="dateNaissance">
+                                <div class="error-message" *ngIf="formErrors['dateNaissance']">{{ formErrors['dateNaissance'] }}</div>
+                            </div>
+                            <div class="form-group" [class.field-error]="formErrors['numeroDeTelephone']">
+                                <label>Téléphone</label>
+                                <input type="tel" [(ngModel)]="newPatient.numeroDeTelephone" name="numeroDeTelephone" placeholder="Numéro de téléphone" maxlength="20">
+                                <div class="error-message" *ngIf="formErrors['numeroDeTelephone']">{{ formErrors['numeroDeTelephone'] }}</div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group" style="flex: 1;" [class.field-error]="formErrors['adresse']">
+                                <label>Adresse</label>
+                                <input type="text" [(ngModel)]="newPatient.adresse" name="adresse" placeholder="Adresse" maxlength="255">
+                                <div class="error-message" *ngIf="formErrors['adresse']">{{ formErrors['adresse'] }}</div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group" [class.field-error]="formErrors['antecedents']">
+                                <label>Antécédents</label>
+                                <input type="text" [(ngModel)]="newPatient.antecedents" name="antecedents" placeholder="Antécédents médicaux" maxlength="500">
+                                <div class="error-message" *ngIf="formErrors['antecedents']">{{ formErrors['antecedents'] }}</div>
+                            </div>
+                            <div class="form-group" [class.field-error]="formErrors['allergies']">
+                                <label>Allergies</label>
+                                <input type="text" [(ngModel)]="newPatient.allergies" name="allergies" placeholder="Allergies" maxlength="500">
+                                <div class="error-message" *ngIf="formErrors['allergies']">{{ formErrors['allergies'] }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" (click)="addPatient()">
+                            {{ 'COMMON.CANCEL' | translate }}
+                        </button>
+                        <button class="btn btn-primary" (click)="submitNewPatient()">
+                            {{ 'COMMON.SAVE' | translate }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading State -->
+            <div class="loading-state" *ngIf="isLoading">
+                <div class="loading-spinner">⏳</div>
+                <h3>{{ 'DOCTOR.LOADING_PATIENTS' | translate }}</h3>
+                <p>{{ 'DOCTOR.LOADING_BACKEND' | translate }}</p>
+            </div>
+
+            <!-- Error State -->
+            <div class="error-state" *ngIf="error && !isLoading">
+                <span class="error-icon">❌</span>
+                <h3>{{ 'DOCTOR.CONNECTION_ERROR' | translate }}</h3>
+                <p>{{ error }}</p>
+                <button class="btn btn-primary" (click)="loadPatientsFromDatabase()">
+                    🔄 {{ 'COMMON.RETRY' | translate }}
+                </button>
+            </div>
+
+            <!-- Patients Grid -->
+            <div class="patients-grid" *ngIf="!isLoading && !error">
+                <div class="patient-card" *ngFor="let patient of filteredPatients">
+                    <div class="patient-header">
+                        <div class="patient-avatar-lg" [ngClass]="patient.actif ? 'status-stable' : 'status-inactive'">
+                            {{ getPatientInitials(patient) }}
+                        </div>
+                        <div class="patient-status-dropdown">
+                            <button class="patient-status-badge" [ngClass]="patient.actif ? 'status-stable' : 'status-inactive'" (click)="toggleStatusDropdown(patient)">
+                                {{ patient.actif ? 'Actif' : 'Inactif' }} ▼
+                            </button>
+                            <div class="status-dropdown-menu" *ngIf="patient.showStatusDropdown">
+                                <button class="status-option" (click)="updatePatientStatus(patient, 'active')">
+                                    Actif
+                                </button>
+                                <button class="status-option" (click)="updatePatientStatus(patient, 'inactive')">
+                                    Inactif
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="patient-info">
+                        <h3>{{ patient.nomComplet }}</h3>
+                        <p class="patient-meta" *ngIf="patient.dateNaissance">
+                            🎂 {{ patient.dateNaissance }}
+                        </p>
+                        <p class="patient-meta" *ngIf="patient.adresse">
+                            📍 {{ patient.adresse }}
+                        </p>
+                        <p class="patient-phone" *ngIf="patient.numeroDeTelephone">
+                            📞 {{ patient.numeroDeTelephone }}
+                        </p>
+                    </div>
+
+                    <!-- Assignation soignant -->
+                    <div class="soignant-assign">
+                        <label class="assign-label">👩‍⚕️ {{ 'DOCTOR.ASSIGNED_CAREGIVER' | translate }}</label>
+                        <select class="assign-select"
+                                [value]="patient.soignant?.id || ''"
+                                (change)="assignerSoignant(patient, $event)">
+                            <option value="">{{ 'DOCTOR.NOT_ASSIGNED_OPTION' | translate }}</option>
+                            <option *ngFor="let s of soignants" [value]="s.id">
+                                {{ s.nom }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="patient-actions">
+                        <!-- Treatment Button -->
+                        <button class="btn-icon treatment-btn" 
+                                [title]="hasTreatment(patient) ? 'View treatment' : 'Add treatment'"
+                                (click)="openTreatmentDialog(patient)">
+                            {{ hasTreatment(patient) ? '💊' : '➕' }}
+                        </button>
+                        <!-- Medical Record Button -->
+                        <button class="btn-icon medical-btn" 
+                                [title]="hasMedicalRecord(patient) ? 'View medical record' : 'Add medical record'"
+                                (click)="openMedicalRecordDialog(patient)">
+                            {{ hasMedicalRecord(patient) ? '📖' : '➕' }}
+                        </button>
+                        <!-- Emergency Contact Button -->
+                        <button class="btn-icon emergency-btn" 
+                                [title]="hasEmergencyContact(patient) ? 'Voir contact urgence' : 'Ajouter contact urgence'"
+                                (click)="openEmergencyContactDialog(patient)">
+                            {{ hasEmergencyContact(patient) ? '🚨' : '➕' }}
+                        </button>
+                        <!-- Generate Report Button -->
+                        <button class="btn-icon report-btn" 
+                                title="Générer rapport"
+                                [class.report-btn-ready]="canGenerateReport(patient)"
+                                (click)="openReportDialog(patient)">
+                            📋
+                        </button>
+                        <button class="btn-icon delete-btn" title="Supprimer patient" (click)="deletePatient(patient)">🗑️</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State (Base de données vide) -->
+            <div class="empty-state" *ngIf="!isLoading && !error && filteredPatients.length === 0 && patients.length === 0">
+                <span class="empty-icon">🏥</span>
+                <h3>{{ 'DOCTOR.NO_PATIENTS_DB' | translate }}</h3>
+                <p>{{ 'DOCTOR.DB_EMPTY' | translate }}</p>
+                <p>{{ 'DOCTOR.ADD_PATIENTS_BACKEND' | translate }}</p>
+            </div>
+
+            <!-- No Results State -->
+            <div class="empty-state" *ngIf="!isLoading && !error && filteredPatients.length === 0 && patients.length > 0">
+                <span class="empty-icon">🔍</span>
+                <h3>{{ 'DOCTOR.NO_PATIENT_FOUND' | translate }}</h3>
+                <p>{{ 'DOCTOR.NO_PATIENT_MATCH' | translate }}</p>
+            </div>
+
+            <!-- Treatment Dialog -->
+            <div class="modal-overlay" *ngIf="showTreatmentDialog" (click)="closeTreatmentDialog()"></div>
+            <div class="modal-dialog" *ngIf="showTreatmentDialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>{{ hasTreatment(selectedPatient!) ? 'Treatment' : 'Add Treatment' }} - {{ selectedPatient?.nomComplet }}</h2>
+                        <button class="modal-close" (click)="closeTreatmentDialog()">✕</button>
+                    </div>
+
+                    <div class="modal-body">
+                        <!-- View Mode - Show existing treatment -->
+                        <div *ngIf="hasTreatment(selectedPatient!)">
+                            <div *ngFor="let treatment of selectedPatient!.treatments" class="treatment-view">
+                                <div class="treatment-field">
+                                    <label>Treatment Name:</label>
+                                    <p>{{ treatment.treatmentName }}</p>
+                                </div>
+                                <div class="treatment-field">
+                                    <label>Dosage:</label>
+                                    <p>{{ treatment.dosage }}</p>
+                                </div>
+                                <div class="treatment-field">
+                                    <label>Frequency:</label>
+                                    <p>{{ treatment.frequency }}</p>
+                                </div>
+                                <div class="treatment-field" *ngIf="treatment.startDate">
+                                    <label>Start Date:</label>
+                                    <p>{{ treatment.startDate }}</p>
+                                </div>
+                                <div class="treatment-field" *ngIf="treatment.endDate">
+                                    <label>End Date:</label>
+                                    <p>{{ treatment.endDate }}</p>
+                                </div>
+                                <div class="treatment-field" *ngIf="treatment.status">
+                                    <label>Status:</label>
+                                    <p>{{ treatment.status }}</p>
+                                </div>
+                                <button class="btn btn-danger" (click)="deleteTreatment(selectedPatient!, treatment)">
+                                    🗑️ Delete Treatment
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Add Mode - Show form to create new treatment -->
+                        <div *ngIf="!hasTreatment(selectedPatient!)">
+                            <div class="validation-summary" *ngIf="formErrors && formErrors['treatmentName']">
+                                ⚠️ Veuillez corriger les erreurs ci-dessous.
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group" [class.field-error]="formErrors['treatmentName']">
+                                    <label>Treatment Name *</label>
+                                    <input type="text" [(ngModel)]="newTreatment.treatmentName" name="treatmentName" placeholder="Treatment name" required maxlength="200">
+                                    <div class="error-message" *ngIf="formErrors['treatmentName']">{{ formErrors['treatmentName'] }}</div>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group" [class.field-error]="formErrors['dosage']">
+                                    <label>Dosage</label>
+                                    <input type="text" [(ngModel)]="newTreatment.dosage" name="dosage" placeholder="Ex: 10mg, 500ml" maxlength="100">
+                                    <div class="error-message" *ngIf="formErrors['dosage']">{{ formErrors['dosage'] }}</div>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group" [class.field-error]="formErrors['frequency']">
+                                    <label>Frequency</label>
+                                    <input type="text" [(ngModel)]="newTreatment.frequency" name="frequency" placeholder="Ex: Once daily, Twice daily" maxlength="100">
+                                    <div class="error-message" *ngIf="formErrors['frequency']">{{ formErrors['frequency'] }}</div>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group" [class.field-error]="formErrors['startDate']">
+                                    <label>Start Date</label>
+                                    <input type="date" [(ngModel)]="newTreatment.startDate" name="startDate">
+                                    <div class="error-message" *ngIf="formErrors['startDate']">{{ formErrors['startDate'] }}</div>
+                                </div>
+                                <div class="form-group" [class.field-error]="formErrors['endDate']">
+                                    <label>End Date</label>
+                                    <input type="date" [(ngModel)]="newTreatment.endDate" name="endDate">
+                                    <div class="error-message" *ngIf="formErrors['endDate']">{{ formErrors['endDate'] }}</div>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Status</label>
+                                    <select [(ngModel)]="newTreatment.status" name="status">
+                                        <option value="Active">Active</option>
+                                        <option value="Inactive">Inactive</option>
+                                        <option value="Paused">Paused</option>
+                                        <option value="Completed">Completed</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" (click)="closeTreatmentDialog()">
+                            {{ 'COMMON.CANCEL' | translate }}
+                        </button>
+                        <button class="btn btn-primary" *ngIf="!hasTreatment(selectedPatient!)" (click)="submitTreatment()">
+                            {{ 'COMMON.SAVE' | translate }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Medical Record Dialog -->
+            <div class="modal-overlay" *ngIf="showMedicalRecordDialog" (click)="closeMedicalRecordDialog()"></div>
+            <div class="modal-dialog" *ngIf="showMedicalRecordDialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>{{ hasMedicalRecord(selectedPatient!) ? 'Medical Record' : 'Add Medical Record' }} - {{ selectedPatient?.nomComplet }}</h2>
+                        <button class="modal-close" (click)="closeMedicalRecordDialog()">✕</button>
+                    </div>
+
+                    <div class="modal-body">
+                        <!-- View Mode - Show existing medical record -->
+                        <div *ngIf="hasMedicalRecord(selectedPatient!)">
+                            <div *ngFor="let record of selectedPatient!.medicalRecords" class="medical-record-view">
+                                <div class="record-field">
+                                    <label>Diagnosis:</label>
+                                    <p>{{ record.diagnosis }}</p>
+                                </div>
+                                <div class="record-field">
+                                    <label>Disease Stage:</label>
+                                    <p>{{ record.diseaseStage }}</p>
+                                </div>
+                                <div class="record-field">
+                                    <label>Medical History:</label>
+                                    <p>{{ record.medicalHistory }}</p>
+                                </div>
+                                <div class="record-field">
+                                    <label>Allergies:</label>
+                                    <p>{{ record.allergies }}</p>
+                                </div>
+                                <div class="record-field" *ngIf="record.recordDate">
+                                    <label>Record Date:</label>
+                                    <p>{{ record.recordDate }}</p>
+                                </div>
+                                <button class="btn btn-danger" (click)="deleteMedicalRecord(selectedPatient!, record)">
+                                    🗑️ Delete Record
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Add Mode - Show form to create new medical record -->
+                        <div *ngIf="!hasMedicalRecord(selectedPatient!)">
+                            <div class="validation-summary" *ngIf="formErrors && formErrors['diagnosis']">
+                                ⚠️ Veuillez corriger les erreurs ci-dessous.
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group" [class.field-error]="formErrors['diagnosis']">
+                                    <label>Diagnosis *</label>
+                                    <input type="text" [(ngModel)]="newMedicalRecord.diagnosis" name="diagnosis" placeholder="Diagnosis" required maxlength="300">
+                                    <div class="error-message" *ngIf="formErrors['diagnosis']">{{ formErrors['diagnosis'] }}</div>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group" [class.field-error]="formErrors['diseaseStage']">
+                                    <label>Disease Stage</label>
+                                    <input type="text" [(ngModel)]="newMedicalRecord.diseaseStage" name="diseaseStage" placeholder="Ex: Mild, Moderate, Severe" maxlength="100">
+                                    <div class="error-message" *ngIf="formErrors['diseaseStage']">{{ formErrors['diseaseStage'] }}</div>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group" [class.field-error]="formErrors['medicalHistory']">
+                                    <label>Medical History</label>
+                                    <textarea [(ngModel)]="newMedicalRecord.medicalHistory" name="medicalHistory" placeholder="Medical history" rows="4" maxlength="2000"></textarea>
+                                    <div class="error-message" *ngIf="formErrors['medicalHistory']">{{ formErrors['medicalHistory'] }}</div>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group" [class.field-error]="formErrors['allergies']">
+                                    <label>Allergies</label>
+                                    <textarea [(ngModel)]="newMedicalRecord.allergies" name="mrAllergies" placeholder="Known allergies" rows="3" maxlength="500"></textarea>
+                                    <div class="error-message" *ngIf="formErrors['allergies']">{{ formErrors['allergies'] }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" (click)="closeMedicalRecordDialog()">
+                            {{ 'COMMON.CANCEL' | translate }}
+                        </button>
+                        <button class="btn btn-primary" *ngIf="!hasMedicalRecord(selectedPatient!)" (click)="submitMedicalRecord()">
+                            {{ 'COMMON.SAVE' | translate }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Emergency Contact Dialog -->
+            <div class="modal-overlay" *ngIf="showEmergencyContactDialog" (click)="closeEmergencyContactDialog()"></div>
+            <div class="modal-dialog" *ngIf="showEmergencyContactDialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>{{ hasEmergencyContact(selectedPatient!) ? 'Contact Urgence' : 'Ajouter Contact Urgence' }} - {{ selectedPatient?.nomComplet }}</h2>
+                        <button class="modal-close" (click)="closeEmergencyContactDialog()">✕</button>
+                    </div>
+
+                    <div class="modal-body">
+                        <!-- View Mode - Show existing emergency contact -->
+                        <div *ngIf="hasEmergencyContact(selectedPatient!)">
+                            <div *ngFor="let contact of selectedPatient!.emergencyContacts" class="emergency-contact-view">
+                                <div class="contact-field">
+                                    <label>Nom Complet:</label>
+                                    <p>{{ contact.fullName }}</p>
+                                </div>
+                                <div class="contact-field">
+                                    <label>Relation:</label>
+                                    <p>{{ contact.relationship }}</p>
+                                </div>
+                                <div class="contact-field">
+                                    <label>Téléphone:</label>
+                                    <p>{{ contact.phone }}</p>
+                                </div>
+                                <div class="contact-field">
+                                    <label>Email:</label>
+                                    <p>{{ contact.email }}</p>
+                                </div>
+                                <button class="btn btn-danger" (click)="deleteEmergencyContact(selectedPatient!, contact)">
+                                    🗑️ Supprimer
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Add Mode - Show form to create new emergency contact -->
+                        <div *ngIf="!hasEmergencyContact(selectedPatient!)">
+                            <div class="validation-summary" *ngIf="formErrors && (formErrors['fullName'] || formErrors['relationship'] || formErrors['phone'] || formErrors['email'])">
+                                ⚠️ Veuillez corriger les erreurs ci-dessous.
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group" [class.field-error]="formErrors['fullName']">
+                                    <label>Nom Complet *</label>
+                                    <input type="text" [(ngModel)]="newEmergencyContact.fullName" name="ecFullName" placeholder="Nom complet" required maxlength="100">
+                                    <div class="error-message" *ngIf="formErrors['fullName']">{{ formErrors['fullName'] }}</div>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group" [class.field-error]="formErrors['relationship']">
+                                    <label>Relation *</label>
+                                    <input type="text" [(ngModel)]="newEmergencyContact.relationship" name="ecRelationship" placeholder="Ex: Famille, Ami, etc." required maxlength="100">
+                                    <div class="error-message" *ngIf="formErrors['relationship']">{{ formErrors['relationship'] }}</div>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group" [class.field-error]="formErrors['phone']">
+                                    <label>Téléphone</label>
+                                    <input type="tel" [(ngModel)]="newEmergencyContact.phone" name="ecPhone" placeholder="Numéro de téléphone" maxlength="20">
+                                    <div class="error-message" *ngIf="formErrors['phone']">{{ formErrors['phone'] }}</div>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group" [class.field-error]="formErrors['email']">
+                                    <label>Email</label>
+                                    <input type="email" [(ngModel)]="newEmergencyContact.email" name="ecEmail" placeholder="Adresse email" maxlength="150">
+                                    <div class="error-message" *ngIf="formErrors['email']">{{ formErrors['email'] }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" (click)="closeEmergencyContactDialog()">
+                            {{ 'COMMON.CANCEL' | translate }}
+                        </button>
+                        <button class="btn btn-primary" *ngIf="!hasEmergencyContact(selectedPatient!)" (click)="submitEmergencyContact()">
+                            {{ 'COMMON.SAVE' | translate }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Report Generation Dialog -->
+            <div class="modal-overlay" *ngIf="showReportDialog" (click)="closeReportDialog()">
+            <div class="modal-content modal-clinical" (click)="$event.stopPropagation()">
+                <!-- Document header — hospital style -->
+                <div class="clinical-doc-header">
+                    <div class="doc-header-left">
+                        <span class="doc-institution">AXE Alzheimer e-Health</span>
+                        <span class="doc-type-label">{{ 'DOCTOR_REPORTS.CLINICAL_REPORT' | translate }}</span>
+                    </div>
+                    <div class="doc-header-right">
+                        <span class="doc-ref">Réf. #{{ generatedReportPreview?.id }}</span>
+                        <span class="doc-date">{{ generatedReportPreview?.date | date:'dd/MM/yyyy HH:mm' }}</span>
+                    </div>
+                    <button class="modal-close" (click)="closeReportDialog()">×</button>
+                </div>
+
+                <div class="modal-body clinical-body" *ngIf="generatedReportPreview">
+                    <!-- Section A : Synthèse clinique (Executive Summary) -->
+                    <section class="clinical-section section-summary">
+                        <h3 class="clinical-section-title">
+                            <span class="section-letter">A</span>
+                            {{ 'DOCTOR_REPORTS.EXECUTIVE_SUMMARY' | translate }}
+                        </h3>
+                        <div class="summary-grid">
+                            <div class="summary-item">
+                                <span class="summary-label">{{ 'DOCTOR.PATIENT' | translate }}</span>
+                                <span class="summary-value summary-value-lg">{{ generatedReportPreview.patient?.nomComplet || '—' }}</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">{{ 'DOCTOR_REPORTS.PERIOD' | translate }}</span>
+                                <span class="summary-value" *ngIf="generatedReportPreview.periodeDebut">
+                                    {{ generatedReportPreview.periodeDebut | date:'dd/MM/yyyy' }} → {{ generatedReportPreview.periodeFin | date:'dd/MM/yyyy' }}
+                                </span>
+                                <span class="summary-value" *ngIf="!generatedReportPreview.periodeDebut">—</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">{{ 'DOCTOR_REPORTS.TYPE' | translate }}</span>
+                                <span class="summary-value">{{ getTypeLabel(generatedReportPreview.typeRapport) | translate }}</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">{{ 'DOCTOR_REPORTS.STATUS' | translate }}</span>
+                                <span class="badge-statut"
+                                    [class.statut-genere]="generatedReportPreview.statut === 'GENERE'"
+                                    [class.statut-envoye]="generatedReportPreview.statut === 'ENVOYE'"
+                                    [class.statut-archive]="generatedReportPreview.statut === 'ARCHIVE'">
+                                    {{ getStatutLabel(generatedReportPreview.statut) | translate }}
+                                </span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Clinical Indicators -->
+                    <section class="clinical-section section-indicators" *ngIf="hasIndicators(generatedReportPreview)">
+                        <h3 class="clinical-section-title">
+                            <span class="section-letter">B</span>
+                            {{ 'DOCTOR_REPORTS.CLINICAL_INDICATORS' | translate }}
+                        </h3>
+                        <div class="indicators-grid">
+                            <div class="indicator-card" *ngIf="generatedReportPreview.tauxObservance != null">
+                                <span class="indicator-value" [class.indicator-alert]="generatedReportPreview.tauxObservance < 70"
+                                    [class.indicator-ok]="generatedReportPreview.tauxObservance >= 70">
+                                    {{ generatedReportPreview.tauxObservance }}%
+                                </span>
+                                <span class="indicator-label">{{ 'DOCTOR_REPORTS.ADHERENCE_RATE' | translate }}</span>
+                            </div>
+                            <div class="indicator-card" *ngIf="generatedReportPreview.qualiteSommeil != null">
+                                <span class="indicator-value" [class.indicator-alert]="generatedReportPreview.qualiteSommeil < 5"
+                                    [class.indicator-ok]="generatedReportPreview.qualiteSommeil >= 5">
+                                    {{ generatedReportPreview.qualiteSommeil }}/10
+                                </span>
+                                <span class="indicator-label">{{ 'DOCTOR_REPORTS.SLEEP_QUALITY' | translate }}</span>
+                            </div>
+                            <div class="indicator-card" *ngIf="generatedReportPreview.nbAlertes != null">
+                                <span class="indicator-value" [class.indicator-alert]="generatedReportPreview.nbAlertes! > 0">
+                                    {{ generatedReportPreview.nbAlertes }}
+                                </span>
+                                <span class="indicator-label">{{ 'DOCTOR_REPORTS.ALERTS' | translate }}</span>
+                            </div>
+                            <div class="indicator-card" *ngIf="generatedReportPreview.nbInterventions != null">
+                                <span class="indicator-value">{{ generatedReportPreview.nbInterventions }}</span>
+                                <span class="indicator-label">{{ 'DOCTOR_REPORTS.INTERVENTIONS' | translate }}</span>
+                            </div>
+                            <div class="indicator-card" *ngIf="generatedReportPreview.nbComportementsAnormaux != null">
+                                <span class="indicator-value" [class.indicator-alert]="generatedReportPreview.nbComportementsAnormaux! > 0">
+                                    {{ generatedReportPreview.nbComportementsAnormaux }}
+                                </span>
+                                <span class="indicator-label">{{ 'DOCTOR_REPORTS.ABNORMAL_BEHAVIORS' | translate }}</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Section C : Therapeutic Protocol (contenu) -->
+                    <section class="clinical-section" *ngIf="generatedReportPreview.contenuTexte">
+                        <h3 class="clinical-section-title">
+                            <span class="section-letter">C</span>
+                            {{ 'DOCTOR_REPORTS.THERAPEUTIC_PROTOCOL' | translate }}
+                        </h3>
+                        <div class="clinical-note-block">
+                            <pre class="clinical-note">{{ generatedReportPreview.contenuTexte }}</pre>
+                        </div>
+                    </section>
+
+                    <!-- Section D : Physician Directives -->
+                    <section class="clinical-section" *ngIf="generatedReportPreview.directives">
+                        <h3 class="clinical-section-title">
+                            <span class="section-letter">D</span>
+                            {{ 'DOCTOR_REPORTS.PHYSICIAN_DIRECTIVES' | translate }}
+                        </h3>
+                        <div class="clinical-note-block clinical-note-directive">
+                            <pre class="clinical-note">{{ generatedReportPreview.directives }}</pre>
+                        </div>
+                    </section>
+
+                    <!-- Section E : Recommendations -->
+                    <section class="clinical-section" *ngIf="generatedReportPreview.recommandations">
+                        <h3 class="clinical-section-title">
+                            <span class="section-letter">E</span>
+                            {{ 'DOCTOR_REPORTS.RECOMMENDATIONS_SECTION' | translate }}
+                        </h3>
+                        <div class="clinical-note-block clinical-note-reco">
+                            <pre class="clinical-note">{{ generatedReportPreview.recommandations }}</pre>
+                        </div>
+                    </section>
+
+                    <!-- Traceability footer -->
+                    <section class="clinical-section section-traceability">
+                        <h3 class="clinical-section-title">
+                            <span class="section-letter">F</span>
+                            {{ 'DOCTOR_REPORTS.TRACEABILITY' | translate }}
+                        </h3>
+                        <div class="traceability-grid">
+                            <div class="trace-item">
+                                <span class="trace-label">{{ 'DOCTOR_REPORTS.AUTHOR' | translate }}</span>
+                                <span class="trace-value">{{ generatedReportPreview.soignant?.nomComplet || generatedReportPreview.soignant?.nom || '—' }}</span>
+                            </div>
+                            <div class="trace-item">
+                                <span class="trace-label">{{ 'DOCTOR_REPORTS.SOURCE' | translate }}</span>
+                                <span class="trace-value">AXE Alzheimer e-Health — Module Médecin</span>
+                            </div>
+                            <div class="trace-item">
+                                <span class="trace-label">{{ 'DOCTOR_REPORTS.GENERATION_DATE' | translate }}</span>
+                                <span class="trace-value">{{ generatedReportPreview.date | date:'dd/MM/yyyy HH:mm:ss' }}</span>
+                            </div>
+                            <div class="trace-item">
+                                <span class="trace-label">{{ 'DOCTOR_REPORTS.FORMAT' | translate }}</span>
+                                <span class="trace-value">{{ generatedReportPreview.formatExport || 'PDF' }}</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Caregiver simplified section -->
+                    <section class="clinical-section section-caregiver" *ngIf="generatedReportPreview.directives || generatedReportPreview.recommandations">
+                        <h3 class="clinical-section-title caregiver-title">
+                            <span class="section-letter section-letter-caregiver">★</span>
+                            {{ 'DOCTOR_REPORTS.CAREGIVER_SECTION' | translate }}
+                        </h3>
+                        <p class="caregiver-notice">{{ 'DOCTOR_REPORTS.CAREGIVER_NOTICE' | translate }}</p>
+                        <div class="caregiver-content">
+                            <div class="caregiver-block" *ngIf="generatedReportPreview.directives">
+                                <h4>{{ 'DOCTOR_REPORTS.CAREGIVER_TODO' | translate }}</h4>
+                                <pre class="caregiver-text">{{ generatedReportPreview.directives }}</pre>
+                            </div>
+                            <div class="caregiver-block" *ngIf="generatedReportPreview.recommandations">
+                                <h4>{{ 'DOCTOR_REPORTS.CAREGIVER_WATCH' | translate }}</h4>
+                                <pre class="caregiver-text">{{ generatedReportPreview.recommandations }}</pre>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn-outline" (click)="closeReportDialog()">{{ 'COMMON.CLOSE' | translate }}</button>
+                    <button class="btn-submit btn-save-report" (click)="submitReport()" [disabled]="reportGenerating || reportSaved">
+                        <span *ngIf="reportGenerating">⏳ {{ 'COMMON.LOADING' | translate }}</span>
+                        <span *ngIf="!reportGenerating && !reportSaved">💾 {{ 'DOCTOR_REPORTS.SAVE_REPORT' | translate }}</span>
+                        <span *ngIf="reportSaved">✅ {{ 'DOCTOR_REPORTS.REPORT_SAVED' | translate }}</span>
+                    </button>
+                    <button class="btn-submit" (click)="downloadReport(generatedReportPreview.id)" [disabled]="!reportSaved">
+                        ⬇️ {{ 'DOCTOR_REPORTS.DOWNLOAD' | translate }}
+                    </button>
+                </div>
+            </div>
+            </div>
+
+        </main>
+    </div>

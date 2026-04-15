@@ -1,0 +1,910 @@
+<div class="dashboard-layout">
+    <!-- Sidebar -->
+    <app-sidebar [role]="'DOCTEUR'" [userName]="userName" [userRole]="'Médecin Référent'"></app-sidebar>
+
+    <!-- Main Content Wrapper -->
+    <div class="main-wrapper">
+        <!-- Topbar -->
+        <header class="topbar">
+            <h1 class="page-title-small">{{ 'DOCTOR_REPORTS.MEDICAL_REPORTS' | translate }}</h1>
+
+            <div class="topbar-actions">
+                <!-- Notification bell -->
+                <div class="notif-wrapper">
+                    <button class="btn-notif" (click)="toggleNotifPanel()" title="Notifications">
+                        🔔
+                        <span class="notif-badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+                    </button>
+
+                    <!-- Notification dropdown -->
+                    <div class="notif-panel" *ngIf="showNotifPanel">
+                        <div class="notif-panel-header">
+                            <h4>Notifications</h4>
+                            <button class="btn-mark-all" *ngIf="unreadCount > 0" (click)="markAllRead()">Tout marquer lu</button>
+                        </div>
+                        <div class="notif-list" *ngIf="notifications.length > 0">
+                            <div *ngFor="let n of notifications" class="notif-item" [class.unread]="!n.lu"
+                                 (click)="n.referenceType === 'FICHE_TRANSMISSION' ? downloadFichePdfFromNotif(n) : n.referenceType === 'RAPPORT_HEBDOMADAIRE' ? openHebdoFromNotif(n) : markNotifRead(n)">
+                                <div class="notif-icon">{{ n.referenceType === 'FICHE_TRANSMISSION' ? '📄' : n.referenceType === 'RAPPORT_HEBDOMADAIRE' ? '📊' : '📋' }}</div>
+                                <div class="notif-body">
+                                    <span class="notif-titre">{{ n.titre }}</span>
+                                    <span class="notif-message">{{ n.message }}</span>
+                                    <span class="notif-date">{{ n.dateCreation | date:'dd/MM/yyyy HH:mm' }}</span>
+                                </div>
+                                <span class="notif-dot" *ngIf="!n.lu"></span>
+                            </div>
+                        </div>
+                        <div class="notif-empty" *ngIf="notifications.length === 0">
+                            Aucune notification
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn btn-logout" (click)="logout()">
+                    <span>{{ 'COMMON.LOGOUT' | translate }}</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Reports Content -->
+        <main class="content-area reports-content">
+
+            <!-- Stats Overview -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon primary-bg">
+                        <span>👥</span>
+                    </div>
+                    <div class="stat-details">
+                        <span class="stat-label">{{ 'DOCTOR_REPORTS.ACTIVE_PATIENTS' | translate }}</span>
+                        <h3 class="stat-value">{{ patientsActifs }}</h3>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon success-bg">
+                        <span>📄</span>
+                    </div>
+                    <div class="stat-details">
+                        <span class="stat-label">{{ 'DOCTOR_REPORTS.TOTAL_REPORTS' | translate }}</span>
+                        <h3 class="stat-value">{{ totalRapports }}</h3>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon info-bg">
+                        <span>📈</span>
+                    </div>
+                    <div class="stat-details">
+                        <span class="stat-label">{{ 'DOCTOR_REPORTS.ADHERENCE_RATE' | translate }}</span>
+                        <h3 class="stat-value">{{ moyenneObservance }}%</h3>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon warning-bg">
+                        <span>✅</span>
+                    </div>
+                    <div class="stat-details">
+                        <span class="stat-label">{{ 'DOCTOR_REPORTS.SENT_REPORTS' | translate }}</span>
+                        <h3 class="stat-value">{{ rapportsEnvoyes }}</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="charts-row">
+                <!-- Quick Actions -->
+                <div class="card actions-card flex-1">
+                    <div class="card-header">
+                        <h3>{{ 'DOCTOR_REPORTS.QUICK_GENERATION' | translate }}</h3>
+                    </div>
+                    <div class="quick-actions-list">
+                        <button class="action-btn action-btn-primary" (click)="goToCreateRapportSuivi()">
+                            <span class="action-icon">📋</span>
+                            <div class="action-info">
+                                <span class="action-title">{{ 'DOCTOR_REPORTS.STRUCTURED_FOLLOW_UP' | translate }}</span>
+                                <span class="action-desc">{{ 'DOCTOR_REPORTS.STRUCTURED_FOLLOW_UP_DESC' | translate }}</span>
+                            </div>
+                            <span class="arrow-icon">→</span>
+                        </button>
+                        <button class="action-btn" (click)="goToPatients()">
+                            <span class="action-icon">👥</span>
+                            <div class="action-info">
+                                <span class="action-title">{{ 'DOCTOR_REPORTS.PATIENT_LIST' | translate }}</span>
+                                <span class="action-desc">{{ 'DOCTOR_REPORTS.PATIENT_LIST_DESC' | translate }}</span>
+                            </div>
+                            <span class="arrow-icon">→</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ════════════════════════════════════════════════════════════ -->
+            <!-- 📤 RAPPORTS ENVOYÉS AUX SOIGNANTS                         -->
+            <!-- ════════════════════════════════════════════════════════════ -->
+            <div class="section-divider">
+                <span class="divider-icon">📤</span>
+                <h2 class="divider-title">Rapports envoyés aux soignants</h2>
+                <span class="divider-line"></span>
+            </div>
+
+            <!-- Rapports de suivi structurés (transmis au soignant) -->
+            <div class="card table-card rapports-suivi-section" *ngIf="rapportsSuivi.length > 0">
+                <div class="card-header">
+                    <h3>📋 Rapports de suivi envoyés</h3>
+                </div>
+                <div class="table-responsive">
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th>{{ 'DOCTOR.PATIENT' | translate }}</th>
+                                <th>{{ 'DOCTOR_REPORTS.CREATED_DATE' | translate }}</th>
+                                <th>{{ 'DOCTOR_REPORTS.READ_BY_CAREGIVER' | translate }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let r of rapportsSuivi">
+                                <td><strong>{{ r.patientPrenom }} {{ r.patientNom }}</strong></td>
+                                <td>{{ r.dateCreation | date:'dd/MM/yyyy HH:mm' }}</td>
+                                <td>
+                                    <span class="badge-lu" [class.lu-oui]="r.luParSoignant" [class.lu-non]="!r.luParSoignant">
+                                        {{ r.luParSoignant ? '✅ Lu' : '⏳ Non lu' }}
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="empty-state-inline" *ngIf="rapportsSuivi.length === 0">
+                <p>📭 Aucun rapport de suivi envoyé aux soignants pour le moment.</p>
+            </div>
+
+            <!-- ════════════════════════════════════════════════════════════ -->
+            <!-- 📥 RAPPORTS REÇUS DES SOIGNANTS                           -->
+            <!-- ════════════════════════════════════════════════════════════ -->
+            <div class="section-divider">
+                <span class="divider-icon">📥</span>
+                <h2 class="divider-title">Rapports reçus des soignants</h2>
+                <span class="divider-line"></span>
+            </div>
+
+            <!-- Fiches de Transmission Reçues -->
+            <div class="card table-card fiches-received-section">
+                <div class="card-header">
+                    <h3>📄 Fiches de transmission reçues</h3>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <span class="badge-count" *ngIf="fichesRecues.length">{{ fichesRecues.length }}</span>
+                        <button class="btn-refresh" (click)="loadFichesRecues()" title="Actualiser">
+                            🔄 Actualiser
+                        </button>
+                    </div>
+                </div>
+
+                <div class="empty-state" *ngIf="fichesRecues.length === 0">
+                    <p>Aucune fiche de transmission reçue pour le moment.</p>
+                </div>
+
+                <div class="table-responsive" *ngIf="fichesRecues.length > 0">
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Patient</th>
+                                <th>Date</th>
+                                <th>Soignant</th>
+                                <th>Signature</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let f of pagedFiches; trackBy: trackByFicheId">
+                                <td><span class="file-id">#{{ f.id }}</span></td>
+                                <td><strong>{{ f.patientNom || f.patient?.nomComplet || '—' }}</strong></td>
+                                <td>{{ f.dateCreation | date:'dd/MM/yyyy HH:mm' }}</td>
+                                <td>{{ f.soignantNom || '—' }}</td>
+                                <td>
+                                    <span class="badge-signature" [class.signe]="f.signatureSoignant">
+                                        {{ f.signatureSoignant ? '✅ Signée' : '—' }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn-icon-sm btn-view" (click)="consulterFicheRecue(f)" title="Consulter">👁️</button>
+                                        <button class="btn-icon-sm btn-download" (click)="downloadFichePdf(f.id)" title="Télécharger PDF">⬇️</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- Pagination -->
+                    <div class="pagination-bar">
+                        <div class="pagination-info">
+                            Affichage {{ ficheRangeStart }}–{{ ficheRangeEnd }} / {{ fichesPagination.totalItems }}
+                        </div>
+
+                        <div class="pagination-controls">
+                            <label class="page-size-label">
+                                Par page
+                                <select class="page-size-select" [(ngModel)]="fichesPagination.pageSize" (ngModelChange)="onFichePageSizeChange()">
+                                    <option *ngFor="let s of fichesPagination.pageSizeOptions" [ngValue]="s">{{ s }}</option>
+                                </select>
+                            </label>
+
+                            <button class="btn-outline btn-page" (click)="prevFichePage()" [disabled]="fichesPagination.currentPage <= 1">◀</button>
+                            <span class="page-indicator">Page {{ fichesPagination.currentPage }} / {{ fichesPagination.totalPages }}</span>
+                            <button class="btn-outline btn-page" (click)="nextFichePage()" [disabled]="fichesPagination.currentPage >= fichesPagination.totalPages">▶</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== Rapports Hebdomadaires Reçus ===== -->
+            <div class="card table-card hebdo-received-section">
+                <div class="card-header">
+                    <h3>📊 Rapports hebdomadaires reçus</h3>
+                    <span class="badge-count" *ngIf="rapportsHebdo.length">{{ rapportsHebdo.length }}</span>
+                </div>
+
+                <div class="empty-state" *ngIf="rapportsHebdo.length === 0">
+                    <p>Aucun rapport hebdomadaire reçu pour le moment.</p>
+                </div>
+
+                <div class="table-responsive" *ngIf="rapportsHebdo.length > 0">
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th>Patient</th>
+                                <th>Période</th>
+                                <th>Médicaments</th>
+                                <th>Repas</th>
+                                <th>RDV</th>
+                                <th>Date d'envoi</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let r of rapportsHebdo" [class.row-new]="!r.consulteParMedecin">
+                                <td><strong>{{ r.patientPrenom }} {{ r.patientNom }}</strong></td>
+                                <td>{{ r.dateDebut | date:'dd/MM' }} - {{ r.dateFin | date:'dd/MM/yyyy' }}</td>
+                                <td>
+                                    <span class="indicator-pill" [class.good]="r.tauxObservanceMedicaments >= 80"
+                                          [class.warning]="r.tauxObservanceMedicaments >= 50 && r.tauxObservanceMedicaments < 80"
+                                          [class.danger]="r.tauxObservanceMedicaments < 50">
+                                        {{ r.tauxObservanceMedicaments }}%
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="indicator-pill" [class.good]="r.tauxObservanceRepas >= 80"
+                                          [class.warning]="r.tauxObservanceRepas >= 50 && r.tauxObservanceRepas < 80"
+                                          [class.danger]="r.tauxObservanceRepas < 50">
+                                        {{ r.tauxObservanceRepas }}%
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="indicator-pill" [class.good]="r.tauxObservanceRdv >= 80"
+                                          [class.warning]="r.tauxObservanceRdv >= 50 && r.tauxObservanceRdv < 80"
+                                          [class.danger]="r.tauxObservanceRdv < 50">
+                                        {{ r.tauxObservanceRdv }}%
+                                    </span>
+                                </td>
+                                <td>{{ r.dateEnvoi | date:'dd/MM/yyyy HH:mm' }}</td>
+                                <td>
+                                    <span class="badge-hebdo-statut" [class.statut-envoye]="!r.consulteParMedecin"
+                                          [class.statut-consulte]="r.consulteParMedecin">
+                                        {{ getHebdoStatut(r) }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="btn-consulter-hebdo" (click)="consulterHebdo(r)">
+                                        {{ r.consulteParMedecin ? '👁️ Revoir' : '📋 Consulter' }}
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Modal détail rapport hebdomadaire -->
+            <div class="modal-overlay" *ngIf="selectedHebdo" (click)="fermerHebdo()">
+                <div class="modal-clinical hebdo-detail-modal" (click)="$event.stopPropagation()">
+                    <div class="modal-header modal-header-hebdo">
+                        <h3>📊 Rapport Hebdomadaire</h3>
+                        <button class="btn-close-modal" (click)="fermerHebdo()">✕</button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- En-tête patient -->
+                        <div class="hebdo-patient-info">
+                            <h4>{{ selectedHebdo.patientPrenom }} {{ selectedHebdo.patientNom }}</h4>
+                            <p class="hebdo-period">📅 {{ selectedHebdo.dateDebut | date:'dd/MM/yyyy' }} — {{ selectedHebdo.dateFin | date:'dd/MM/yyyy' }}</p>
+                            <span class="badge-hebdo-statut" [class.statut-envoye]="!selectedHebdo.consulteParMedecin"
+                                  [class.statut-consulte]="selectedHebdo.consulteParMedecin">
+                                {{ getHebdoStatut(selectedHebdo) }}
+                            </span>
+                        </div>
+
+                        <!-- Indicateurs d'observance -->
+                        <div class="hebdo-indicators-grid">
+                            <div class="hebdo-ind-card">
+                                <span class="hebdo-ind-icon">💊</span>
+                                <span class="hebdo-ind-label">Médicaments</span>
+                                <span class="hebdo-ind-value" [class.good]="selectedHebdo.tauxObservanceMedicaments >= 80"
+                                      [class.warning]="selectedHebdo.tauxObservanceMedicaments >= 50 && selectedHebdo.tauxObservanceMedicaments < 80"
+                                      [class.danger]="selectedHebdo.tauxObservanceMedicaments < 50">
+                                    {{ selectedHebdo.tauxObservanceMedicaments }}%
+                                </span>
+                            </div>
+                            <div class="hebdo-ind-card">
+                                <span class="hebdo-ind-icon">🍽️</span>
+                                <span class="hebdo-ind-label">Repas</span>
+                                <span class="hebdo-ind-value" [class.good]="selectedHebdo.tauxObservanceRepas >= 80"
+                                      [class.warning]="selectedHebdo.tauxObservanceRepas >= 50 && selectedHebdo.tauxObservanceRepas < 80"
+                                      [class.danger]="selectedHebdo.tauxObservanceRepas < 50">
+                                    {{ selectedHebdo.tauxObservanceRepas }}%
+                                </span>
+                            </div>
+                            <div class="hebdo-ind-card">
+                                <span class="hebdo-ind-icon">📅</span>
+                                <span class="hebdo-ind-label">Rendez-vous</span>
+                                <span class="hebdo-ind-value" [class.good]="selectedHebdo.tauxObservanceRdv >= 80"
+                                      [class.warning]="selectedHebdo.tauxObservanceRdv >= 50 && selectedHebdo.tauxObservanceRdv < 80"
+                                      [class.danger]="selectedHebdo.tauxObservanceRdv < 50">
+                                    {{ selectedHebdo.tauxObservanceRdv }}%
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Observations -->
+                        <div class="hebdo-section" *ngIf="selectedHebdo.observations">
+                            <h5>📝 Observations</h5>
+                            <p class="hebdo-text">{{ selectedHebdo.observations }}</p>
+                        </div>
+
+                        <!-- Incidents -->
+                        <div class="hebdo-section" *ngIf="selectedHebdo.incidents">
+                            <h5>⚠️ Incidents</h5>
+                            <p class="hebdo-text hebdo-text-warning">{{ selectedHebdo.incidents }}</p>
+                        </div>
+
+                        <!-- Recommandations -->
+                        <div class="hebdo-section" *ngIf="selectedHebdo.recommandations">
+                            <h5>💡 Recommandations</h5>
+                            <p class="hebdo-text">{{ selectedHebdo.recommandations }}</p>
+                        </div>
+
+                        <!-- Traçabilité -->
+                        <div class="hebdo-traceability">
+                            <p *ngIf="selectedHebdo.dateEnvoi">📤 Envoyé le {{ selectedHebdo.dateEnvoi | date:'dd/MM/yyyy à HH:mm' }}</p>
+                            <p *ngIf="selectedHebdo.dateConsultation">👁️ Consulté le {{ selectedHebdo.dateConsultation | date:'dd/MM/yyyy à HH:mm' }}</p>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn-secondary" (click)="fermerHebdo()">Fermer</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal détail fiche de transmission reçue -->
+            <div class="modal-overlay" *ngIf="selectedFicheRecue" (click)="fermerFicheRecue()">
+                <div class="modal-clinical fiche-detail-modal" (click)="$event.stopPropagation()">
+                    <div class="modal-header modal-header-fiche">
+                        <h3>📄 Fiche de Transmission #{{ selectedFicheRecue.id }}</h3>
+                        <button class="btn-close-modal" (click)="fermerFicheRecue()">✕</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="fiche-detail-grid">
+                            <div class="fiche-detail-item">
+                                <span class="fiche-label">Patient</span>
+                                <span class="fiche-value">{{ selectedFicheRecue.patientNom || selectedFicheRecue.patient?.nomComplet || '—' }}</span>
+                            </div>
+                            <div class="fiche-detail-item">
+                                <span class="fiche-label">Date</span>
+                                <span class="fiche-value">{{ selectedFicheRecue.dateCreation | date:'dd/MM/yyyy HH:mm' }}</span>
+                            </div>
+                            <div class="fiche-detail-item">
+                                <span class="fiche-label">Soignant</span>
+                                <span class="fiche-value">{{ selectedFicheRecue.soignantNom || '—' }}</span>
+                            </div>
+                            <div class="fiche-detail-item">
+                                <span class="fiche-label">Signature</span>
+                                <span class="fiche-value">{{ selectedFicheRecue.signatureSoignant ? '✅ Signée' : '❌ Non signée' }}</span>
+                            </div>
+                        </div>
+
+                        <div class="hebdo-section" *ngIf="selectedFicheRecue.etatGeneral">
+                            <h5>🏥 État général</h5>
+                            <p class="hebdo-text">{{ selectedFicheRecue.etatGeneral }}</p>
+                        </div>
+                        <div class="hebdo-section" *ngIf="selectedFicheRecue.humeur">
+                            <h5>😊 Humeur</h5>
+                            <p class="hebdo-text">{{ selectedFicheRecue.humeur }}</p>
+                        </div>
+                        <div class="hebdo-section" *ngIf="selectedFicheRecue.repas">
+                            <h5>🍽️ Repas</h5>
+                            <p class="hebdo-text">{{ selectedFicheRecue.repas }}</p>
+                        </div>
+                        <div class="hebdo-section" *ngIf="selectedFicheRecue.medicaments">
+                            <h5>💊 Médicaments</h5>
+                            <p class="hebdo-text">{{ selectedFicheRecue.medicaments }}</p>
+                        </div>
+                        <div class="hebdo-section" *ngIf="selectedFicheRecue.activites">
+                            <h5>🎯 Activités</h5>
+                            <p class="hebdo-text">{{ selectedFicheRecue.activites }}</p>
+                        </div>
+                        <div class="hebdo-section" *ngIf="selectedFicheRecue.commentaire">
+                            <h5>📝 Commentaire</h5>
+                            <p class="hebdo-text">{{ selectedFicheRecue.commentaire }}</p>
+                        </div>
+                        <div class="hebdo-section" *ngIf="selectedFicheRecue.incidents">
+                            <h5>⚠️ Incidents</h5>
+                            <p class="hebdo-text hebdo-text-warning">{{ selectedFicheRecue.incidents }}</p>
+                        </div>
+
+                        <div class="hebdo-traceability">
+                            <p>📤 Envoyée par le soignant le {{ selectedFicheRecue.dateCreation | date:'dd/MM/yyyy à HH:mm' }}</p>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn-secondary" (click)="fermerFicheRecue()">Fermer</button>
+                        <button class="btn-icon-sm btn-download" (click)="downloadFichePdf(selectedFicheRecue.id)" title="Télécharger PDF"
+                                style="padding: 8px 16px; font-size: 14px;">⬇️ Télécharger PDF</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ════════════════════════════════════════════════════════════ -->
+            <!-- 📋 RAPPORTS MÉDICAUX (gestion médecin)                     -->
+            <!-- ════════════════════════════════════════════════════════════ -->
+            <div class="section-divider">
+                <span class="divider-icon">📋</span>
+                <h2 class="divider-title">Gestion des rapports médicaux</h2>
+                <span class="divider-line"></span>
+            </div>
+
+            <!-- Rapports depuis l'API (dynamique) -->
+            <div class="card table-card">
+                <div class="card-header">
+                    <h3>{{ 'DOCTOR_REPORTS.MEDICAL_REPORTS' | translate }}</h3>
+                    <div class="table-controls">
+                        <div class="filter-tabs">
+                            <button class="filter-tab" [class.active]="activeFilter === 'all'" (click)="setFilter('all')">{{ 'DOCTOR_REPORTS.FILTER_ALL' | translate }}</button>
+                            <button class="filter-tab" [class.active]="activeFilter === 'GENERE'" (click)="setFilter('GENERE')">{{ 'DOCTOR_REPORTS.STATUS_GENERATED' | translate }}</button>
+                            <button class="filter-tab" [class.active]="activeFilter === 'ENVOYE'" (click)="setFilter('ENVOYE')">{{ 'DOCTOR_REPORTS.STATUS_SENT' | translate }}</button>
+                            <button class="filter-tab" [class.active]="activeFilter === 'ARCHIVE'" (click)="setFilter('ARCHIVE')">{{ 'DOCTOR_REPORTS.STATUS_ARCHIVED' | translate }}</button>
+                        </div>
+                        <div class="search-box">
+                            <input type="text" [placeholder]="'DOCTOR_REPORTS.SEARCH_REPORT' | translate" class="search-input-sm"
+                                   [(ngModel)]="searchQuery" (ngModelChange)="filterRapports()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loading -->
+                <div class="loading-state" *ngIf="loading">
+                    <p>{{ 'DOCTOR_REPORTS.LOADING_REPORTS' | translate }}</p>
+                </div>
+
+                <!-- Table -->
+                <div class="table-responsive" *ngIf="!loading">
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th>{{ 'DOCTOR_REPORTS.TITLE' | translate }}</th>
+                                <th>{{ 'DOCTOR.PATIENT' | translate }}</th>
+                                <th>{{ 'DOCTOR_REPORTS.TYPE' | translate }}</th>
+                                <th>{{ 'DOCTOR_REPORTS.PERIOD' | translate }}</th>
+                                <th>{{ 'DOCTOR_REPORTS.CREATED_BY' | translate }}</th>
+                                <th>{{ 'DOCTOR_REPORTS.STATUS' | translate }}</th>
+                                <th>{{ 'DOCTOR_REPORTS.GENERATION_DATE' | translate }}</th>
+                                <th>{{ 'COMMON.ACTIONS' | translate }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let rapport of pagedRapports">
+                                <td>
+                                    <div class="file-info">
+                                        <span class="file-icon">📄</span>
+                                        <span class="file-name">{{ rapport.titre || ('DOCTOR_REPORTS.NO_TITLE' | translate) }}</span>
+                                        <span class="file-id" *ngIf="rapport.id">#{{ rapport.id }}</span>
+                                    </div>
+                                </td>
+                                <td>{{ rapport.patient?.nomComplet || '—' }}</td>
+                                <td>
+                                    <span class="badge badge-type">{{ getTypeLabel(rapport.typeRapport) | translate }}</span>
+                                </td>
+                                <td>
+                                    <span *ngIf="rapport.periodeDebut && rapport.periodeFin">
+                                        {{ rapport.periodeDebut | date:'dd/MM/yy' }} → {{ rapport.periodeFin | date:'dd/MM/yy' }}
+                                    </span>
+                                    <span *ngIf="!rapport.periodeDebut">—</span>
+                                </td>
+                                <td>{{ rapport.soignant?.nomComplet || rapport.soignant?.nom || '—' }}</td>
+                                <td>
+                                    <span class="badge-statut"
+                                          [class.statut-genere]="rapport.statut === 'GENERE'"
+                                          [class.statut-envoye]="rapport.statut === 'ENVOYE'"
+                                          [class.statut-archive]="rapport.statut === 'ARCHIVE'">
+                                        {{ getStatutLabel(rapport.statut) | translate }}
+                                    </span>
+                                </td>
+                                <td>{{ rapport.dateGeneration | date:'dd/MM/yyyy HH:mm' }}</td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn-icon-sm btn-view" (click)="consulterRapport(rapport)"
+                                                [title]="'COMMON.CONSULT' | translate">👁️</button>
+                                        <button class="btn-icon-sm btn-edit" (click)="modifierRapport(rapport)" *ngIf="rapport.statut === 'GENERE'"
+                                                [title]="'COMMON.EDIT' | translate">✏️</button>
+                                        <button class="btn-icon-sm btn-download" (click)="downloadReport(rapport.id!)"
+                                                [title]="'DOCTOR_REPORTS.DOWNLOAD' | translate">⬇️</button>
+                                        <button class="btn-icon-sm btn-send" *ngIf="rapport.statut === 'GENERE'"
+                                                (click)="envoyerRapport(rapport)" [title]="'COMMON.SEND' | translate">📤</button>
+                                        <button class="btn-icon-sm btn-del" (click)="deleteRapport(rapport.id!)"
+                                                [title]="'COMMON.DELETE' | translate">🗑️</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- Empty state -->
+                    <div class="empty-state" *ngIf="filteredRapports.length === 0 && !loading">
+                        <span class="empty-icon">📭</span>
+                        <p *ngIf="searchQuery">{{ 'DOCTOR_REPORTS.NO_REPORT_MATCH' | translate }}</p>
+                        <p *ngIf="!searchQuery">{{ 'DOCTOR_REPORTS.NO_REPORT_AVAILABLE' | translate }}</p>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="pagination-bar" *ngIf="filteredRapports.length > 0">
+                        <div class="pagination-info">
+                            Affichage {{ rapportRangeStart }}–{{ rapportRangeEnd }} / {{ rapportsPagination.totalItems }}
+                        </div>
+
+                        <div class="pagination-controls">
+                            <label class="page-size-label">
+                                Par page
+                                <select class="page-size-select" [(ngModel)]="rapportsPagination.pageSize" (ngModelChange)="onRapportPageSizeChange()">
+                                    <option *ngFor="let s of rapportsPagination.pageSizeOptions" [ngValue]="s">{{ s }}</option>
+                                </select>
+                            </label>
+
+                            <button class="btn-outline btn-page" (click)="prevRapportPage()" [disabled]="rapportsPagination.currentPage <= 1">◀</button>
+                            <span class="page-indicator">Page {{ rapportsPagination.currentPage }} / {{ rapportsPagination.totalPages }}</span>
+                            <button class="btn-outline btn-page" (click)="nextRapportPage()" [disabled]="rapportsPagination.currentPage >= rapportsPagination.totalPages">▶</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table footer -->
+                <div class="table-footer" *ngIf="filteredRapports.length > 0">
+                    <span class="table-info">{{ filteredRapports.length }} {{ 'DOCTOR_REPORTS.REPORT_COUNT' | translate }}</span>
+                </div>
+            </div>
+
+        </main>
+    </div>
+</div>
+
+<!-- ═══ Modal de consultation du rapport — Clinical View ═══ -->
+<div class="modal-overlay" *ngIf="selectedRapport" (click)="fermerConsultation()">
+    <div class="modal-content modal-clinical" (click)="$event.stopPropagation()">
+        <!-- Document header — hospital style -->
+        <div class="clinical-doc-header">
+            <div class="doc-header-left">
+                <span class="doc-institution">AXE Alzheimer e-Health</span>
+                <span class="doc-type-label">{{ 'DOCTOR_REPORTS.CLINICAL_REPORT' | translate }}</span>
+            </div>
+            <div class="doc-header-right">
+                <span class="doc-ref">Réf. #{{ selectedRapport.id }}</span>
+                <span class="doc-date">{{ selectedRapport.dateGeneration | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+            <button class="modal-close" (click)="fermerConsultation()">×</button>
+        </div>
+
+        <div class="modal-body clinical-body">
+
+            <!-- ─── Section A : Synthèse clinique (Executive Summary) ─── -->
+            <section class="clinical-section section-summary">
+                <h3 class="clinical-section-title">
+                    <span class="section-letter">A</span>
+                    {{ 'DOCTOR_REPORTS.EXECUTIVE_SUMMARY' | translate }}
+                </h3>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <span class="summary-label">{{ 'DOCTOR.PATIENT' | translate }}</span>
+                        <span class="summary-value summary-value-lg">{{ selectedRapport.patient?.nomComplet || '—' }}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">{{ 'DOCTOR_REPORTS.PERIOD' | translate }}</span>
+                        <span class="summary-value" *ngIf="selectedRapport.periodeDebut">
+                            {{ selectedRapport.periodeDebut | date:'dd/MM/yyyy' }} → {{ selectedRapport.periodeFin | date:'dd/MM/yyyy' }}
+                        </span>
+                        <span class="summary-value" *ngIf="!selectedRapport.periodeDebut">—</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">{{ 'DOCTOR_REPORTS.TYPE' | translate }}</span>
+                        <span class="summary-value">{{ getTypeLabel(selectedRapport.typeRapport) | translate }}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">{{ 'DOCTOR_REPORTS.STATUS' | translate }}</span>
+                        <span class="badge-statut"
+                              [class.statut-genere]="selectedRapport.statut === 'GENERE'"
+                              [class.statut-envoye]="selectedRapport.statut === 'ENVOYE'"
+                              [class.statut-archive]="selectedRapport.statut === 'ARCHIVE'">
+                            {{ getStatutLabel(selectedRapport.statut) | translate }}
+                        </span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ─── Clinical Indicators ─── -->
+            <section class="clinical-section section-indicators" *ngIf="hasIndicators(selectedRapport)">
+                <h3 class="clinical-section-title">
+                    <span class="section-letter">B</span>
+                    {{ 'DOCTOR_REPORTS.CLINICAL_INDICATORS' | translate }}
+                </h3>
+                <div class="indicators-grid">
+                    <div class="indicator-card" *ngIf="selectedRapport.tauxObservance != null">
+                        <span class="indicator-value" [class.indicator-alert]="selectedRapport.tauxObservance < 70"
+                              [class.indicator-ok]="selectedRapport.tauxObservance >= 70">
+                            {{ selectedRapport.tauxObservance }}%
+                        </span>
+                        <span class="indicator-label">{{ 'DOCTOR_REPORTS.ADHERENCE_RATE' | translate }}</span>
+                    </div>
+                    <div class="indicator-card" *ngIf="selectedRapport.qualiteSommeil != null">
+                        <span class="indicator-value" [class.indicator-alert]="selectedRapport.qualiteSommeil < 5"
+                              [class.indicator-ok]="selectedRapport.qualiteSommeil >= 5">
+                            {{ selectedRapport.qualiteSommeil }}/10
+                        </span>
+                        <span class="indicator-label">{{ 'DOCTOR_REPORTS.SLEEP_QUALITY' | translate }}</span>
+                    </div>
+                    <div class="indicator-card" *ngIf="selectedRapport.nbAlertes != null">
+                        <span class="indicator-value" [class.indicator-alert]="selectedRapport.nbAlertes! > 0">
+                            {{ selectedRapport.nbAlertes }}
+                        </span>
+                        <span class="indicator-label">{{ 'DOCTOR_REPORTS.ALERTS' | translate }}</span>
+                    </div>
+                    <div class="indicator-card" *ngIf="selectedRapport.nbInterventions != null">
+                        <span class="indicator-value">{{ selectedRapport.nbInterventions }}</span>
+                        <span class="indicator-label">{{ 'DOCTOR_REPORTS.INTERVENTIONS' | translate }}</span>
+                    </div>
+                    <div class="indicator-card" *ngIf="selectedRapport.nbComportementsAnormaux != null">
+                        <span class="indicator-value" [class.indicator-alert]="selectedRapport.nbComportementsAnormaux! > 0">
+                            {{ selectedRapport.nbComportementsAnormaux }}
+                        </span>
+                        <span class="indicator-label">{{ 'DOCTOR_REPORTS.ABNORMAL_BEHAVIORS' | translate }}</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ─── Section C : Therapeutic Protocol (contenu) ─── -->
+            <section class="clinical-section" *ngIf="selectedRapport.contenuTexte">
+                <h3 class="clinical-section-title">
+                    <span class="section-letter">C</span>
+                    {{ 'DOCTOR_REPORTS.THERAPEUTIC_PROTOCOL' | translate }}
+                </h3>
+                <div class="clinical-note-block">
+                    <pre class="clinical-note">{{ selectedRapport.contenuTexte }}</pre>
+                </div>
+            </section>
+
+            <!-- ─── Section D : Physician Directives ─── -->
+            <section class="clinical-section" *ngIf="selectedRapport.directives">
+                <h3 class="clinical-section-title">
+                    <span class="section-letter">D</span>
+                    {{ 'DOCTOR_REPORTS.PHYSICIAN_DIRECTIVES' | translate }}
+                </h3>
+                <div class="clinical-note-block clinical-note-directive">
+                    <pre class="clinical-note">{{ selectedRapport.directives }}</pre>
+                </div>
+            </section>
+
+            <!-- ─── Section E : Recommendations ─── -->
+            <section class="clinical-section" *ngIf="selectedRapport.recommandations">
+                <h3 class="clinical-section-title">
+                    <span class="section-letter">E</span>
+                    {{ 'DOCTOR_REPORTS.RECOMMENDATIONS_SECTION' | translate }}
+                </h3>
+                <div class="clinical-note-block clinical-note-reco">
+                    <pre class="clinical-note">{{ selectedRapport.recommandations }}</pre>
+                </div>
+            </section>
+
+            <!-- ─── Traceability footer ─── -->
+            <section class="clinical-section section-traceability">
+                <h3 class="clinical-section-title">
+                    <span class="section-letter">F</span>
+                    {{ 'DOCTOR_REPORTS.TRACEABILITY' | translate }}
+                </h3>
+                <div class="traceability-grid">
+                    <div class="trace-item">
+                        <span class="trace-label">{{ 'DOCTOR_REPORTS.AUTHOR' | translate }}</span>
+                        <span class="trace-value">{{ selectedRapport.soignant?.nomComplet || selectedRapport.soignant?.nom || '—' }}</span>
+                    </div>
+                    <div class="trace-item">
+                        <span class="trace-label">{{ 'DOCTOR_REPORTS.SOURCE' | translate }}</span>
+                        <span class="trace-value">AXE Alzheimer e-Health — Module Médecin</span>
+                    </div>
+                    <div class="trace-item">
+                        <span class="trace-label">{{ 'DOCTOR_REPORTS.GENERATION_DATE' | translate }}</span>
+                        <span class="trace-value">{{ selectedRapport.dateGeneration | date:'dd/MM/yyyy HH:mm:ss' }}</span>
+                    </div>
+                    <div class="trace-item">
+                        <span class="trace-label">{{ 'DOCTOR_REPORTS.FORMAT' | translate }}</span>
+                        <span class="trace-value">{{ selectedRapport.formatExport || 'PDF' }}</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ─── Caregiver simplified section ─── -->
+            <section class="clinical-section section-caregiver" *ngIf="selectedRapport.directives || selectedRapport.recommandations">
+                <h3 class="clinical-section-title caregiver-title">
+                    <span class="section-letter section-letter-caregiver">★</span>
+                    {{ 'DOCTOR_REPORTS.CAREGIVER_SECTION' | translate }}
+                </h3>
+                <p class="caregiver-notice">{{ 'DOCTOR_REPORTS.CAREGIVER_NOTICE' | translate }}</p>
+                <div class="caregiver-content">
+                    <div class="caregiver-block" *ngIf="selectedRapport.directives">
+                        <h4>{{ 'DOCTOR_REPORTS.CAREGIVER_TODO' | translate }}</h4>
+                        <pre class="caregiver-text">{{ selectedRapport.directives }}</pre>
+                    </div>
+                    <div class="caregiver-block" *ngIf="selectedRapport.recommandations">
+                        <h4>{{ 'DOCTOR_REPORTS.CAREGIVER_WATCH' | translate }}</h4>
+                        <pre class="caregiver-text">{{ selectedRapport.recommandations }}</pre>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn-outline" (click)="fermerConsultation()">{{ 'COMMON.CLOSE' | translate }}</button>
+            <button class="btn-submit" (click)="downloadReport(selectedRapport.id!)">⬇️ {{ 'DOCTOR_REPORTS.DOWNLOAD' | translate }}</button>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ Modal de modification du rapport ═══ -->
+<div class="modal-overlay" *ngIf="editRapport" (click)="fermerModification()">
+    <div class="modal-content modal-clinical modal-edit" (click)="$event.stopPropagation()">
+        <div class="clinical-doc-header">
+            <div class="doc-header-left">
+                <span class="doc-institution">{{ 'COMMON.EDIT' | translate }}</span>
+                <span class="doc-type-label">{{ 'DOCTOR_REPORTS.EDIT_SUBTITLE' | translate }}</span>
+            </div>
+            <div class="doc-header-right">
+                <span class="doc-ref">Réf. #{{ editRapport.id }}</span>
+            </div>
+            <button class="modal-close" (click)="fermerModification()">×</button>
+        </div>
+
+        <div class="modal-body clinical-body">
+
+            <!-- Section 1 : Identification -->
+            <section class="clinical-section">
+                <h3 class="clinical-section-title">
+                    <span class="section-letter">1</span>
+                    {{ 'DOCTOR_REPORTS.EDIT_IDENTIFICATION' | translate }}
+                </h3>
+                <div class="form-group">
+                    <label>{{ 'DOCTOR_REPORTS.TITLE' | translate }}</label>
+                    <input type="text" class="input" [(ngModel)]="editRapport.titre"
+                           [placeholder]="'DOCTOR_REPORTS.EDIT_TITLE_PLACEHOLDER' | translate">
+                </div>
+                <div class="form-row">
+                    <div class="form-group form-group-half">
+                        <label>{{ 'DOCTOR_REPORTS.TYPE' | translate }}</label>
+                        <select class="input" [(ngModel)]="editRapport.typeRapport">
+                            <option value="HEBDOMADAIRE">{{ 'DOCTOR_REPORTS.TYPE_WEEKLY' | translate }}</option>
+                            <option value="MENSUEL">{{ 'DOCTOR_REPORTS.TYPE_MONTHLY' | translate }}</option>
+                            <option value="QUOTIDIEN">{{ 'DOCTOR_REPORTS.TYPE_DAILY' | translate }}</option>
+                            <option value="INCIDENT">{{ 'DOCTOR_REPORTS.TYPE_INCIDENT' | translate }}</option>
+                        </select>
+                    </div>
+                    <div class="form-group form-group-half">
+                        <label>{{ 'DOCTOR_REPORTS.STATUS' | translate }}</label>
+                        <select class="input" [(ngModel)]="editRapport.statut">
+                            <option value="GENERE">{{ 'DOCTOR_REPORTS.STATUS_GENERATED' | translate }}</option>
+                            <option value="ENVOYE">{{ 'DOCTOR_REPORTS.STATUS_SENT' | translate }}</option>
+                            <option value="ARCHIVE">{{ 'DOCTOR_REPORTS.STATUS_ARCHIVED' | translate }}</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 2 : Période -->
+            <section class="clinical-section">
+                <h3 class="clinical-section-title">
+                    <span class="section-letter">2</span>
+                    {{ 'DOCTOR_REPORTS.PERIOD' | translate }}
+                </h3>
+                <div class="form-row">
+                    <div class="form-group form-group-half">
+                        <label>{{ 'DOCTOR_REPORTS.EDIT_START_DATE' | translate }}</label>
+                        <input type="date" class="input" [(ngModel)]="editRapport.periodeDebut">
+                    </div>
+                    <div class="form-group form-group-half">
+                        <label>{{ 'DOCTOR_REPORTS.EDIT_END_DATE' | translate }}</label>
+                        <input type="date" class="input" [(ngModel)]="editRapport.periodeFin">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 3 : Indicateurs cliniques -->
+            <section class="clinical-section">
+                <h3 class="clinical-section-title">
+                    <span class="section-letter">3</span>
+                    {{ 'DOCTOR_REPORTS.CLINICAL_INDICATORS' | translate }}
+                </h3>
+                <div class="form-row form-row-3">
+                    <div class="form-group">
+                        <label>{{ 'DOCTOR_REPORTS.ADHERENCE_RATE' | translate }} (%)</label>
+                        <input type="number" class="input" [(ngModel)]="editRapport.tauxObservance" min="0" max="100" step="1">
+                    </div>
+                    <div class="form-group">
+                        <label>{{ 'DOCTOR_REPORTS.SLEEP_QUALITY' | translate }} (/10)</label>
+                        <input type="number" class="input" [(ngModel)]="editRapport.qualiteSommeil" min="0" max="10" step="0.5">
+                    </div>
+                    <div class="form-group">
+                        <label>{{ 'DOCTOR_REPORTS.ALERTS' | translate }}</label>
+                        <input type="number" class="input" [(ngModel)]="editRapport.nbAlertes" min="0">
+                    </div>
+                </div>
+                <div class="form-row form-row-3">
+                    <div class="form-group">
+                        <label>{{ 'DOCTOR_REPORTS.INTERVENTIONS' | translate }}</label>
+                        <input type="number" class="input" [(ngModel)]="editRapport.nbInterventions" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>{{ 'DOCTOR_REPORTS.ABNORMAL_BEHAVIORS' | translate }}</label>
+                        <input type="number" class="input" [(ngModel)]="editRapport.nbComportementsAnormaux" min="0">
+                    </div>
+                    <div class="form-group"></div>
+                </div>
+            </section>
+
+            <!-- Section 4 : Contenu clinique -->
+            <section class="clinical-section">
+                <h3 class="clinical-section-title">
+                    <span class="section-letter">4</span>
+                    {{ 'DOCTOR_REPORTS.THERAPEUTIC_PROTOCOL' | translate }}
+                </h3>
+                <div class="form-group">
+                    <textarea class="input input-textarea input-clinical" rows="5" [(ngModel)]="editRapport.contenuTexte"
+                              [placeholder]="'DOCTOR_REPORTS.EDIT_CONTENT_PLACEHOLDER' | translate"></textarea>
+                </div>
+            </section>
+
+            <!-- Section 5 : Directives -->
+            <section class="clinical-section">
+                <h3 class="clinical-section-title">
+                    <span class="section-letter">5</span>
+                    {{ 'DOCTOR_REPORTS.PHYSICIAN_DIRECTIVES' | translate }}
+                </h3>
+                <div class="form-group">
+                    <textarea class="input input-textarea input-directive" rows="4" [(ngModel)]="editRapport.directives"
+                              [placeholder]="'DOCTOR_REPORTS.EDIT_DIRECTIVES_PLACEHOLDER' | translate"></textarea>
+                </div>
+            </section>
+
+            <!-- Section 6 : Recommandations -->
+            <section class="clinical-section">
+                <h3 class="clinical-section-title">
+                    <span class="section-letter">6</span>
+                    {{ 'DOCTOR_REPORTS.RECOMMENDATIONS_SECTION' | translate }}
+                </h3>
+                <div class="form-group">
+                    <textarea class="input input-textarea input-reco" rows="4" [(ngModel)]="editRapport.recommandations"
+                              [placeholder]="'DOCTOR_REPORTS.EDIT_RECO_PLACEHOLDER' | translate"></textarea>
+                </div>
+            </section>
+
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn-outline" (click)="fermerModification()">{{ 'COMMON.CANCEL' | translate }}</button>
+            <button class="btn-submit" (click)="sauvegarderModification()" [disabled]="editSaving">
+                {{ editSaving ? ('COMMON.LOADING' | translate) : ('COMMON.SAVE' | translate) }}
+            </button>
+        </div>
+    </div>
+</div>

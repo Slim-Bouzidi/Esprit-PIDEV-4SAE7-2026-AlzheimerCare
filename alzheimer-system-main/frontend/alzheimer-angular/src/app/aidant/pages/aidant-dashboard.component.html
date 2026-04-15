@@ -1,0 +1,166 @@
+<!-- Topbar -->
+<div class="topbar-page">
+  <h1>{{ 'AIDANT.DASHBOARD_TITLE' | translate }}</h1>
+  <div class="topbar-right">
+    <span class="topbar-date">{{ todayFormatted }}</span>
+    <button class="btn-logout" (click)="logout()" title="Déconnexion">
+      🚪 Déconnexion
+    </button>
+  </div>
+</div>
+
+<!-- Content -->
+<div class="content-area">
+
+  <!-- Stats Row -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon purple">👥</div>
+      <div class="stat-info">
+        <span class="stat-value">{{ patients.length }}</span>
+        <span class="stat-label">{{ 'AIDANT.FOLLOWED_PATIENTS' | translate }}</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon green">💊</div>
+      <div class="stat-info">
+        <span class="stat-value">{{ observanceGlobale }}%</span>
+        <span class="stat-label">{{ 'AIDANT.MEDICATION_ADHERENCE' | translate }}</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon blue">📅</div>
+      <div class="stat-info">
+        <span class="stat-value">{{ rdvSemaine }}</span>
+        <span class="stat-label">{{ 'AIDANT.WEEK_APPOINTMENTS' | translate }}</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon orange">📝</div>
+      <div class="stat-info">
+        <span class="stat-value">{{ rapportsNonLus }}</span>
+        <span class="stat-label">{{ 'AIDANT.UNREAD_REPORTS' | translate }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="two-columns">
+    <!-- Left: Patients Overview + Prochain RDV -->
+    <div>
+      <!-- Patients Overview -->
+      <div class="card" style="margin-bottom: 1.5rem;">
+        <div class="card-header">
+          <h2>👥 {{ 'AIDANT.MY_PATIENTS' | translate }}</h2>
+          <button class="btn btn-sm btn-outline" (click)="goToPatients()">{{ 'AIDANT.VIEW_ALL' | translate }}</button>
+        </div>
+        <div *ngIf="patients.length > 0">
+          <div class="list-item" *ngFor="let patient of patients" (click)="goToPatients()" style="cursor:pointer;">
+            <div class="list-item-left">
+              <div class="avatar" [class.avatar-inactive]="!patient.actif">{{ getPatientInitials(patient) }}</div>
+              <div class="list-item-info">
+                <h4>{{ patient.nomComplet }}</h4>
+                <p>{{ patient.antecedents || ('AIDANT.NO_CONDITION' | translate) }}</p>
+              </div>
+            </div>
+            <span class="badge" [ngClass]="patient.actif ? 'badge-success' : 'badge-warning'">
+              {{ patient.actif ? ('AIDANT.ACTIVE' | translate) : ('AIDANT.INACTIVE' | translate) }}
+            </span>
+          </div>
+        </div>
+        <div class="empty-state" *ngIf="patients.length === 0">
+          <span class="empty-icon">👥</span>
+          <p>{{ 'AIDANT.NO_PATIENT' | translate }}</p>
+        </div>
+      </div>
+
+      <!-- Prochain RDV -->
+      <div class="card">
+        <div class="card-header">
+          <h2>📅 {{ 'AIDANT.NEXT_APPOINTMENT' | translate }}</h2>
+          <button class="btn btn-sm btn-outline" (click)="goToPlanning()">{{ 'AIDANT.VIEW_PLANNING' | translate }}</button>
+        </div>
+        <div *ngIf="prochainRdv" class="next-rdv">
+          <div class="next-rdv-date">
+            <span class="rdv-day">{{ prochainRdv.dateHeure | date:'EEE dd MMM':'':'fr-FR' }}</span>
+            <span class="rdv-time">{{ prochainRdv.dateHeure | date:'HH:mm' }}</span>
+          </div>
+          <div class="next-rdv-info">
+            <h4>{{ prochainRdv.motif || prochainRdv.type }}</h4>
+            <p>{{ prochainRdv.lieu || '—' }}</p>
+            <span class="badge badge-info">{{ prochainRdv.statut }}</span>
+          </div>
+        </div>
+        <div class="empty-state" *ngIf="!prochainRdv">
+          <span class="empty-icon">📅</span>
+          <p>{{ 'AIDANT.NO_UPCOMING_APPOINTMENT' | translate }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Observance + Alertes -->
+    <div>
+      <!-- Observance Chart -->
+      <div class="card" style="margin-bottom: 1.5rem;">
+        <div class="card-header">
+          <h2>💊 {{ 'AIDANT.MEDICATION_ADHERENCE' | translate }}</h2>
+        </div>
+        <div class="observance-display">
+          <div class="observance-circle" [class]="getObservanceClass()">
+            <span class="observance-value">{{ observanceGlobale }}%</span>
+          </div>
+          <div class="observance-details">
+            <p>{{ 'AIDANT.ADHERENCE_DESCRIPTION' | translate }}</p>
+            <div class="progress-bar" style="margin-top: 0.5rem;">
+              <div class="progress-fill" [class]="getObservanceClass()" [style.width.%]="observanceGlobale"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alerts -->
+      <div class="card">
+        <div class="card-header">
+          <h2>🔔 {{ 'AIDANT.RECENT_ALERTS' | translate }}</h2>
+          <span class="badge badge-danger" *ngIf="alertes.length > 0">{{ alertes.length }}</span>
+        </div>
+        <div *ngIf="alertes.length > 0">
+          <div class="list-item" *ngFor="let alerte of alertes">
+            <div class="list-item-left">
+              <div class="list-item-icon" [ngClass]="'alert-' + alerte.type">{{ alerte.icon }}</div>
+              <div class="list-item-info">
+                <h4>{{ alerte.message | translate }}</h4>
+                <p>{{ formatDate(alerte.date) }}</p>
+              </div>
+            </div>
+            <span class="badge" [ngClass]="'badge-' + alerte.type">{{ alerte.type }}</span>
+          </div>
+        </div>
+        <div class="empty-state" *ngIf="alertes.length === 0">
+          <span class="empty-icon">✅</span>
+          <p>{{ 'AIDANT.NO_ALERT' | translate }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dernier rapport -->
+  <div class="card">
+    <div class="card-header">
+      <h2>📝 {{ 'AIDANT.LATEST_REPORT' | translate }}</h2>
+      <button class="btn btn-sm btn-primary" (click)="goToRapports()">{{ 'AIDANT.VIEW_ALL_REPORTS' | translate }}</button>
+    </div>
+    <div *ngIf="dernierRapport" class="latest-report">
+      <div class="report-meta">
+        <span class="badge badge-purple">{{ dernierRapport.typeRapport || 'Rapport' }}</span>
+        <span class="report-date">{{ formatDate(dernierRapport.dateGeneration) }}</span>
+      </div>
+      <h4>{{ dernierRapport.titre || ('AIDANT.FOLLOW_UP_REPORT' | translate) }}</h4>
+      <p class="report-excerpt">{{ dernierRapport.recommandations || dernierRapport.contenuTexte || '—' }}</p>
+    </div>
+    <div class="empty-state" *ngIf="!dernierRapport">
+      <span class="empty-icon">📝</span>
+      <p>{{ 'AIDANT.NO_REPORT' | translate }}</p>
+    </div>
+  </div>
+
+</div>

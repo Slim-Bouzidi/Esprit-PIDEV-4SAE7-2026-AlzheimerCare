@@ -1,0 +1,192 @@
+<div class="fiche-panel">
+  <!-- Header -->
+  <div class="panel-header">
+    <h3>{{ 'FICHE_TRANSMISSION.TITLE' | translate }}</h3>
+    <button class="btn-close" (click)="closePanel.emit()">✕</button>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>{{ 'COMMON.LOADING' | translate }}...</p>
+  </div>
+
+  <!-- Success overlay -->
+  <div *ngIf="submissionSuccess" class="success-state">
+    <div class="icon-check">✅</div>
+    <h4>{{ 'FICHE_TRANSMISSION.SENT' | translate }}</h4>
+    <p>{{ 'FICHE_TRANSMISSION.SENT_DESC' | translate }}</p>
+
+    <div class="pdf-actions" *ngIf="pdfReady">
+      <button class="btn-pdf" (click)="downloadPdf()">
+        📄 Télécharger le PDF
+      </button>
+      <span class="info-send-hint">💡 L'envoi au médecin s'effectue depuis la page Fiches</span>
+      <button class="btn-new" (click)="nouvelleFiche()">
+        🔄 Nouvelle fiche
+      </button>
+    </div>
+    <div class="send-doctor-error" *ngIf="sendDoctorError">
+      ⚠️ {{ sendDoctorError }}
+    </div>
+  </div>
+
+  <!-- Error message -->
+  <div *ngIf="error" class="error-state">
+    <div class="icon-error">❌</div>
+    <h4>Erreur</h4>
+    <p>{{ error }}</p>
+    <button class="btn-retry" (click)="error = null">Réessayer</button>
+  </div>
+
+  <!-- Main form -->
+  <div *ngIf="!loading && !submissionSuccess && patientId" class="panel-body">
+
+    <!-- Patient info -->
+    <section class="panel-section header-info">
+      <div class="info-row">
+        <div class="info-item">
+          <label>{{ 'SUIVI_PAGE.PATIENT' | translate }}</label>
+          <strong>{{ fiche.patientInfo.prenom }} {{ fiche.patientInfo.nom }}</strong>
+          <span class="sub-text" *ngIf="fiche.patientInfo.age">{{ fiche.patientInfo.age }} {{ 'COMMON.YEARS_OLD' | translate }}</span>
+        </div>
+        <div class="info-item">
+          <label>{{ 'SUIVI_PAGE.DATE' | translate }}</label>
+          <strong>{{ fiche.patientInfo.dateDuJour | date:'dd/MM/yyyy' }}</strong>
+          <span class="sub-text">{{ fiche.patientInfo.heureSaisie | date:'HH:mm' }}</span>
+        </div>
+      </div>
+    </section>
+
+    <form (ngSubmit)="submitFiche()" #ficheForm="ngForm">
+
+      <!-- 1. Observance Médicamenteuse -->
+      <section class="panel-section">
+        <h4>💊 {{ 'SUIVI_PAGE.MEDICATION_ADHERENCE_TITLE' | translate }}</h4>
+        <div class="medication-list" *ngIf="fiche.observanceMedicaments.listeMedicaments.length > 0">
+          <div class="med-item"
+            *ngFor="let med of fiche.observanceMedicaments.listeMedicaments; let i = index"
+            [class.taken]="med.pris" (click)="toggleMedication(i)">
+            <div class="med-info">
+              <span class="med-name">{{ med.nom }}</span>
+              <span class="med-dosage">{{ med.dosage }}</span>
+            </div>
+            <span class="moment-badge">{{ med.moment }}</span>
+            <div class="checkbox-circle" [class.checked]="med.pris">
+              <span *ngIf="med.pris">✓</span>
+            </div>
+          </div>
+        </div>
+        <p *ngIf="fiche.observanceMedicaments.listeMedicaments.length === 0" class="empty-text">
+          {{ 'FICHE_TRANSMISSION.NO_MEDICATIONS' | translate }}
+        </p>
+        <div class="med-summary" *ngIf="fiche.observanceMedicaments.listeMedicaments.length > 0">
+          {{ 'FICHE_TRANSMISSION.TAKEN' | translate }}: <strong>{{ fiche.observanceMedicaments.totalPris }} / {{ fiche.observanceMedicaments.totalPrevus }}</strong>
+        </div>
+      </section>
+
+      <!-- 2. Alimentation -->
+      <section class="panel-section">
+        <h4>🍽️ {{ 'SUIVI_PAGE.FOOD_TITLE' | translate }}</h4>
+        <div class="form-grid-panel">
+          <div class="form-group">
+            <label>{{ 'FICHE_TRANSMISSION.APPETITE' | translate }}</label>
+            <select [(ngModel)]="fiche.alimentation.appetit" name="appetit" class="form-ctrl">
+              <option value="bon">Bon</option>
+              <option value="moyen">Moyen</option>
+              <option value="faible">Faible</option>
+              <option value="refus">Refus</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>{{ 'FICHE_TRANSMISSION.HYDRATION' | translate }}</label>
+            <div class="radio-inline">
+              <label><input type="radio" value="suffisante" [(ngModel)]="fiche.alimentation.hydratation" name="hydratation"> ✅</label>
+              <label><input type="radio" value="insuffisante" [(ngModel)]="fiche.alimentation.hydratation" name="hydratation"> ⚠️</label>
+            </div>
+          </div>
+          <div class="form-group full-w">
+            <input type="text" [(ngModel)]="fiche.alimentation.details" name="detailsAlimentation"
+              class="form-ctrl" placeholder="Observations...">
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. Vie Sociale -->
+      <section class="panel-section">
+        <h4>👥 {{ 'SUIVI_PAGE.SOCIAL_TITLE' | translate }}</h4>
+        <div class="form-grid-panel">
+          <div class="form-group">
+            <label>{{ 'FICHE_TRANSMISSION.INTERACTION' | translate }}</label>
+            <select [(ngModel)]="fiche.vieSociale.interaction" name="interaction" class="form-ctrl">
+              <option value="normale">Normale</option>
+              <option value="retrait">Retrait</option>
+              <option value="conflit">Conflit</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>{{ 'FICHE_TRANSMISSION.HYGIENE' | translate }}</label>
+            <select [(ngModel)]="fiche.vieSociale.hygiene" name="hygiene" class="form-ctrl">
+              <option value="autonome">Autonome</option>
+              <option value="aide_partielle">Aide partielle</option>
+              <option value="aide_totale">Aide totale</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>{{ 'FICHE_TRANSMISSION.SLEEP' | translate }}</label>
+            <select [(ngModel)]="fiche.vieSociale.sommeil" name="sommeil" class="form-ctrl">
+              <option value="calme">Calme</option>
+              <option value="agité">Agité</option>
+              <option value="insomnie">Insomnie</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. Directives Médecin -->
+      <section class="panel-section highlight" *ngIf="fiche.suiviDirectives.length > 0">
+        <h4>📋 {{ 'SUIVI_PAGE.DIRECTIVES_TITLE' | translate }}</h4>
+        <span *ngIf="rapportSuiviLibelle" class="rapport-ref">{{ rapportSuiviLibelle }}</span>
+        <div class="directive-item" *ngFor="let s of fiche.suiviDirectives; let i = index">
+          <div class="directive-label">{{ getDirectiveLabel(s.directiveId) }}</div>
+          <div class="directive-actions">
+            <div class="radio-inline small">
+              <label><input type="radio" value="fait" [(ngModel)]="s.statut" [name]="'dir'+i"> ✅</label>
+              <label><input type="radio" value="en_cours" [(ngModel)]="s.statut" [name]="'dir'+i"> 🔄</label>
+              <label><input type="radio" value="non_fait" [(ngModel)]="s.statut" [name]="'dir'+i"> ❌</label>
+            </div>
+            <input type="text" [(ngModel)]="s.reponse" [name]="'repDir'+i"
+              placeholder="Commentaire..." class="form-ctrl small-input">
+          </div>
+        </div>
+      </section>
+
+      <!-- Validation -->
+      <section class="panel-section validation">
+        <div class="form-group full-w" [class.field-error]="formErrors['commentaireLibre']">
+          <label>{{ 'SUIVI_PAGE.FREE_COMMENT' | translate }}</label>
+          <textarea [(ngModel)]="fiche.commentaireLibre" name="commentaireLibre" rows="2" class="form-ctrl" maxlength="2000"></textarea>
+          <div class="error-message" *ngIf="formErrors['commentaireLibre']">{{ formErrors['commentaireLibre'] }}</div>
+        </div>
+        <div [class.field-error]="formErrors['signatureSoignant']">
+          <label class="checkbox-container">
+            <input type="checkbox" [(ngModel)]="fiche.signatureSoignant" name="signature">
+            <span class="checkmark"></span>
+            {{ 'SUIVI_PAGE.CERTIFY' | translate }}
+          </label>
+          <div class="error-message" *ngIf="formErrors['signatureSoignant']">{{ formErrors['signatureSoignant'] }}</div>
+        </div>
+        <button type="submit" class="btn-submit"
+          [disabled]="!fiche.signatureSoignant">
+          {{ 'SUIVI_PAGE.SEND_TO_DOCTOR' | translate }}
+        </button>
+      </section>
+
+    </form>
+  </div>
+
+  <!-- No patient selected -->
+  <div *ngIf="!loading && !patientId" class="empty-state">
+    <p>{{ 'SOIGNANT_AGENDA.SELECT_EVENT' | translate }}</p>
+  </div>
+</div>
