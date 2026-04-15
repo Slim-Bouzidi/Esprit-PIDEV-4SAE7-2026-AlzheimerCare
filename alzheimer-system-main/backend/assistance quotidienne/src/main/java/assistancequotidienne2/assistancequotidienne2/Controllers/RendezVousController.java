@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -37,6 +38,11 @@ public class RendezVousController {
         if (rendezVous.getSoignant() != null && rendezVous.getSoignant().getId() != null) {
             userRepository.findById(rendezVous.getSoignant().getId())
                     .orElseThrow(() -> new RuntimeException("Soignant non trouvé"));
+        }
+
+        // Business rule: avoid schedule conflicts for patient and soignant.
+        if (hasScheduleConflict(rendezVous)) {
+            return ResponseEntity.badRequest().build();
         }
         
         return ResponseEntity.ok(rendezVousRepository.save(rendezVous));
@@ -157,5 +163,37 @@ public class RendezVousController {
                 .orElseThrow(() -> new RuntimeException("Rendez-vous non trouvé"));
         rdv.setStatut(StatutRendezVous.ANNULE);
         return ResponseEntity.ok(rendezVousRepository.save(rdv));
+    }
+
+    private boolean hasScheduleConflict(RendezVous incoming) {
+        if (incoming.getPatient() == null || incoming.getPatient().getId() == null || incoming.getDateHeure() == null) {
+            return false;
+        }
+
+        int incomingDuration = incoming.getDureeMinutes() != null ? incoming.getDureeMinutes() : 30;
+        LocalDateTime incomingEnd = incoming.getDateHeure().plusMinutes(incomingDuration);
+
+        List<RendezVous> candidates = new ArrayList<>(rendezVousRepository.findByPatientId(incoming.getPatient().getId()));
+        if (incoming.getSoignant() != null && incoming.getSoignant().getId() != null) {
+            candidates.addAll(rendezVousRepository.findBySoignantId(incoming.getSoignant().getId()));
+        }
+
+        for (RendezVous existing : candidates) {
+            if (existing == null || existing.getId() != null && existing.getId().equals(incoming.getId())) {
+                continue;
+            }
+            if (existing.getStatut() == StatutRendezVous.ANNULE || existing.getDateHeure() == null) {
+                continue;
+            }
+
+            int existingDuration = existing.getDureeMinutes() != null ? existing.getDureeMinutes() : 30;
+            LocalDateTime existingEnd = existing.getDateHeure().plusMinutes(existingDuration);
+
+            boolean overlap = incoming.getDateHeure().isBefore(existingEnd) && existing.getDateHeure().isBefore(incomingEnd);
+            if (overlap) {
+                return true;
+            }
+        }
+        return false;
     }
 }

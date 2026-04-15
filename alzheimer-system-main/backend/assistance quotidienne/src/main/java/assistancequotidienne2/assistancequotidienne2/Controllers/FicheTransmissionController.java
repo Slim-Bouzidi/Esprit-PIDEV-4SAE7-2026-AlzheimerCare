@@ -47,6 +47,16 @@ public class FicheTransmissionController {
             fiche.setPatient(patient);
         }
 
+        // Business rule: one fiche per patient per day.
+        LocalDate dateFiche = fiche.getDateFiche() != null ? fiche.getDateFiche() : LocalDate.now();
+        fiche.setDateFiche(dateFiche);
+        if (patient != null) {
+            List<FicheTransmission> existing = ficheRepository.findByPatientIdAndDateFiche(patient.getId(), dateFiche);
+            if (!existing.isEmpty()) {
+                return ResponseEntity.badRequest().build();
+            }
+        }
+
         // Force statut to brouillon on creation
         fiche.setStatut("brouillon");
         fiche.setDateEnvoi(null);

@@ -33,7 +33,7 @@ public class RapportController {
 
         // Period consistency check (server-side)
         if (request.getPeriodeFin().isBefore(request.getPeriodeDebut())) {
-            throw new IllegalArgumentException("La date de fin doit être postérieure à la date de début.");
+            return ResponseEntity.badRequest().build();
         }
 
         Rapport rapport = new Rapport();
@@ -114,6 +114,11 @@ public class RapportController {
     public ResponseEntity<Rapport> marquerLuParSoignant(@PathVariable Long id) {
         Rapport rapport = rapportRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Rapport non trouvé"));
+
+        // Workflow rule: report can be read only after being sent.
+        if (rapport.getStatut() != StatutRapport.ENVOYE) {
+            return ResponseEntity.badRequest().build();
+        }
 
         rapport.marquerLuParSoignant();
         return ResponseEntity.ok(rapportRepository.save(rapport));
