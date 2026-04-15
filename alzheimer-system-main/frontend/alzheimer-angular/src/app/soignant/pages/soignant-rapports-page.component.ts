@@ -18,16 +18,30 @@ import { environment } from '../../../environments/environment';
 export class SoignantRapportsPageComponent implements OnInit {
   // Rapports réels du médecin (depuis la BDD)
   rapportsMedecin: Rapport[] = [];
+  pagedRapportsMedecin: Rapport[] = [];
   selectedRapportMedecin: Rapport | null = null;
   loadingRapportsMedecin = false;
 
+  // Pagination rapports médecin
+  medecinPage = 1;
+  medecinPageSize = 5;
+  medecinPageSizeOptions = [5, 10, 20];
+  medecinTotalPages = 1;
+
   // Rapports hebdomadaires
   rapportsHebdo: any[] = [];
+  pagedRapportsHebdo: any[] = [];
   loadingHebdo = false;
   sendingHebdo: number | null = null;  // ID of the rapport being sent
   sendHebdoSuccess: {id: number, patientName: string} | null = null;
   sendHebdoError: string | null = null;
   selectedHebdo: any | null = null;
+
+  // Pagination rapports hebdo
+  hebdoPage = 1;
+  hebdoPageSize = 5;
+  hebdoPageSizeOptions = [5, 10, 20];
+  hebdoTotalPages = 1;
 
   constructor(
     private rapportService: RapportService,
@@ -50,6 +64,8 @@ export class SoignantRapportsPageComponent implements OnInit {
         // Seulement les rapports envoyés par le médecin (statut ENVOYE)
         this.rapportsMedecin = data.filter(r => r.statut === 'ENVOYE');
         this.loadingRapportsMedecin = false;
+        this.medecinPage = 1;
+        this.applyMedecinPagination();
       },
       error: (err) => {
         console.error('Erreur chargement rapports médecin:', err);
@@ -67,6 +83,8 @@ export class SoignantRapportsPageComponent implements OnInit {
           new Date(b.dateCreation || 0).getTime() - new Date(a.dateCreation || 0).getTime()
         );
         this.loadingHebdo = false;
+        this.hebdoPage = 1;
+        this.applyHebdoPagination();
       },
       error: (err) => {
         console.error('Erreur chargement rapports hebdo:', err);
@@ -120,6 +138,70 @@ export class SoignantRapportsPageComponent implements OnInit {
     if (r.consulteParMedecin) return 'Consulté';
     if (r.envoyeAuMedecin) return 'Envoyé';
     return 'En attente';
+  }
+
+  // === Pagination Rapports Médecin ===
+  applyMedecinPagination(): void {
+    this.medecinTotalPages = Math.max(1, Math.ceil(this.rapportsMedecin.length / this.medecinPageSize));
+    const start = (this.medecinPage - 1) * this.medecinPageSize;
+    this.pagedRapportsMedecin = this.rapportsMedecin.slice(start, start + this.medecinPageSize);
+  }
+
+  goToMedecinPage(page: number): void {
+    if (page < 1 || page > this.medecinTotalPages) return;
+    this.medecinPage = page;
+    this.applyMedecinPagination();
+  }
+
+  onMedecinPageSizeChange(): void {
+    this.medecinPage = 1;
+    this.applyMedecinPagination();
+  }
+
+  get medecinRangeStart(): number {
+    return this.rapportsMedecin.length === 0 ? 0 : (this.medecinPage - 1) * this.medecinPageSize + 1;
+  }
+
+  get medecinRangeEnd(): number {
+    return Math.min(this.rapportsMedecin.length, this.medecinPage * this.medecinPageSize);
+  }
+
+  get medecinPageNumbers(): number[] {
+    const pages: number[] = [];
+    for (let i = 1; i <= this.medecinTotalPages; i++) pages.push(i);
+    return pages;
+  }
+
+  // === Pagination Rapports Hebdo ===
+  applyHebdoPagination(): void {
+    this.hebdoTotalPages = Math.max(1, Math.ceil(this.rapportsHebdo.length / this.hebdoPageSize));
+    const start = (this.hebdoPage - 1) * this.hebdoPageSize;
+    this.pagedRapportsHebdo = this.rapportsHebdo.slice(start, start + this.hebdoPageSize);
+  }
+
+  goToHebdoPage(page: number): void {
+    if (page < 1 || page > this.hebdoTotalPages) return;
+    this.hebdoPage = page;
+    this.applyHebdoPagination();
+  }
+
+  onHebdoPageSizeChange(): void {
+    this.hebdoPage = 1;
+    this.applyHebdoPagination();
+  }
+
+  get hebdoRangeStart(): number {
+    return this.rapportsHebdo.length === 0 ? 0 : (this.hebdoPage - 1) * this.hebdoPageSize + 1;
+  }
+
+  get hebdoRangeEnd(): number {
+    return Math.min(this.rapportsHebdo.length, this.hebdoPage * this.hebdoPageSize);
+  }
+
+  get hebdoPageNumbers(): number[] {
+    const pages: number[] = [];
+    for (let i = 1; i <= this.hebdoTotalPages; i++) pages.push(i);
+    return pages;
   }
 
   /** Ouvre la consultation d'un rapport médecin (BDD) et marque comme lu */

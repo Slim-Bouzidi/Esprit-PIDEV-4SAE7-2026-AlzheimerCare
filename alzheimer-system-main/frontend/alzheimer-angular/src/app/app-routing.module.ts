@@ -7,6 +7,7 @@ import { DoctorReportCreateComponent } from './doctor/doctor-report-create.compo
 import { DoctorPatientsComponent } from './doctor/doctor-patients.component';
 import { DoctorAppointmentsComponent } from './doctor/doctor-appointments.component';
 import { MedicalAgendaComponent } from './doctor/medical-agenda.component';
+import { DoctorMemoireAssisteeComponent } from './doctor/doctor-memoire-assistee.component';
 import { SoignantLayoutComponent } from './soignant/soignant-layout.component';
 import { SoignantDashboardComponent } from './soignant/soignant-dashboard.component';
 import { SoignantPatientsPageComponent } from './soignant/pages/soignant-patients-page.component';
@@ -23,13 +24,14 @@ import { AidantDashboardComponent } from './aidant/pages/aidant-dashboard.compon
 import { AidantPatientsComponent } from './aidant/pages/aidant-patients.component';
 import { AidantPlanningComponent } from './aidant/pages/aidant-planning.component';
 import { AidantRapportsComponent } from './aidant/pages/aidant-rapports.component';
+import { AidantMemoireAssisteeComponent } from './aidant/pages/memoire-assistee/aidant-memoire-assistee.component';
 import { AppShellComponent } from './layout/app-shell/app-shell.component';
 import { roleRedirectGuard } from './core/guards/role-redirect.guard';
 import { roleGuard } from './core/guards/role.guard';
 
 const routes: Routes = [
-  // Default route: auto-redirect based on Keycloak role
-  { path: '', canActivate: [roleRedirectGuard], children: [], pathMatch: 'full' },
+  // Default route: GUARD REMOVED FOR TESTING
+  { path: '', redirectTo: '/admin', pathMatch: 'full' },
 
   // ═══════ ADMIN routes (AppShellComponent layout) ═══════
   {
@@ -115,6 +117,7 @@ const routes: Routes = [
   { path: 'aidant-patients', component: AidantLayoutComponent, canActivate: [roleGuard], data: { role: 'AIDANT' }, children: [{ path: '', component: AidantPatientsComponent }] },
   { path: 'aidant-planning', component: AidantLayoutComponent, canActivate: [roleGuard], data: { role: 'AIDANT' }, children: [{ path: '', component: AidantPlanningComponent }] },
   { path: 'aidant-rapports', component: AidantLayoutComponent, canActivate: [roleGuard], data: { role: 'AIDANT' }, children: [{ path: '', component: AidantRapportsComponent }] },
+  { path: 'aidant-memoire-assistee', component: AidantLayoutComponent, canActivate: [roleGuard], data: { role: 'AIDANT' }, children: [{ path: '', component: AidantMemoireAssisteeComponent }] },
 
   // ═══════ MEDECIN routes ═══════
   { path: 'doctor-dashboard', component: DoctorDashboardSimpleComponent, canActivate: [roleGuard], data: { role: 'MEDECIN' } },
@@ -124,6 +127,7 @@ const routes: Routes = [
   { path: 'doctor-patients', component: DoctorPatientsComponent, canActivate: [roleGuard], data: { role: 'MEDECIN' } },
   { path: 'doctor-appointments', component: DoctorAppointmentsComponent, canActivate: [roleGuard], data: { role: 'MEDECIN' } },
   { path: 'medical-agenda', component: MedicalAgendaComponent, canActivate: [roleGuard], data: { role: 'MEDECIN' } },
+  { path: 'doctor-memoire-assistee', component: DoctorMemoireAssisteeComponent, canActivate: [roleGuard], data: { role: 'MEDECIN' } },
 
   { path: '**', redirectTo: '' }
 ];

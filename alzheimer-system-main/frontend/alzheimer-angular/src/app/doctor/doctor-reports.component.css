@@ -2042,3 +2042,202 @@ select.input {
     flex-wrap: wrap;
   }
 }
+
+/* ========================================================================
+   PREMIUM WEEKLY REPORTS (DOCTOR VIEW)
+   ======================================================================== */
+
+.hebdo-received-section {
+  background: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.modern-hebdo-table th {
+  background: #f8fafc;
+  color: #64748b;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  padding: 1.25rem 1.5rem;
+}
+
+.row-new {
+  background-color: rgba(59, 130, 246, 0.03);
+}
+
+.btn-consulter-hebdo {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 0.6rem 1.25rem;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 12px rgba(118, 75, 162, 0.25);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-consulter-hebdo:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(118, 75, 162, 0.35);
+}
+
+/* Redesigned Modal Clinical Hebdo */
+.hebdo-detail-modal {
+  width: 90%;
+  max-width: 900px !important;
+  border-radius: 32px !important;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.3) !important;
+  animation: modalEnter 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalEnter {
+  from { transform: scale(0.95) translateY(20px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.modal-header-hebdo {
+  background: linear-gradient(to right, #f8fafc, #ffffff) !important;
+  padding: 2.5rem !important;
+  border-bottom: 1px solid #edf2f7 !important;
+}
+
+.hebdo-patient-header {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.hebdo-avatar {
+  width: 72px;
+  height: 72px;
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+  border-radius: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 800;
+  box-shadow: 0 8px 20px rgba(79, 172, 254, 0.3);
+}
+
+.hebdo-patient-info h4 {
+  font-size: 1.75rem;
+  margin: 0;
+  font-weight: 800;
+  color: #1e293b;
+}
+
+.hebdo-period {
+  color: #64748b;
+  font-size: 1.05rem;
+  margin: 0.25rem 0;
+}
+
+.hebdo-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  margin: 2rem 0 3rem;
+}
+
+.hebdo-stat-item {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.hebdo-stat-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.progress-bar-premium {
+  height: 14px;
+  background: #f1f5f9;
+  border-radius: 7px;
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.progress-bar-premium .fill {
+  height: 100%;
+  border-radius: 7px;
+  background: linear-gradient(to right, #3b82f6, #2563eb);
+  transition: width 1s ease-out;
+}
+
+.progress-bar-premium .fill.yellow {
+  background: linear-gradient(to right, #f59e0b, #d97706);
+}
+
+.progress-bar-premium .fill.green {
+  background: linear-gradient(to right, #10b981, #059669);
+}
+
+.hebdo-stat-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #1e293b;
+}
+
+.hebdo-section-clinical {
+  background: #f8fafc;
+  border-radius: 24px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  border: 1px solid #f1f5f9;
+}
+
+.hebdo-section-clinical h5 {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.15rem;
+  font-weight: 750;
+  margin-bottom: 1.25rem;
+  color: #334155;
+}
+
+.hebdo-text-premium {
+  line-height: 1.7;
+  color: #475569;
+  font-size: 1.05rem;
+  white-space: pre-wrap;
+}
+
+.hebdo-text-warning {
+  color: #dc2626;
+  font-weight: 500;
+}
+
+.hebdo-footer-trace {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 1.5rem;
+  border-top: 1px solid #f1f5f9;
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+
+.status-badge-premium {
+  padding: 0.5rem 1.25rem;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.badge-sent { background: #dcfce7; color: #15803d; }
+.badge-consulted { background: #eff6ff; color: #1e40af; }

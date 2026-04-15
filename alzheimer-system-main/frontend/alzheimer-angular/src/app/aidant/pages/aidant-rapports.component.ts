@@ -15,9 +15,16 @@ export class AidantRapportsComponent implements OnInit {
 
   rapports: Rapport[] = [];
   filteredRapports: Rapport[] = [];
+  pagedRapports: Rapport[] = [];
   selectedRapport: Rapport | null = null;
   searchQuery = '';
   activeFilter = 'all';
+
+  // Pagination
+  currentPage = 1;
+  pageSize = 5;
+  pageSizeOptions = [5, 10, 20];
+  totalPages = 1;
 
   constructor(private rapportService: RapportService) {}
 
@@ -89,6 +96,39 @@ export class AidantRapportsComponent implements OnInit {
     }
 
     this.filteredRapports = result;
+    this.currentPage = 1;
+    this.applyPagination();
+  }
+
+  applyPagination(): void {
+    this.totalPages = Math.max(1, Math.ceil(this.filteredRapports.length / this.pageSize));
+    const start = (this.currentPage - 1) * this.pageSize;
+    this.pagedRapports = this.filteredRapports.slice(start, start + this.pageSize);
+  }
+
+  goToPage(page: number): void {
+    if (page < 1 || page > this.totalPages) return;
+    this.currentPage = page;
+    this.applyPagination();
+  }
+
+  onPageSizeChange(): void {
+    this.currentPage = 1;
+    this.applyPagination();
+  }
+
+  get rangeStart(): number {
+    return this.filteredRapports.length === 0 ? 0 : (this.currentPage - 1) * this.pageSize + 1;
+  }
+
+  get rangeEnd(): number {
+    return Math.min(this.filteredRapports.length, this.currentPage * this.pageSize);
+  }
+
+  get pageNumbers(): number[] {
+    const pages: number[] = [];
+    for (let i = 1; i <= this.totalPages; i++) pages.push(i);
+    return pages;
   }
 
   setFilter(filter: string): void {

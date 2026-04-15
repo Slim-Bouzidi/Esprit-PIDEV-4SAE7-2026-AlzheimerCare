@@ -148,6 +148,11 @@ public class RapportHebdomadaireController {
         return ResponseEntity.ok(rapport);
     }
 
+    @Autowired
+    private RapportHebdomadaireService rapportHebdoService;
+
+    // ... (rest ofAutowired remains)
+
     // CONSOLIDATION: Generate weekly report from daily fiches
     @PostMapping("/consolider/{patientId}")
     public ResponseEntity<RapportHebdomadaire> consolider(
@@ -158,45 +163,8 @@ public class RapportHebdomadaireController {
         LocalDate dateDebut = LocalDate.parse(debut);
         LocalDate dateFin = LocalDate.parse(fin);
 
-        // Get all daily fiches for this patient in the period
-        List<FicheTransmission> fiches = ficheRepository.findByPatientIdAndDateFicheBetween(patientId, dateDebut, dateFin);
-
-        var patient = patientRepository.findById(patientId)
-                .orElseThrow(() -> new RuntimeException("Patient non trouvé"));
-
-        // Build the weekly report
-        RapportHebdomadaire rapport = new RapportHebdomadaire();
-        rapport.setPatient(patient);
-        rapport.setPatientNom(patient.getNomComplet());
-        rapport.setDateDebut(dateDebut);
-        rapport.setDateFin(dateFin);
-
-        // Collect fiche IDs as JSON array
-        StringBuilder idsJson = new StringBuilder("[");
-        for (int i = 0; i < fiches.size(); i++) {
-            if (i > 0) idsJson.append(",");
-            idsJson.append(fiches.get(i).getId());
-        }
-        idsJson.append("]");
-        rapport.setFormulaireIdsJson(idsJson.toString());
-
-        // Calculate observance rates from fiches (simplified)
-        int totalFiches = fiches.size();
-        if (totalFiches > 0) {
-            // Basic rate: count fiches that are signed/sent
-            long envoyes = fiches.stream().filter(f -> "envoye".equals(f.getStatut()) || "valide".equals(f.getStatut())).count();
-            rapport.setTauxObservanceMedicaments((double) Math.round((double) envoyes / totalFiches * 100.0));
-            rapport.setTauxObservanceRepas((double) Math.round((double) envoyes / totalFiches * 100.0));
-            rapport.setTauxObservanceRendezVous(100.0);
-        } else {
-            rapport.setTauxObservanceMedicaments(0.0);
-            rapport.setTauxObservanceRepas(0.0);
-            rapport.setTauxObservanceRendezVous(0.0);
-        }
-
-        rapport.setObservationsGenerales("Rapport consolidé automatiquement à partir de " + totalFiches + " fiches de transmission.");
-        rapport.setIncidentsNotables("");
-
-        return ResponseEntity.ok(rapportHebdoRepository.save(rapport));
+        RapportHebdomadaire saved = rapportHebdoService.consolider(patientId, dateDebut, dateFin, false);
+        return ResponseEntity.ok(saved);
     }
 }
+

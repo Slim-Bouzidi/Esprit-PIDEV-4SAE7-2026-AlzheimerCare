@@ -22,7 +22,7 @@
   <div class="reports-layout" [class.has-detail]="selectedRapport">
     <!-- Reports list -->
     <div class="reports-list">
-      <div class="report-card" *ngFor="let rapport of filteredRapports"
+      <div class="report-card" *ngFor="let rapport of pagedRapports"
            [class.selected]="selectedRapport?.id === rapport.id"
            (click)="selectRapport(rapport)">
         <div class="report-card-header">
@@ -49,6 +49,23 @@
         <button class="btn btn-sm btn-outline" *ngIf="searchQuery || activeFilter !== 'all'" (click)="searchQuery = ''; activeFilter = 'all'; filterRapports()">
           {{ 'AIDANT.CLEAR_FILTERS' | translate }}
         </button>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-bar" *ngIf="filteredRapports.length > 0">
+      <div class="pagination-info">
+        Affichage {{ rangeStart }}–{{ rangeEnd }} sur {{ filteredRapports.length }}
+      </div>
+      <div class="pagination-controls">
+        <button class="page-btn" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">‹</button>
+        <button class="page-btn" *ngFor="let p of pageNumbers" [class.active]="p === currentPage" (click)="goToPage(p)">{{ p }}</button>
+        <button class="page-btn" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">›</button>
+      </div>
+      <div class="pagination-size">
+        <select [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+          <option *ngFor="let s of pageSizeOptions" [ngValue]="s">{{ s }} / page</option>
+        </select>
       </div>
     </div>
 

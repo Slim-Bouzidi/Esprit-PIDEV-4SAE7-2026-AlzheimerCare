@@ -19,7 +19,7 @@
 
     <!-- Cartes des rapports -->
     <div class="rapports-grid" *ngIf="!loadingRapportsMedecin && rapportsMedecin.length > 0">
-      <div *ngFor="let r of rapportsMedecin" class="rapport-card rapport-medecin-card" (click)="consulterRapportMedecin(r)">
+      <div *ngFor="let r of pagedRapportsMedecin" class="rapport-card rapport-medecin-card" (click)="consulterRapportMedecin(r)">
         <div class="rapport-header">
           <div class="doctor-info">
             <span class="doctor-icon">🩺</span> {{ r.soignant?.nomComplet || r.soignant?.nom || 'Médecin' }}
@@ -51,6 +51,23 @@
       </div>
     </div>
 
+    <!-- Pagination Rapports Médecin -->
+    <div class="pagination-bar" *ngIf="rapportsMedecin.length > 0">
+      <div class="pagination-info">
+        Affichage {{ medecinRangeStart }}–{{ medecinRangeEnd }} sur {{ rapportsMedecin.length }}
+      </div>
+      <div class="pagination-controls">
+        <button class="page-btn" [disabled]="medecinPage === 1" (click)="goToMedecinPage(medecinPage - 1)">‹</button>
+        <button class="page-btn" *ngFor="let p of medecinPageNumbers" [class.active]="p === medecinPage" (click)="goToMedecinPage(p)">{{ p }}</button>
+        <button class="page-btn" [disabled]="medecinPage === medecinTotalPages" (click)="goToMedecinPage(medecinPage + 1)">›</button>
+      </div>
+      <div class="pagination-size">
+        <select [(ngModel)]="medecinPageSize" (change)="onMedecinPageSizeChange()">
+          <option *ngFor="let s of medecinPageSizeOptions" [ngValue]="s">{{ s }} / page</option>
+        </select>
+      </div>
+    </div>
+
     <p *ngIf="!loadingRapportsMedecin && rapportsMedecin.length === 0" class="empty-msg">
       {{ 'SOIGNANT_REPORTS.NO_DOCTOR_DB_REPORT' | translate }}
     </p>
@@ -67,7 +84,7 @@
     <div *ngIf="loadingHebdo" class="loading-msg">⏳ {{ 'COMMON.LOADING' | translate }}...</div>
 
     <div class="rapports-grid" *ngIf="!loadingHebdo && rapportsHebdo.length > 0">
-      <div *ngFor="let rh of rapportsHebdo" class="rapport-card rapport-hebdo-card" (click)="openHebdoDetail(rh)">
+      <div *ngFor="let rh of pagedRapportsHebdo" class="rapport-card rapport-hebdo-card" (click)="openHebdoDetail(rh)">
         <div class="rapport-header">
           <div class="doctor-info">
             <span class="doctor-icon">📊</span> Rapport #{{ rh.id }}
@@ -111,6 +128,23 @@
             </span>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Pagination Rapports Hebdo -->
+    <div class="pagination-bar" *ngIf="rapportsHebdo.length > 0">
+      <div class="pagination-info">
+        Affichage {{ hebdoRangeStart }}–{{ hebdoRangeEnd }} sur {{ rapportsHebdo.length }}
+      </div>
+      <div class="pagination-controls">
+        <button class="page-btn" [disabled]="hebdoPage === 1" (click)="goToHebdoPage(hebdoPage - 1)">‹</button>
+        <button class="page-btn" *ngFor="let p of hebdoPageNumbers" [class.active]="p === hebdoPage" (click)="goToHebdoPage(p)">{{ p }}</button>
+        <button class="page-btn" [disabled]="hebdoPage === hebdoTotalPages" (click)="goToHebdoPage(hebdoPage + 1)">›</button>
+      </div>
+      <div class="pagination-size">
+        <select [(ngModel)]="hebdoPageSize" (change)="onHebdoPageSizeChange()">
+          <option *ngFor="let s of hebdoPageSizeOptions" [ngValue]="s">{{ s }} / page</option>
+        </select>
       </div>
     </div>
 

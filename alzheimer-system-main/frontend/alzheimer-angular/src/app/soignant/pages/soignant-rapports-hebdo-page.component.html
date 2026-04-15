@@ -1,34 +1,214 @@
-<header class="topbar-page">
-  <h1>{{ 'SOIGNANT_WEEKLY_REPORTS.TITLE' | translate }}</h1>
-  <div class="topbar-actions">
-    <button class="btn-outline" (click)="logout()">{{ 'COMMON.LOGOUT' | translate }}</button>
-  </div>
-</header>
-<main class="content-area">
-  <section class="card">
-    <div class="card-header">
-      <h2>{{ 'SOIGNANT_WEEKLY_REPORTS.REPORTS_TO_SEND' | translate }}</h2>
-    </div>
-    <div class="list-simple">
-      <div *ngFor="let r of rapportsToSend" class="list-item">
-        <strong>{{ r.patientNom }}</strong> · {{ r.dateDebut }} → {{ r.dateFin }}<br>
-        Observance: Médic. {{ r.tauxObservanceMedicaments }}% · Repas {{ r.tauxObservanceRepas }}% · RDV {{ r.tauxObservanceRendezVous }}%
-        <button *ngIf="!r.envoyeAuMedecin" class="btn-primary" (click)="envoyer(r.id)">{{ 'SOIGNANT_WEEKLY_REPORTS.SEND_TO_DOCTOR' | translate }}</button>
+<div class="reports-container">
+  <!-- Header with actions -->
+  <header class="page-header">
+    <div class="header-content">
+      <div class="title-group">
+        <span class="badge badge-weekly">Hebdomadaire</span>
+        <h1>Rapports de Transmission</h1>
+        <p class="subtitle">Suivi et consolidation des fiches de soins hebdomadaires</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-glass btn-refresh" (click)="load()" [disabled]="loading">
+          <span class="icon">🔄</span> Actualiser
+        </button>
+        <button class="btn btn-primary btn-consolidate" (click)="consoliderTout()" [disabled]="consolidating">
+          <span class="icon">{{ consolidating ? '⌛' : '📊' }}</span>
+          {{ consolidating ? 'Consolidation...' : 'Générer Rapports' }}
+        </button>
+        <button class="btn btn-outline" (click)="logout()">Déconnexion</button>
       </div>
     </div>
-    <p *ngIf="rapportsToSend.length === 0" class="empty-msg">Aucun rapport hebdomadaire en attente d'envoi.</p>
-  </section>
+  </header>
 
-  <section class="card" style="margin-top: 16px;">
-    <div class="card-header">
-      <h2>Rapports déjà envoyés</h2>
-    </div>
-    <div class="list-simple">
-      <div *ngFor="let r of rapportsSent" class="list-item">
-        <strong>{{ r.patientNom }}</strong> · {{ r.dateDebut }} → {{ r.dateFin }}<br>
-        Observance: Médic. {{ r.tauxObservanceMedicaments }}% · Repas {{ r.tauxObservanceRepas }}% · RDV {{ r.tauxObservanceRendezVous }}%
+  <main class="reports-content">
+    
+    <!-- Stats Overview -->
+    <div class="stats-grid">
+      <div class="stat-card glass-card">
+        <div class="stat-icon">📄</div>
+        <div class="stat-info">
+          <span class="label">À Envoyer</span>
+          <span class="value">{{ rapportsToSend.length }}</span>
+        </div>
+      </div>
+      <div class="stat-card glass-card">
+        <div class="stat-icon">📩</div>
+        <div class="stat-info">
+          <span class="label">Envoyés</span>
+          <span class="value">{{ rapportsSent.length }}</span>
+        </div>
+      </div>
+      <div class="stat-card glass-card">
+        <div class="stat-icon">👥</div>
+        <div class="stat-info">
+          <span class="label">Patients Suivis</span>
+          <span class="value">{{ patients.length }}</span>
+        </div>
       </div>
     </div>
-    <p *ngIf="rapportsSent.length === 0" class="empty-msg">Aucun rapport hebdomadaire envoyé.</p>
-  </section>
-</main>
+
+    <!-- Grouped Sections -->
+    <div class="reports-sections">
+      
+      <!-- Pending Reports -->
+      <section class="report-section active-reports">
+        <div class="section-header">
+          <h2><span class="dot dot-pending"></span> Rapports à Valider</h2>
+          <span class="count">{{ rapportsToSend.length }} total</span>
+        </div>
+        
+        <div class="reports-list" *ngIf="!loading && rapportsToSend.length > 0">
+          <div *ngFor="let r of rapportsToSend" class="report-item glass-card hover-lift">
+            <div class="report-info">
+              <div class="patient-title">
+                <span class="patient-avatar">{{ r.patientNom.charAt(0) }}</span>
+                <div>
+                  <h3>{{ r.patientNom }}</h3>
+                  <span class="period">Semaine du {{ r.dateDebut | date:'dd/MM' }} au {{ r.dateFin | date:'dd/MM/yyyy' }}</span>
+                </div>
+              </div>
+              <div class="metrics-grid">
+                <div class="metric">
+                  <span class="label">Molières</span>
+                  <div class="progress-bar-small"><div class="fill" [style.width.%]="r.tauxObservanceMedicaments"></div></div>
+                  <span class="perc">{{ r.tauxObservanceMedicaments }}%</span>
+                </div>
+                <div class="metric">
+                  <span class="label">Alimentation</span>
+                  <div class="progress-bar-small"><div class="fill yellow" [style.width.%]="r.tauxObservanceRepas"></div></div>
+                  <span class="perc">{{ r.tauxObservanceRepas }}%</span>
+                </div>
+              </div>
+            </div>
+            <div class="report-actions">
+              <button class="btn btn-glass btn-sm" (click)="openReportDetail(r)">Consulter</button>
+              <button class="btn btn-danger btn-sm" (click)="supprimer(r.id); $event.stopPropagation()">Supprimer</button>
+              <button class="btn btn-primary btn-sm" (click)="envoyer(r.id)">
+                Envoyer au Médecin
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <div *ngIf="!loading && rapportsToSend.length === 0" class="empty-state glass-card">
+          <span class="empty-icon">✅</span>
+          <p>Tous les rapports de cette semaine ont été traités.</p>
+        </div>
+      </section>
+
+      <!-- Sent Reports -->
+      <section class="report-section history-reports">
+        <div class="section-header">
+          <h2><span class="dot dot-sent"></span> Historique des envois</h2>
+        </div>
+        
+        <div class="reports-grid" *ngIf="!loading && rapportsSent.length > 0">
+          <div *ngFor="let r of rapportsSent" class="report-compact glass-card" (click)="openReportDetail(r)">
+            <div class="compact-header">
+              <strong>{{ r.patientNom }}</strong>
+              <span class="sent-date">Le {{ r.dateEnvoi | date:'dd/MM' }}</span>
+            </div>
+            <div class="compact-body">
+              {{ r.dateDebut | date:'dd/MM' }} → {{ r.dateFin | date:'dd/MM' }}
+            </div>
+            <div class="status-indicator">Envoyé</div>
+            <div class="compact-footer">
+              <span class="view-link">Consulter →</span>
+              <span class="delete-link" (click)="supprimer(r.id); $event.stopPropagation()">Supprimer</span>
+            </div>
+          </div>
+        </div>
+
+        <p *ngIf="!loading && rapportsSent.length === 0" class="empty-msg">Aucun archivé.</p>
+      </section>
+
+    </div>
+
+    <!-- Modal Detail -->
+    <div class="modal-overlay" *ngIf="selectedRapport" (click)="closeReportDetail()">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <header class="modal-header">
+          <div class="patient-info-group" style="display: flex; align-items: center; gap: 1.5rem;">
+            <span class="avatar-large">{{ selectedRapport.patientNom.charAt(0) }}</span>
+            <div class="patient-info">
+              <h2>{{ selectedRapport.patientNom }}</h2>
+              <p>Rapport du <strong>{{ selectedRapport.dateDebut | date:'dd MMM yyyy' }}</strong> au <strong>{{ selectedRapport.dateFin | date:'dd MMM yyyy' }}</strong></p>
+            </div>
+          </div>
+          <div class="modal-header-actions">
+            <button class="btn-icon-danger" (click)="supprimer(selectedRapport.id); closeReportDetail()" title="Supprimer ce rapport">🗑️</button>
+            <button class="btn-close" (click)="closeReportDetail()">×</button>
+          </div>
+        </header>
+
+        <div class="modal-content">
+          <!-- Main Stats Grid -->
+          <div class="detail-stats-grid">
+            <div class="detail-stat">
+              <span class="stat-label">💊 Médicaments</span>
+              <div class="progress-bar-large">
+                <div class="fill" [style.width.%]="selectedRapport.tauxObservanceMedicaments"></div>
+              </div>
+              <span class="stat-value">{{ selectedRapport.tauxObservanceMedicaments }}%</span>
+            </div>
+            
+            <div class="detail-stat">
+              <span class="stat-label">🍽️ Alimentation</span>
+              <div class="progress-bar-large">
+                <div class="fill yellow" [style.width.%]="selectedRapport.tauxObservanceRepas"></div>
+              </div>
+              <span class="stat-value">{{ selectedRapport.tauxObservanceRepas }}%</span>
+            </div>
+            
+            <div class="detail-stat">
+              <span class="stat-label">👨‍⚕️ Rendez-vous</span>
+              <div class="progress-bar-large">
+                <div class="fill green" [style.width.%]="selectedRapport.tauxObservanceRendezVous"></div>
+              </div>
+              <span class="stat-value">{{ selectedRapport.tauxObservanceRendezVous }}%</span>
+            </div>
+          </div>
+
+          <!-- Observations Synthesis -->
+          <div class="observations-box">
+            <h3><span class="icon">📝</span> Synthèse des observations hebdomadaires</h3>
+            <div class="obs-content">
+              {{ selectedRapport.observationsGenerales || 'Aucune observation enregistrée pour cette période.' }}
+            </div>
+          </div>
+
+          <!-- Incident Section (Conditional) -->
+          <div class="incidents-box" *ngIf="selectedRapport.incidentsNotables">
+            <h3><span class="icon">⚠️</span> Incidents notables</h3>
+            <div class="obs-content">
+              {{ selectedRapport.incidentsNotables }}
+            </div>
+          </div>
+        </div>
+
+        <footer class="modal-footer">
+          <div class="status-group">
+            <div class="status-badge" [class.status-sent]="selectedRapport.envoyeAuMedecin">
+              {{ selectedRapport.envoyeAuMedecin ? '✓ Transmis au médecin le ' + (selectedRapport.dateEnvoi | date:'dd/MM à HH:mm') : '⚠ Brouillon - En attente d\'envoi' }}
+            </div>
+          </div>
+          <div class="footer-actions">
+            <button class="btn btn-glass" (click)="closeReportDetail()">Fermer</button>
+            <button *ngIf="!selectedRapport.envoyeAuMedecin" class="btn btn-primary" (click)="envoyer(selectedRapport.id); closeReportDetail()">
+              🚀 Envoyer au Médecin
+            </button>
+          </div>
+        </footer>
+      </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" *ngIf="loading || consolidating">
+      <div class="spinner"></div>
+      <p>{{ consolidating ? 'Consolidation des données...' : 'Chargement...' }}</p>
+    </div>
+
+  </main>
+</div>
+
+

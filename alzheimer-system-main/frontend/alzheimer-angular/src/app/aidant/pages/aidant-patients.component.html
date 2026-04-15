@@ -13,7 +13,7 @@
 
   <!-- Patients List -->
   <div class="patients-grid">
-    <div class="patient-card" *ngFor="let patient of filteredPatients"
+    <div class="patient-card" *ngFor="let patient of pagedPatients"
          [class.selected]="selectedPatient?.id === patient.id"
          (click)="selectPatient(patient)">
       <div class="patient-card-header">
@@ -56,6 +56,23 @@
           📞 {{ 'AIDANT.CALL' | translate }}
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination-bar" *ngIf="filteredPatients.length > 0">
+    <div class="pagination-info">
+      Affichage {{ rangeStart }}–{{ rangeEnd }} sur {{ filteredPatients.length }} patients
+    </div>
+    <div class="pagination-controls">
+      <button class="page-btn" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">‹</button>
+      <button class="page-btn" *ngFor="let p of pageNumbers" [class.active]="p === currentPage" (click)="goToPage(p)">{{ p }}</button>
+      <button class="page-btn" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">›</button>
+    </div>
+    <div class="pagination-size">
+      <select [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+        <option *ngFor="let s of pageSizeOptions" [ngValue]="s">{{ s }} / page</option>
+      </select>
     </div>
   </div>
 

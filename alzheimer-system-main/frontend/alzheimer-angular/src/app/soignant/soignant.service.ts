@@ -82,7 +82,7 @@ export class SoignantService {
           }));
           this.rapportsHebdoSubject.next(mapped);
         }
-        // DB vide → on ne touche pas au subject, les mock restent
+        // DB vide → on ne touche pas au subject
       },
       error: () => {}
     });
@@ -119,8 +119,7 @@ export class SoignantService {
   }
 
   getPatientsAssignes(): PatientSoignant[] {
-    const realPatients = this.patientsSubject.value;
-    return realPatients.length > 0 ? realPatients : this.getMockPatients();
+    return this.patientsSubject.value;
   }
 
   getReglesPatients(): ReglePatient[] {
@@ -589,30 +588,6 @@ export class SoignantService {
       { id: 'ev-6', type: 'repas', heure: '12:00', titre: this.translate.instant('AGENDA.LUNCH'), detail: 'Jean Dupont', patientId: 'p2', patientNom: 'Jean Dupont', statut: 'en_attente', date: d },
       { id: 'ev-7', type: 'medicament', heure: '08:30', titre: 'Ebixa 10mg', detail: 'Lucie Bernard', patientId: 'p3', patientNom: 'Lucie Bernard', statut: 'fait', date: d },
       { id: 'ev-8', type: 'repas', heure: '12:00', titre: this.translate.instant('AGENDA.LUNCH'), detail: 'Lucie Bernard', patientId: 'p3', patientNom: 'Lucie Bernard', statut: 'en_attente', date: d },
-    ];
-  }
-
-  private getMockRapportsHebdo(): RapportHebdomadaire[] {
-    const d = new Date();
-    const debut = new Date(d);
-    debut.setDate(debut.getDate() - 7);
-    const fin = new Date(d);
-    return [
-      {
-        id: 'rh-1',
-        patientId: 'p1',
-        patientNom: 'Alice Robert',
-        soignantId: 'soignant-1',
-        dateDebut: debut.toISOString().slice(0, 10),
-        dateFin: fin.toISOString().slice(0, 10),
-        formulaireIds: ['f-1', 'f-2', 'f-3', 'f-4', 'f-5'],
-        tauxObservanceMedicaments: 92,
-        tauxObservanceRepas: 88,
-        tauxObservanceRendezVous: 100,
-        incidentsNotables: this.translate.instant('MOCK.NO_NOTABLE_INCIDENTS'),
-        observationsGenerales: this.translate.instant('MOCK.PATIENT_STABLE_GOOD_COMPLIANCE'),
-        envoyeAuMedecin: false,
-      },
     ];
   }
 

@@ -238,10 +238,13 @@
                 </div>
             </div>
 
-            <!-- ===== Rapports Hebdomadaires Reçus ===== -->
-            <div class="card table-card hebdo-received-section">
+            <!-- ===== Rapports Hebdomadaires Reçus (Modernized) ===== -->
+            <div class="card hebdo-received-section">
                 <div class="card-header">
-                    <h3>📊 Rapports hebdomadaires reçus</h3>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <span style="font-size: 1.5rem;">📊</span>
+                        <h3>Rapports hebdomadaires reçus</h3>
+                    </div>
                     <span class="badge-count" *ngIf="rapportsHebdo.length">{{ rapportsHebdo.length }}</span>
                 </div>
 
@@ -250,54 +253,57 @@
                 </div>
 
                 <div class="table-responsive" *ngIf="rapportsHebdo.length > 0">
-                    <table class="modern-table">
+                    <table class="modern-table modern-hebdo-table">
                         <thead>
                             <tr>
                                 <th>Patient</th>
                                 <th>Période</th>
-                                <th>Médicaments</th>
-                                <th>Repas</th>
-                                <th>RDV</th>
-                                <th>Date d'envoi</th>
+                                <th>💊 Médicaments</th>
+                                <th>🍽️ Repas</th>
+                                <th>👨‍⚕️ RDV</th>
+                                <th>Envoi</th>
                                 <th>Statut</th>
-                                <th>Actions</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr *ngFor="let r of rapportsHebdo" [class.row-new]="!r.consulteParMedecin">
-                                <td><strong>{{ r.patientPrenom }} {{ r.patientNom }}</strong></td>
-                                <td>{{ r.dateDebut | date:'dd/MM' }} - {{ r.dateFin | date:'dd/MM/yyyy' }}</td>
                                 <td>
-                                    <span class="indicator-pill" [class.good]="r.tauxObservanceMedicaments >= 80"
-                                          [class.warning]="r.tauxObservanceMedicaments >= 50 && r.tauxObservanceMedicaments < 80"
-                                          [class.danger]="r.tauxObservanceMedicaments < 50">
-                                        {{ r.tauxObservanceMedicaments }}%
-                                    </span>
+                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                        <div style="width: 32px; height: 32px; background: #e2e8f0; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.8rem; color: #475569;">
+                                            {{ r.patientNom.charAt(0) }}
+                                        </div>
+                                        <strong>{{ r.patientPrenom }} {{ r.patientNom }}</strong>
+                                    </div>
+                                </td>
+                                <td><span style="color: #64748b; font-size: 0.85rem;">{{ r.dateDebut | date:'dd/MM' }} - {{ r.dateFin | date:'dd/MM/yyyy' }}</span></td>
+                                <td>
+                                    <div class="progress-bar-premium" style="width: 80px; height: 8px;">
+                                        <div class="fill" [style.width.%]="r.tauxObservanceMedicaments"></div>
+                                    </div>
+                                    <span style="font-size: 0.75rem; font-weight: 700; color: #3b82f6;">{{ r.tauxObservanceMedicaments }}%</span>
                                 </td>
                                 <td>
-                                    <span class="indicator-pill" [class.good]="r.tauxObservanceRepas >= 80"
-                                          [class.warning]="r.tauxObservanceRepas >= 50 && r.tauxObservanceRepas < 80"
-                                          [class.danger]="r.tauxObservanceRepas < 50">
-                                        {{ r.tauxObservanceRepas }}%
-                                    </span>
+                                    <div class="progress-bar-premium" style="width: 80px; height: 8px;">
+                                        <div class="fill yellow" [style.width.%]="r.tauxObservanceRepas"></div>
+                                    </div>
+                                    <span style="font-size: 0.75rem; font-weight: 700; color: #f59e0b;">{{ r.tauxObservanceRepas }}%</span>
                                 </td>
                                 <td>
-                                    <span class="indicator-pill" [class.good]="r.tauxObservanceRdv >= 80"
-                                          [class.warning]="r.tauxObservanceRdv >= 50 && r.tauxObservanceRdv < 80"
-                                          [class.danger]="r.tauxObservanceRdv < 50">
-                                        {{ r.tauxObservanceRdv }}%
-                                    </span>
+                                    <div class="progress-bar-premium" style="width: 80px; height: 8px;">
+                                        <div class="fill green" [style.width.%]="r.tauxObservanceRdv"></div>
+                                    </div>
+                                    <span style="font-size: 0.75rem; font-weight: 700; color: #10b981;">{{ r.tauxObservanceRdv }}%</span>
                                 </td>
-                                <td>{{ r.dateEnvoi | date:'dd/MM/yyyy HH:mm' }}</td>
+                                <td style="font-size: 0.8rem; color: #94a3b8;">{{ r.dateEnvoi | date:'dd/MM/yy' }}</td>
                                 <td>
-                                    <span class="badge-hebdo-statut" [class.statut-envoye]="!r.consulteParMedecin"
-                                          [class.statut-consulte]="r.consulteParMedecin">
-                                        {{ getHebdoStatut(r) }}
+                                    <span class="status-badge-premium" [class.badge-sent]="!r.consulteParMedecin" [class.badge-consulted]="r.consulteParMedecin">
+                                        {{ r.consulteParMedecin ? 'Consulté' : 'Nouveau' }}
                                     </span>
                                 </td>
                                 <td>
                                     <button class="btn-consulter-hebdo" (click)="consulterHebdo(r)">
-                                        {{ r.consulteParMedecin ? '👁️ Revoir' : '📋 Consulter' }}
+                                        <span>👁️</span> Consulter
                                     </button>
                                 </td>
                             </tr>
@@ -306,81 +312,67 @@
                 </div>
             </div>
 
-            <!-- Modal détail rapport hebdomadaire -->
+            <!-- ═══ Redesigned Modal Detail Rapport Hebdomadaire ═══ -->
             <div class="modal-overlay" *ngIf="selectedHebdo" (click)="fermerHebdo()">
-                <div class="modal-clinical hebdo-detail-modal" (click)="$event.stopPropagation()">
-                    <div class="modal-header modal-header-hebdo">
-                        <h3>📊 Rapport Hebdomadaire</h3>
-                        <button class="btn-close-modal" (click)="fermerHebdo()">✕</button>
-                    </div>
-                    <div class="modal-body">
-                        <!-- En-tête patient -->
-                        <div class="hebdo-patient-info">
-                            <h4>{{ selectedHebdo.patientPrenom }} {{ selectedHebdo.patientNom }}</h4>
-                            <p class="hebdo-period">📅 {{ selectedHebdo.dateDebut | date:'dd/MM/yyyy' }} — {{ selectedHebdo.dateFin | date:'dd/MM/yyyy' }}</p>
-                            <span class="badge-hebdo-statut" [class.statut-envoye]="!selectedHebdo.consulteParMedecin"
-                                  [class.statut-consulte]="selectedHebdo.consulteParMedecin">
-                                {{ getHebdoStatut(selectedHebdo) }}
-                            </span>
+                <div class="modal-content hebdo-detail-modal" (click)="$event.stopPropagation()">
+                    <header class="modal-header-hebdo">
+                        <div class="hebdo-patient-header">
+                            <div class="hebdo-avatar">{{ selectedHebdo.patientNom.charAt(0) }}</div>
+                            <div class="hebdo-patient-info">
+                                <h4>{{ selectedHebdo.patientPrenom }} {{ selectedHebdo.patientNom }}</h4>
+                                <p class="hebdo-period">📅 Rapport du <strong>{{ selectedHebdo.dateDebut | date:'dd MMM' }}</strong> au <strong>{{ selectedHebdo.dateFin | date:'dd MMM yyyy' }}</strong></p>
+                            </div>
                         </div>
+                        <button class="btn-close" (click)="fermerHebdo()" style="background: #f1f5f9; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 1.2rem; cursor: pointer;">×</button>
+                    </header>
 
-                        <!-- Indicateurs d'observance -->
-                        <div class="hebdo-indicators-grid">
-                            <div class="hebdo-ind-card">
-                                <span class="hebdo-ind-icon">💊</span>
-                                <span class="hebdo-ind-label">Médicaments</span>
-                                <span class="hebdo-ind-value" [class.good]="selectedHebdo.tauxObservanceMedicaments >= 80"
-                                      [class.warning]="selectedHebdo.tauxObservanceMedicaments >= 50 && selectedHebdo.tauxObservanceMedicaments < 80"
-                                      [class.danger]="selectedHebdo.tauxObservanceMedicaments < 50">
-                                    {{ selectedHebdo.tauxObservanceMedicaments }}%
-                                </span>
+                    <div class="modal-body" style="padding: 2.5rem; overflow-y: auto;">
+                        <!-- Performance Metrics -->
+                        <div class="hebdo-stats-grid">
+                            <div class="hebdo-stat-item">
+                                <span class="hebdo-stat-label">💊 Médicaments</span>
+                                <div class="progress-bar-premium"><div class="fill" [style.width.%]="selectedHebdo.tauxObservanceMedicaments"></div></div>
+                                <span class="hebdo-stat-value">{{ selectedHebdo.tauxObservanceMedicaments }}%</span>
                             </div>
-                            <div class="hebdo-ind-card">
-                                <span class="hebdo-ind-icon">🍽️</span>
-                                <span class="hebdo-ind-label">Repas</span>
-                                <span class="hebdo-ind-value" [class.good]="selectedHebdo.tauxObservanceRepas >= 80"
-                                      [class.warning]="selectedHebdo.tauxObservanceRepas >= 50 && selectedHebdo.tauxObservanceRepas < 80"
-                                      [class.danger]="selectedHebdo.tauxObservanceRepas < 50">
-                                    {{ selectedHebdo.tauxObservanceRepas }}%
-                                </span>
+                            <div class="hebdo-stat-item">
+                                <span class="hebdo-stat-label">🍽️ Alimentation</span>
+                                <div class="progress-bar-premium"><div class="fill yellow" [style.width.%]="selectedHebdo.tauxObservanceRepas"></div></div>
+                                <span class="hebdo-stat-value">{{ selectedHebdo.tauxObservanceRepas }}%</span>
                             </div>
-                            <div class="hebdo-ind-card">
-                                <span class="hebdo-ind-icon">📅</span>
-                                <span class="hebdo-ind-label">Rendez-vous</span>
-                                <span class="hebdo-ind-value" [class.good]="selectedHebdo.tauxObservanceRdv >= 80"
-                                      [class.warning]="selectedHebdo.tauxObservanceRdv >= 50 && selectedHebdo.tauxObservanceRdv < 80"
-                                      [class.danger]="selectedHebdo.tauxObservanceRdv < 50">
-                                    {{ selectedHebdo.tauxObservanceRdv }}%
-                                </span>
+                            <div class="hebdo-stat-item">
+                                <span class="hebdo-stat-label">👨‍⚕️ Rendez-vous</span>
+                                <div class="progress-bar-premium"><div class="fill green" [style.width.%]="selectedHebdo.tauxObservanceRdv"></div></div>
+                                <span class="hebdo-stat-value">{{ selectedHebdo.tauxObservanceRdv }}%</span>
                             </div>
                         </div>
 
-                        <!-- Observations -->
-                        <div class="hebdo-section" *ngIf="selectedHebdo.observations">
-                            <h5>📝 Observations</h5>
-                            <p class="hebdo-text">{{ selectedHebdo.observations }}</p>
+                        <!-- Clinical Observations -->
+                        <div class="hebdo-section-clinical">
+                            <h5>📝 Synthèse des observations hebdomadaires</h5>
+                            <div class="hebdo-text-premium">{{ selectedHebdo.observations || 'Aucune observation enregistrée pour cette période.' }}</div>
                         </div>
 
                         <!-- Incidents -->
-                        <div class="hebdo-section" *ngIf="selectedHebdo.incidents">
-                            <h5>⚠️ Incidents</h5>
-                            <p class="hebdo-text hebdo-text-warning">{{ selectedHebdo.incidents }}</p>
+                        <div class="hebdo-section-clinical" *ngIf="selectedHebdo.incidents">
+                            <h5 style="color: #dc2626;"><span style="color: #dc2626;">⚠️</span> Incidents notables</h5>
+                            <div class="hebdo-text-premium hebdo-text-warning">{{ selectedHebdo.incidents }}</div>
                         </div>
 
-                        <!-- Recommandations -->
-                        <div class="hebdo-section" *ngIf="selectedHebdo.recommandations">
-                            <h5>💡 Recommandations</h5>
-                            <p class="hebdo-text">{{ selectedHebdo.recommandations }}</p>
+                        <!-- Recommendations -->
+                        <div class="hebdo-section-clinical" *ngIf="selectedHebdo.recommandations">
+                            <h5 style="color: #059669;">💡 Recommandations soignantes</h5>
+                            <div class="hebdo-text-premium">{{ selectedHebdo.recommandations }}</div>
                         </div>
 
-                        <!-- Traçabilité -->
-                        <div class="hebdo-traceability">
-                            <p *ngIf="selectedHebdo.dateEnvoi">📤 Envoyé le {{ selectedHebdo.dateEnvoi | date:'dd/MM/yyyy à HH:mm' }}</p>
-                            <p *ngIf="selectedHebdo.dateConsultation">👁️ Consulté le {{ selectedHebdo.dateConsultation | date:'dd/MM/yyyy à HH:mm' }}</p>
+                        <!-- Traceability -->
+                        <div class="hebdo-footer-trace">
+                            <span *ngIf="selectedHebdo.dateEnvoi">📤 Envoyé par le soignant le {{ selectedHebdo.dateEnvoi | date:'dd/MM/yyyy à HH:mm' }}</span>
+                            <span *ngIf="selectedHebdo.dateConsultation">👁️ Consulté par vous le {{ selectedHebdo.dateConsultation | date:'dd/MM/yyyy à HH:mm' }}</span>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button class="btn-secondary" (click)="fermerHebdo()">Fermer</button>
+
+                    <div class="modal-footer" style="padding: 1.5rem 2.5rem; background: #f8fafc; display: flex; justify-content: flex-end;">
+                        <button class="btn btn-outline" (click)="fermerHebdo()">Fermer la consultation</button>
                     </div>
                 </div>
             </div>

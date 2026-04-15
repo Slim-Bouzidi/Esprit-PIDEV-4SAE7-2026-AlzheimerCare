@@ -6,15 +6,12 @@ import { CanActivateFn, Router } from '@angular/router';
  * Guard that redirects the user to the appropriate dashboard
  * based on their Keycloak realm role.
  * 
- * TEMPORARY: Keycloak disabled - redirecting to admin by default
+ * TEMPORARY: Keycloak disabled - COMPLETELY BYPASSED
  */
 export const roleRedirectGuard: CanActivateFn = () => {
-  const router = inject(Router);
-
-  // TEMPORARY: Bypass Keycloak and redirect to admin
-  console.warn('[RoleRedirect] Keycloak disabled - redirecting to admin');
-  router.navigate(['/admin']);
-  return false;
+  // COMPLETELY DISABLED - Always allow navigation
+  console.log('[RoleRedirect] GUARD BYPASSED - Navigation allowed');
+  return true;
 
   /* ORIGINAL CODE (commented out):
   console.log('[RoleRedirect] Keycloak roles:', keycloak.realmAccess?.roles);

@@ -81,6 +81,7 @@ export class SidebarComponent implements OnInit, OnChanges {
           { label: 'SIDEBAR.APPOINTMENTS', icon: '📅', route: '/doctor-appointments' },
           { label: 'SIDEBAR.REPORTS_ASSESSMENTS', icon: '📝', route: '/doctor-reports' },
           { label: 'SIDEBAR.CREATE_FOLLOW_UP_REPORT', icon: '📋', route: '/doctor-report-create' },
+          { label: 'Mémoire Assistée', icon: '🧠', route: '/doctor-memoire-assistee' },
           { label: 'SIDEBAR.SETTINGS', icon: '⚙️', route: '/doctor-settings' }
         ];
         break;
@@ -89,7 +90,8 @@ export class SidebarComponent implements OnInit, OnChanges {
           { label: 'SIDEBAR.HOME', icon: '🏠', route: '/aidant-dashboard' },
           { label: 'SIDEBAR.MY_PATIENTS', icon: '👥', route: '/aidant-patients' },
           { label: 'SIDEBAR.PLANNING', icon: '📅', route: '/aidant-planning' },
-          { label: 'SIDEBAR.REPORTS', icon: '📝', route: '/aidant-rapports' }
+          { label: 'SIDEBAR.REPORTS', icon: '📝', route: '/aidant-rapports' },
+          { label: 'Mémoire assistée', icon: '🧠', route: '/aidant-memoire-assistee' }
         ];
         break;
       default:

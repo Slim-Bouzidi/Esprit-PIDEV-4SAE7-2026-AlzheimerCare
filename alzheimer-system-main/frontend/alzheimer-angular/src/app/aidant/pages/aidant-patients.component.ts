@@ -15,8 +15,15 @@ export class AidantPatientsComponent implements OnInit {
 
   patients: Patient[] = [];
   filteredPatients: Patient[] = [];
+  pagedPatients: Patient[] = [];
   selectedPatient: Patient | null = null;
   searchQuery = '';
+
+  // Pagination
+  currentPage = 1;
+  pageSize = 6;
+  pageSizeOptions = [6, 12, 24];
+  totalPages = 1;
 
   constructor(private patientService: PatientService) {}
 
@@ -25,6 +32,7 @@ export class AidantPatientsComponent implements OnInit {
       next: (patients) => {
         this.patients = patients;
         this.filteredPatients = patients;
+        this.applyPagination();
       },
       error: () => this.loadMockPatients()
     });
@@ -48,6 +56,7 @@ export class AidantPatientsComponent implements OnInit {
       }
     ];
     this.filteredPatients = [...this.patients];
+    this.applyPagination();
   }
 
   filterPatients(): void {
@@ -60,6 +69,39 @@ export class AidantPatientsComponent implements OnInit {
       p.nomComplet.toLowerCase().includes(q) ||
       (p.antecedents || '').toLowerCase().includes(q)
     );
+    this.currentPage = 1;
+    this.applyPagination();
+  }
+
+  applyPagination(): void {
+    this.totalPages = Math.max(1, Math.ceil(this.filteredPatients.length / this.pageSize));
+    const start = (this.currentPage - 1) * this.pageSize;
+    this.pagedPatients = this.filteredPatients.slice(start, start + this.pageSize);
+  }
+
+  goToPage(page: number): void {
+    if (page < 1 || page > this.totalPages) return;
+    this.currentPage = page;
+    this.applyPagination();
+  }
+
+  onPageSizeChange(): void {
+    this.currentPage = 1;
+    this.applyPagination();
+  }
+
+  get rangeStart(): number {
+    return this.filteredPatients.length === 0 ? 0 : (this.currentPage - 1) * this.pageSize + 1;
+  }
+
+  get rangeEnd(): number {
+    return Math.min(this.filteredPatients.length, this.currentPage * this.pageSize);
+  }
+
+  get pageNumbers(): number[] {
+    const pages: number[] = [];
+    for (let i = 1; i <= this.totalPages; i++) pages.push(i);
+    return pages;
   }
 
   selectPatient(patient: Patient): void {
