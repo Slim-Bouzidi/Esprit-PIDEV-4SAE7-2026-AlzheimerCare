@@ -5,9 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "rapport_hebdomadaire", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"patient_id", "date_debut", "date_fin"})
-})
+@Table(name = "rapport_hebdomadaire")
 public class RapportHebdomadaire {
 
     @Id
@@ -24,7 +22,10 @@ public class RapportHebdomadaire {
     @JoinColumn(name = "soignant_id")
     private User soignant;
 
+    @Column(name = "date_debut")
     private LocalDate dateDebut;
+
+    @Column(name = "date_fin")
     private LocalDate dateFin;
 
     @Column(columnDefinition = "TEXT")

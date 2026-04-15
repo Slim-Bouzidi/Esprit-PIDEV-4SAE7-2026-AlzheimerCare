@@ -40,9 +40,9 @@ public class Patient {
     @JoinColumn(name = "soignant_id")
     private User soignant;
 
-    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
-    @JsonIgnore
-    private List<Traitement> traitements;
+    //@OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
+    //@JsonIgnore
+    //private List<Traitement> traitements;
 
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
     @JsonIgnore
@@ -52,17 +52,17 @@ public class Patient {
     @JsonIgnore
     private List<Rapport> rapports;
 
-    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
-    @JsonIgnore
-    private List<MedicalRecord> medicalRecords;
+    //@OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
+    //@JsonIgnore
+    //private List<MedicalRecord> medicalRecords;
 
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<EmergencyContact> emergencyContacts;
 
-    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
-    @JsonIgnore
-    private List<Treatment> treatments;
+    //@OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
+    //@JsonIgnore
+    //private List<Treatment> treatments;
 
     public Patient() {}
 
@@ -116,8 +116,8 @@ public class Patient {
     public Boolean getActif() { return actif; }
     public void setActif(Boolean actif) { this.actif = actif; }
 
-    public List<Traitement> getTraitements() { return traitements; }
-    public void setTraitements(List<Traitement> traitements) { this.traitements = traitements; }
+    //public List<Traitement> getTraitements() { return traitements; }
+    //public void setTraitements(List<Traitement> traitements) { this.traitements = traitements; }
 
     public List<RendezVous> getRendezVous() { return rendezVous; }
     public void setRendezVous(List<RendezVous> rendezVous) { this.rendezVous = rendezVous; }
@@ -125,14 +125,14 @@ public class Patient {
     public List<Rapport> getRapports() { return rapports; }
     public void setRapports(List<Rapport> rapports) { this.rapports = rapports; }
 
-    public List<MedicalRecord> getMedicalRecords() { return medicalRecords; }
-    public void setMedicalRecords(List<MedicalRecord> medicalRecords) { this.medicalRecords = medicalRecords; }
+    //public List<MedicalRecord> getMedicalRecords() { return medicalRecords; }
+    //public void setMedicalRecords(List<MedicalRecord> medicalRecords) { this.medicalRecords = medicalRecords; }
 
     public List<EmergencyContact> getEmergencyContacts() { return emergencyContacts; }
     public void setEmergencyContacts(List<EmergencyContact> emergencyContacts) { this.emergencyContacts = emergencyContacts; }
 
-    public List<Treatment> getTreatments() { return treatments; }
-    public void setTreatments(List<Treatment> treatments) { this.treatments = treatments; }
+    //public List<Treatment> getTreatments() { return treatments; }
+    //public void setTreatments(List<Treatment> treatments) { this.treatments = treatments; }
 
     public User getSoignant() { return soignant; }
     public void setSoignant(User soignant) { this.soignant = soignant; }

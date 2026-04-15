@@ -238,6 +238,46 @@
                 </div>
             </div>
 
+            <!-- ═══ Section Cognitive Insight Engine (Premium) ═══ -->
+            <div class="card insight-section" *ngIf="rapportsHebdo.length > 0">
+                <div class="card-header">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <span class="pulse-icon">🧠</span>
+                        <h3>Cognitive Insight Engine</h3>
+                        <span class="beta-tag">AI Analysis</span>
+                    </div>
+                </div>
+
+                <div class="insight-container">
+                    <div class="insight-placeholder" *ngIf="!selectedHebdo && insights.length === 0">
+                        <div class="placeholder-icon">🔍</div>
+                        <p>Sélectionnez un rapport pour charger les insights cognitifs du patient ou déclenchez une analyse manuelle.</p>
+                        <button class="btn btn-primary" (click)="refreshInsights()">
+                            Lancer une analyse globale
+                        </button>
+                    </div>
+
+                    <div class="insight-loading" *ngIf="loadingInsights">
+                        <div class="spinner"></div>
+                        <p>Analyse des données cliniques en cours...</p>
+                    </div>
+
+                    <div class="insight-grid" *ngIf="!loadingInsights && insights.length > 0">
+                        <div class="insight-card-glass" *ngFor="let insight of insights" [class.severity-critical]="insight.type === 'CRITICAL'" [class.severity-warning]="insight.type === 'WARNING'">
+                            <div class="insight-icon">
+                                <span *ngIf="insight.type === 'INFO'">💡</span>
+                                <span *ngIf="insight.type === 'WARNING'">⚠️</span>
+                                <span *ngIf="insight.type === 'CRITICAL'">🚨</span>
+                            </div>
+                            <div class="insight-content">
+                                <p class="insight-msg">{{ insight.message }}</p>
+                                <span class="insight-date">Détecté le {{ insight.dateCreation | date:'dd/MM à HH:mm' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- ===== Rapports Hebdomadaires Reçus (Modernized) ===== -->
             <div class="card hebdo-received-section">
                 <div class="card-header">

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PatientService, Patient } from '../../../services/patient.service';
+import { InsightService } from '../../../services/insight.service';
 
 interface MemoireData {
   adresse: string;
@@ -156,7 +157,10 @@ interface ConfiguredMemoire extends MemoireData {
         </div>
 
         <div class="floating-action-bar" *ngIf="selectedPatientId">
-          <span class="save-status" [class.show]="saveSuccess">✅ Sauvegardé avec succès !</span>
+          <span class="save-status" [class.show]="saveSuccess">✅ Action enregistrée !</span>
+          <button class="btn-outline-danger" (click)="signalMemoryDifficulty()" style="margin-right: 15px; border: 1px solid #ef4444; color: #ef4444; padding: 12px 24px; border-radius: 40px; cursor: pointer; font-weight: 600;">
+            ⚠️ Signaler une difficulté
+          </button>
           <button class="btn-primary" (click)="saveData()">Enregistrer la fiche</button>
         </div>
 
@@ -451,7 +455,10 @@ export class AidantMemoireAssisteeComponent implements OnInit {
     photos: []
   };
 
-  constructor(private patientService: PatientService) {}
+  constructor(
+    private patientService: PatientService,
+    private insightService: InsightService
+  ) {}
 
   ngOnInit(): void {
     // Récupérer les patients puis charger le tableau
@@ -628,10 +635,26 @@ export class AidantMemoireAssisteeComponent implements OnInit {
           this.saveSuccess = false;
         }, 3000);
         this.loadConfiguredMemoires();
+        
+        // Record backend interaction for cognitive engine
+        if (this.selectedPatientId) {
+          this.insightService.recordInteraction(this.selectedPatientId, 'SUCCESS', 'Fiche mémoire mise à jour').subscribe();
+        }
       } catch (e: any) {
         // En cas de dépassement de limite localStorage (QuotaExceededError)
         alert("Oups ! Vous avez mis trop d'images globalement et la mémoire du navigateur sature. Essayez d'en supprimer quelques-unes.");
       }
+    }
+  }
+
+  signalMemoryDifficulty() {
+    if (this.selectedPatientId) {
+      this.insightService.recordInteraction(this.selectedPatientId, 'FAILURE', 'Difficulté de mémorisation signalée par l\'aidant').subscribe({
+        next: () => {
+          this.saveSuccess = true;
+          setTimeout(() => this.saveSuccess = false, 3000);
+        }
+      });
     }
   }
 }

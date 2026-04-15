@@ -2241,3 +2241,139 @@ select.input {
 
 .badge-sent { background: #dcfce7; color: #15803d; }
 .badge-consulted { background: #eff6ff; color: #1e40af; }
+
+/* ========================================================================
+   COGNITIVE INSIGHT ENGINE (DASHBOARD)
+   ======================================================================== */
+
+.insight-section {
+  background: rgba(255, 255, 255, 0.4) !important;
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  margin-bottom: 2.5rem !important;
+}
+
+.pulse-icon {
+  font-size: 1.8rem;
+  animation: brainPulse 3s infinite ease-in-out;
+}
+
+@keyframes brainPulse {
+  0% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(79, 172, 254, 0)); }
+  50% { transform: scale(1.1); filter: drop-shadow(0 0 10px rgba(79, 172, 254, 0.4)); }
+  100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(79, 172, 254, 0)); }
+}
+
+.beta-tag {
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  color: white;
+  font-size: 0.65rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 50px;
+  text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  margin-left: 0.5rem;
+}
+
+.insight-container {
+  padding: 1rem 2rem 2rem;
+  min-height: 120px;
+}
+
+.insight-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.insight-card-glass {
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  padding: 1.25rem;
+  border-radius: 20px;
+  display: flex;
+  gap: 1.25rem;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: slideLeft 0.5s ease-out forwards;
+}
+
+@keyframes slideLeft {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.insight-card-glass:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 12px 25px rgba(0,0,0,0.08);
+}
+
+.insight-icon {
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f1f5f9;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+}
+
+.severity-warning {
+  border-left: 4px solid #f59e0b;
+  background: rgba(255, 251, 235, 0.7);
+}
+
+.severity-critical {
+  border-left: 4px solid #ef4444;
+  background: rgba(254, 242, 242, 0.7);
+}
+
+.insight-msg {
+  color: #334155;
+  font-weight: 650;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0 0 0.5rem 0;
+}
+
+.insight-date {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.insight-placeholder {
+  text-align: center;
+  padding: 2rem;
+}
+
+.placeholder-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  opacity: 0.3;
+}
+
+.insight-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f1f5f9;
+  border-top: 4px solid #3b82f6;
+  border-radius: 50%;
+  animation: rotate 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes rotate {
+  100% { transform: rotate(360deg); }
+}

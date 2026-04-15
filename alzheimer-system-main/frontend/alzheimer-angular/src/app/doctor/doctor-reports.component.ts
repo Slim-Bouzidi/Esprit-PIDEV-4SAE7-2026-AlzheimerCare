@@ -13,6 +13,7 @@ import { NotificationApiService, NotificationApi } from '../services/notificatio
 import { RapportHebdomadaireApiService } from '../services/rapport-hebdomadaire-api.service';
 import { FicheTransmissionApiService } from '../services/fiche-transmission-api.service';
 import { DoctorNotificationWsService, DoctorNotificationMessage } from '../services/doctor-notification-ws.service';
+import { InsightService, Insight } from '../services/insight.service';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { environment } from '../../environments/environment';
 import keycloak from '../keycloak';
@@ -78,6 +79,10 @@ export class DoctorReportsComponent implements OnInit, OnDestroy {
     // Loading states
     loading: boolean = true;
 
+    // Cognitive Insights
+    insights: Insight[] = [];
+    loadingInsights: boolean = false;
+
     // Consultation modal
     selectedRapport: Rapport | null = null;
 
@@ -96,6 +101,7 @@ export class DoctorReportsComponent implements OnInit, OnDestroy {
         private doctorWs: DoctorNotificationWsService,
         private http: HttpClient,
         private translate: TranslateService,
+        private insightService: InsightService,
         private cdr: ChangeDetectorRef,
         private ngZone: NgZone
     ) { }
@@ -601,9 +607,63 @@ export class DoctorReportsComponent implements OnInit, OnDestroy {
         });
     }
 
+    // === Cognitive Insights ===
+    loadInsights(patientId: number): void {
+        if (!patientId) {
+            this.loadingInsights = false;
+            this.insights = [];
+            return;
+        }
+        this.loadingInsights = true;
+        this.insightService.getInsights(patientId).subscribe({
+            next: (data) => {
+                this.insights = data;
+                this.loadingInsights = false;
+            },
+            error: () => {
+                this.loadingInsights = false;
+            }
+        });
+    }
+
+    refreshInsights(): void {
+        this.loadingInsights = true;
+        this.insightService.triggerGlobalAnalysis().subscribe({
+            next: () => {
+                // After global analysis, if a rapport was selected, reload its specific insights
+                if (this.selectedHebdo) {
+                    const selectedPatientId = this.resolvePatientId(this.selectedHebdo);
+                    if (selectedPatientId) {
+                        this.loadInsights(selectedPatientId);
+                    } else {
+                        this.loadingInsights = false;
+                    }
+                } else {
+                    this.loadingInsights = false;
+                    // For the test, if no one is selected, we can try to load for the first one found
+                    if (this.rapportsHebdo.length > 0) {
+                        const firstPatientId = this.resolvePatientId(this.rapportsHebdo[0]);
+                        if (firstPatientId) {
+                            this.loadInsights(firstPatientId);
+                        }
+                    }
+                }
+            },
+            error: () => {
+                this.loadingInsights = false;
+            }
+        });
+    }
+
     /** Open weekly report and mark it as consulted */
     consulterHebdo(rapport: any): void {
         this.selectedHebdo = rapport;
+        const patientId = this.resolvePatientId(rapport);
+        if (patientId) {
+            this.loadInsights(patientId);
+        } else {
+            this.insights = [];
+        }
         // Mark as consulted via API if not already
         if (rapport.id && !rapport.consulteParMedecin) {
             this.rapportHebdoApi.marquerConsulte(rapport.id).subscribe({
@@ -618,6 +678,13 @@ export class DoctorReportsComponent implements OnInit, OnDestroy {
 
     fermerHebdo(): void {
         this.selectedHebdo = null;
+    }
+
+    private resolvePatientId(rapport: any): number | null {
+        if (!rapport) return null;
+        if (typeof rapport.patientId === 'number') return rapport.patientId;
+        if (typeof rapport.patient?.id === 'number') return rapport.patient.id;
+        return null;
     }
 
     getHebdoStatut(r: any): string {

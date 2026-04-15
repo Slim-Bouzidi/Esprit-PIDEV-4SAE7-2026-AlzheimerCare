@@ -27,6 +27,9 @@ public class RapportHebdomadaireScheduler {
     @Autowired
     private RapportHebdomadaireService rapportHebdoService;
 
+    @Autowired
+    private FicheTransmissionRepository ficheRepository;
+
     /**
      * Consolidation automatique journalière
      * Cron: Chaque soir à 23:00
