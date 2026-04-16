@@ -28,10 +28,10 @@ import { AidantMemoireAssisteeComponent } from './aidant/pages/memoire-assistee/
 import { AppShellComponent } from './layout/app-shell/app-shell.component';
 import { roleRedirectGuard } from './core/guards/role-redirect.guard';
 import { roleGuard } from './core/guards/role.guard';
+import { TestPageComponent } from './test-page/test-page.component';
 
 const routes: Routes = [
-  // Default route: GUARD REMOVED FOR TESTING
-  { path: '', redirectTo: '/admin', pathMatch: 'full' },
+  { path: '', component: TestPageComponent, canActivate: [roleRedirectGuard], pathMatch: 'full' },
 
   // ═══════ ADMIN routes (AppShellComponent layout) ═══════
   {

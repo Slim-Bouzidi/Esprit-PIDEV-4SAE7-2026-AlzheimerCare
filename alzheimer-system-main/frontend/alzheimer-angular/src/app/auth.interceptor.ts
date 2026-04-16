@@ -1,14 +1,7 @@
 import { HttpInterceptorFn } from '@angular/common/http';
-// import keycloak from './keycloak'; // TEMPORARY: Disabled
+import keycloak from './keycloak';
 
-/**
- * TEMPORARY: Keycloak disabled - not attaching JWT tokens
- */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  // TEMPORARY: Bypass Keycloak token attachment (silent mode)
-  return next(req);
-
-  /* ORIGINAL CODE (commented out):
   const token = keycloak.token;
 
   if (token) {
@@ -23,5 +16,4 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   }
 
   return next(req);
-  */
 };

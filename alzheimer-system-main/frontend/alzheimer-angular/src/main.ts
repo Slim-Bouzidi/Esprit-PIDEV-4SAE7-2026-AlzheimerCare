@@ -4,15 +4,6 @@ import { AppModule } from './app/app.module';
 // Some dependencies expect Node.js globals. Provide minimal polyfills for the browser.
 (window as any).global = window;
 (window as any).process = (window as any).process || { env: {} };
-
-// TEMPORARY: Keycloak disabled for testing
-console.warn('Keycloak authentication is temporarily disabled');
-platformBrowserDynamic().bootstrapModule(AppModule, {
-  ngZoneEventCoalescing: true,
-}).catch(err => console.error(err));
-
-// ORIGINAL CODE (commented out):
-/*
 import('./app/keycloak')
   .then(({ default: keycloak }) => {
     return keycloak
@@ -44,9 +35,7 @@ import('./app/keycloak')
   })
   .catch((err: any) => {
     console.error('Keycloak init failed:', err);
-    // Fallback: allow app to start even if Keycloak is down/misconfigured
     platformBrowserDynamic().bootstrapModule(AppModule, {
       ngZoneEventCoalescing: true,
     }).catch(e => console.error(e));
   });
-*/
