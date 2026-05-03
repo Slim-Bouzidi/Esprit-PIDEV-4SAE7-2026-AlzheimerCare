@@ -15,7 +15,7 @@ import reactor.core.publisher.Mono;
 public class AuthenticationFilter implements GlobalFilter, Ordered {
 
     @Override
-    public Mono<Void> resolve(ServerWebExchange exchange, GatewayFilterChain chain) {
+    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         return ReactiveSecurityContextHolder.getContext()
                 .map(ctx -> ctx.getAuthentication())
                 .filter(auth -> auth instanceof JwtAuthenticationToken)
