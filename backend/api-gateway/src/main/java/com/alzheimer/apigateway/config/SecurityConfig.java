@@ -28,11 +28,11 @@ public class SecurityConfig {
                 .authorizeExchange(exchange -> exchange
                         .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .pathMatchers("/actuator/**").permitAll()
-                        .pathMatchers(HttpMethod.POST, "/api/users/register").permitAll()
+                        .pathMatchers("/api/users/register").permitAll() // Allow both GET and POST
                         .anyExchange().authenticated()
                 )
                 .oauth2ResourceServer(oauth -> oauth
-                        .jwt(jwt -> jwt.jwtDecoder(jwtDecoder()))
+                        .jwt(Customizer.withDefaults())
                 )
                 .build();
     }
