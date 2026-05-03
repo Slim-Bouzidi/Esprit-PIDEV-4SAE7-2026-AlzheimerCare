@@ -44,7 +44,7 @@ spec:
                 }
                 container('docker') {
                     sh '''
-                        docker build -t alzheimer-keycloak:latest ./keycloak
+                        docker build -t alzheimer-keycloak:latest -f keycloak/Dockerfile .
                         docker build -t alzheimer-api-gateway:latest ./backend/api-gateway
                         docker build -t alzheimer-user-service:latest ./backend/user-service
                         docker build -t alzheimer-cognitive-service:latest ./backend/cognitive-service
@@ -79,6 +79,9 @@ spec:
                         kubectl apply -f k8s/keycloak.yaml -n alzheimer
                         kubectl apply -f k8s/microservices.yaml -n alzheimer
                         kubectl apply -f k8s/frontend.yaml -n alzheimer
+                        
+                        # Force refresh all pods to use the new images
+                        kubectl rollout restart deployment -n alzheimer
                     '''
                 }
             }
