@@ -26,7 +26,7 @@ spec:
       containers:
       - name: user-service
         image: alzheimer-user-service:latest
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Never
         envFrom:
         - configMapRef:
             name: alzheimer-config
@@ -67,7 +67,7 @@ spec:
       containers:
       - name: api-gateway
         image: alzheimer-api-gateway:latest
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Never
         envFrom:
         - configMapRef:
             name: alzheimer-config
@@ -100,7 +100,7 @@ spec:
       containers:
       - name: cognitive-service
         image: alzheimer-cognitive-service:latest
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Never
         envFrom:
         - configMapRef:
             name: alzheimer-config
@@ -133,7 +133,7 @@ spec:
       containers:
       - name: patient-service
         image: alzheimer-patient-service:latest
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Never
         envFrom:
         - configMapRef:
             name: alzheimer-config
