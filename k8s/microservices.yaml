@@ -71,6 +71,13 @@ spec:
         envFrom:
         - configMapRef:
             name: alzheimer-config
+        volumeMounts:
+        - name: gateway-override
+          mountPath: /app/config
+      volumes:
+      - name: gateway-override
+        configMap:
+          name: api-gateway-override
 ---
 apiVersion: v1
 kind: Service

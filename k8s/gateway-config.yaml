@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-gateway-override
+  namespace: alzheimer
+data:
+  application.properties: |
+    spring.cloud.gateway.globalcors.cors-configurations.[/**].allowed-origins=http://localhost:4200,http://192.168.192.130:30420
+    spring.cloud.gateway.globalcors.cors-configurations.[/**].allowed-methods=GET,POST,PUT,DELETE,OPTIONS,PATCH
+    spring.cloud.gateway.globalcors.cors-configurations.[/**].allowed-headers=Authorization,Content-Type,X-Requested-With,Accept,Origin,x-user-id
+    spring.cloud.gateway.globalcors.cors-configurations.[/**].allow-credentials=true
+    spring.cloud.gateway.globalcors.cors-configurations.[/**].max-age=3600
