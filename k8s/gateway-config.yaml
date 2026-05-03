@@ -10,3 +10,4 @@ data:
     spring.cloud.gateway.globalcors.cors-configurations.[/**].allowed-headers=Authorization,Content-Type,X-Requested-With,Accept,Origin,x-user-id
     spring.cloud.gateway.globalcors.cors-configurations.[/**].allow-credentials=true
     spring.cloud.gateway.globalcors.cors-configurations.[/**].max-age=3600
+    spring.cloud.gateway.default-filters[1]=RemoveRequestHeader=Origin
