@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak-realm-config
+  namespace: alzheimer
+data:
+  realm-export.json: |
+    {
+      "realm": "alzheimer-realm",
+      "displayName": "Alzheimer Support System",
+      "enabled": true,
+      "loginTheme": "mytheme",
+      "registrationAllowed": true,
+      "registrationEmailAsUsername": true,
+      "loginWithEmailAllowed": true,
+      "duplicateEmailsAllowed": false,
+      "resetPasswordAllowed": true,
+      "editUsernameAllowed": false,
+      "bruteForceProtected": true,
+      "roles": {
+        "realm": [
+          { "name": "ADMIN", "description": "Administrator role" },
+          { "name": "DOCTOR", "description": "Doctor role" },
+          { "name": "CAREGIVER", "description": "Caregiver role" },
+          { "name": "PATIENT", "description": "Patient role" }
+        ]
+      },
+      "clients": [
+        {
+          "clientId": "alzheimer-angular-client",
+          "name": "Alzheimer Angular Client",
+          "enabled": true,
+          "protocol": "openid-connect",
+          "publicClient": true,
+          "standardFlowEnabled": true,
+          "redirectUris": [
+            "http://localhost:4200/*",
+            "http://192.168.192.130:30420/*"
+          ],
+          "webOrigins": [
+            "http://localhost:4200",
+            "http://192.168.192.130:30420"
+          ],
+          "attributes": {
+            "pkce.code.challenge.method": "S256"
+          }
+        },
+        {
+          "clientId": "admin-cli",
+          "name": "Admin CLI",
+          "enabled": true,
+          "protocol": "openid-connect",
+          "publicClient": false,
+          "serviceAccountsEnabled": true,
+          "clientAuthenticatorType": "client-secret",
+          "secret": "admin-cli-secret-placeholder"
+        }
+      ]
+    }

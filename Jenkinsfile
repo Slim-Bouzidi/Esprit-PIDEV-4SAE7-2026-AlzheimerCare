@@ -44,6 +44,7 @@ spec:
                 }
                 container('docker') {
                     sh '''
+                        docker build -t alzheimer-keycloak:latest ./keycloak
                         docker build -t alzheimer-api-gateway:latest ./backend/api-gateway
                         docker build -t alzheimer-user-service:latest ./backend/user-service
                         docker build -t alzheimer-cognitive-service:latest ./backend/cognitive-service
@@ -72,6 +73,7 @@ spec:
                 container('kubectl') {
                     sh '''
                         kubectl apply -f k8s/configmap.yaml -n alzheimer
+                        kubectl apply -f k8s/keycloak-realm-config.yaml -n alzheimer
                         kubectl apply -f k8s/infrastructure.yaml -n alzheimer
                         kubectl apply -f k8s/discovery-server.yaml -n alzheimer
                         kubectl apply -f k8s/keycloak.yaml -n alzheimer
