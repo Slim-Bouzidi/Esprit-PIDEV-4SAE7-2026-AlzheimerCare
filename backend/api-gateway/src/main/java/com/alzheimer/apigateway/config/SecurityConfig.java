@@ -45,22 +45,30 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfig = new CorsConfiguration();
-        corsConfig.setAllowedOrigins(Arrays.asList("http://localhost:4200", "http://192.168.192.130:30420"));
+        
+        // Professional approach: Only allow specific, known origins
+        corsConfig.setAllowedOrigins(Arrays.asList(
+            "http://localhost:4200", 
+            "http://192.168.192.130:30420"
+        ));
+        
         corsConfig.setMaxAge(3600L);
         corsConfig.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        
+        // List only the headers your application actually uses
         corsConfig.setAllowedHeaders(Arrays.asList(
             "Authorization", 
             "Content-Type", 
             "X-Requested-With", 
             "Accept", 
-            "Origin", 
-            "Access-Control-Request-Method", 
-            "Access-Control-Request-Headers", 
-            "x-user-id", 
-            "X-User-Id"
+            "Origin",
+            "x-user-id"
         ));
+        
         corsConfig.setAllowCredentials(true);
-        corsConfig.setExposedHeaders(Arrays.asList("Access-Control-Allow-Origin", "Access-Control-Allow-Credentials"));
+        
+        // Ensure standard headers are exposed for the frontend to read
+        corsConfig.setExposedHeaders(Arrays.asList("Authorization"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", corsConfig);
