@@ -22,7 +22,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
                 .cast(JwtAuthenticationToken.class)
                 .map(jwtAuth -> (Jwt) jwtAuth.getPrincipal())
                 .map(jwt -> {
-                    String userId = jwt.getSubject(); // This is the Keycloak UUID
+                    String userId = jwt.getSubject();
                     ServerHttpRequest request = exchange.getRequest().mutate()
                             .header("X-User-Id", userId)
                             .build();
@@ -34,6 +34,6 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
     @Override
     public int getOrder() {
-        return -1; // Run before other filters
+        return -1;
     }
 }
