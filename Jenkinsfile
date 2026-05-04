@@ -45,8 +45,8 @@ spec:
     }
 
     triggers {
-        // Poll GitHub every 5 minutes for changes
-        pollSCM('H/5 * * * *') 
+        // Poll GitHub every minute for changes
+        pollSCM('* * * * *') 
     }
 
     stages {
