@@ -1,0 +1,83 @@
+pipeline {
+    agent {
+        kubernetes {
+            yaml '''
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: maven
+    image: maven:3.9.6-eclipse-temurin-17
+    command: ['cat']
+    tty: true
+  - name: docker
+    image: docker:latest
+    command: ['cat']
+    tty: true
+    volumeMounts:
+    - name: docker-sock
+      mountPath: /var/run/docker.sock
+  volumes:
+  - name: docker-sock
+    hostPath:
+      path: /var/run/docker.sock
+'''
+        }
+    }
+
+    environment {
+        NEXUS_REGISTRY = "192.168.192.130:30083"
+        NEXUS_PASSWORD = "admin1234"
+    }
+
+    stages {
+        stage('Login') {
+            steps {
+                container('docker') {
+                    sh "echo ${NEXUS_PASSWORD} | docker login ${NEXUS_REGISTRY} --username admin --password-stdin"
+                }
+            }
+        }
+
+        stage('Maven Build') {
+            steps {
+                container('maven') {
+                    dir('backend') {
+                        sh 'mvn clean install -DskipTests'
+                    }
+                }
+            }
+        }
+
+        stage('Docker Build & Push') {
+            steps {
+                container('docker') {
+                    sh '''
+                        for service in user-service api-gateway cognitive-service patient-service discovery-server AlzheimerApp; do
+                            if [ "$service" == "AlzheimerApp" ]; then
+                                img_name="alzheimer-main-app"
+                                ctx="./backend/AlzheimerApp"
+                            else
+                                img_name="alzheimer-$service"
+                                ctx="./backend/$service"
+                            fi
+                            docker build -t $NEXUS_REGISTRY/$img_name:latest $ctx
+                            docker push $NEXUS_REGISTRY/$img_name:latest
+                        done
+                        
+                        # Also build Keycloak if needed (merged into backend CI for simplicity)
+                        docker build -t $NEXUS_REGISTRY/alzheimer-keycloak:latest ./keycloak
+                        docker push $NEXUS_REGISTRY/alzheimer-keycloak:latest
+                    '''
+                }
+            }
+        }
+
+        stage('Trigger Deployment') {
+            steps {
+                echo "Handing off to CD Pipeline..."
+                build job: 'alzheimer-backend-cd', wait: false
+            }
+        }
+    }
+}

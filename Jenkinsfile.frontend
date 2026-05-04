@@ -1,0 +1,64 @@
+pipeline {
+    agent {
+        kubernetes {
+            yaml '''
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: node
+    image: node:20-alpine
+    command: ['cat']
+    tty: true
+  - name: docker
+    image: docker:latest
+    command: ['cat']
+    tty: true
+    volumeMounts:
+    - name: docker-sock
+      mountPath: /var/run/docker.sock
+  volumes:
+  - name: docker-sock
+    hostPath:
+      path: /var/run/docker.sock
+'''
+        }
+    }
+
+    environment {
+        NEXUS_REGISTRY = "192.168.192.130:30083"
+        NEXUS_PASSWORD = "admin1234"
+    }
+
+    stages {
+        stage('Login') {
+            steps {
+                container('docker') {
+                    sh "echo ${NEXUS_PASSWORD} | docker login ${NEXUS_REGISTRY} --username admin --password-stdin"
+                }
+            }
+        }
+
+        stage('Build & Push Frontend') {
+            steps {
+                container('node') {
+                    dir('frontend/alzheimer-angular') {
+                        sh 'npm install'
+                        sh 'npm run build'
+                    }
+                }
+                container('docker') {
+                    sh "docker build -t ${NEXUS_REGISTRY}/alzheimer-frontend:latest ./frontend/alzheimer-angular"
+                    sh "docker push ${NEXUS_REGISTRY}/alzheimer-frontend:latest"
+                }
+            }
+        }
+
+        stage('Trigger Deployment') {
+            steps {
+                echo "Handing off to CD Pipeline..."
+                build job: 'alzheimer-backend-cd', wait: false
+            }
+        }
+    }
+}
