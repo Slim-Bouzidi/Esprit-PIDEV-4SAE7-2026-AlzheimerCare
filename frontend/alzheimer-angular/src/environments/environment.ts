@@ -1,12 +1,12 @@
-const vmIp = window.location.hostname;
-
 export const environment = {
   production: false,
-  apiUrl: `http://${vmIp}:30080/api`,
-  keycloakUrl: `http://${vmIp}:30081`,
+  // Use the VM IP for the API URL
+  apiUrl: `http://192.168.192.130:30080/api`,
+  keycloakUrl: 'http://192.168.192.130:30081',
   keycloakRealm: 'alzheimer-realm',
   keycloakClientId: 'alzheimer-angular-client',
   supportNetworkApiUrl: '/api',
-  supportNetworkWebSocketUrl: `http://${vmIp}:30080/ws`
-  // Trigger Jenkins frontend build #73 - Force rebuild
+  supportNetworkWebSocketUrl: `http://192.168.192.130:30080/ws`,
+  // Build Trigger: Modular Pipeline Test #1
+  // Status: System Restored with 60GB Disk
 };
