@@ -28,7 +28,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: alzheimer-frontend:latest
-        imagePullPolicy: IfNotPresent
+        image: 192.168.192.130:30083/alzheimer-frontend:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 80

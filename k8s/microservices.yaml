@@ -25,8 +25,8 @@ spec:
     spec:
       containers:
       - name: user-service
-        image: alzheimer-user-service:latest
-        imagePullPolicy: Never
+        image: 192.168.192.130:30083/alzheimer-user-service:latest
+        imagePullPolicy: Always
         envFrom:
         - configMapRef:
             name: alzheimer-config
@@ -66,8 +66,8 @@ spec:
     spec:
       containers:
       - name: api-gateway
-        image: alzheimer-api-gateway:latest
-        imagePullPolicy: Never
+        image: 192.168.192.130:30083/alzheimer-api-gateway:latest
+        imagePullPolicy: Always
         envFrom:
         - configMapRef:
             name: alzheimer-config
@@ -106,8 +106,8 @@ spec:
     spec:
       containers:
       - name: cognitive-service
-        image: alzheimer-cognitive-service:latest
-        imagePullPolicy: Never
+        image: 192.168.192.130:30083/alzheimer-cognitive-service:latest
+        imagePullPolicy: Always
         envFrom:
         - configMapRef:
             name: alzheimer-config
@@ -139,8 +139,8 @@ spec:
     spec:
       containers:
       - name: patient-service
-        image: alzheimer-patient-service:latest
-        imagePullPolicy: Never
+        image: 192.168.192.130:30083/alzheimer-patient-service:latest
+        imagePullPolicy: Always
         envFrom:
         - configMapRef:
             name: alzheimer-config
@@ -172,8 +172,8 @@ spec:
     spec:
       containers:
       - name: alzheimerapp
-        image: alzheimer-main-app:latest
-        imagePullPolicy: Never
+        image: 192.168.192.130:30083/alzheimer-main-app:latest
+        imagePullPolicy: Always
         envFrom:
         - configMapRef:
             name: alzheimer-config

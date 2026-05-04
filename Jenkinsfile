@@ -34,8 +34,43 @@ spec:
 '''
         }
     }
+
+    environment {
+        NEXUS_REGISTRY = "192.168.192.130:30083"
+        // Replace with your real Nexus password if it's different
+        NEXUS_CREDS = "admin:admin1234" 
+    }
+
+    triggers {
+        // Poll GitHub every minute for changes
+        pollSCM('* * * * *') 
+    }
+
     stages {
-        stage('Build & Dockerize Backend') {
+        stage('Detect Changes') {
+            steps {
+                script {
+                    // Check which files changed in the last commit
+                    def changedFiles = sh(script: 'git diff --name-only HEAD~1', returnStdout: true).trim()
+                    echo "Changed files: ${changedFiles}"
+                    
+                    env.BACKEND_CHANGED = changedFiles.contains('backend/') ? 'true' : 'false'
+                    env.FRONTEND_CHANGED = changedFiles.contains('frontend/') ? 'true' : 'false'
+                    env.KEYCLOAK_CHANGED = changedFiles.contains('keycloak/') ? 'true' : 'false'
+                }
+            }
+        }
+
+        stage('Login to Nexus') {
+            steps {
+                container('docker') {
+                    sh "echo ${NEXUS_CREDS} | docker login ${NEXUS_REGISTRY} --username admin --password-stdin"
+                }
+            }
+        }
+
+        stage('Build & Push Backend') {
+            when { expression { return env.BACKEND_CHANGED == 'true' } }
             steps {
                 container('maven') {
                     dir('backend') {
@@ -44,18 +79,38 @@ spec:
                 }
                 container('docker') {
                     sh '''
-                        docker build -t alzheimer-keycloak:latest -f keycloak/Dockerfile .
-                        docker build -t alzheimer-api-gateway:latest ./backend/api-gateway
-                        docker build -t alzheimer-user-service:latest ./backend/user-service
-                        docker build -t alzheimer-cognitive-service:latest ./backend/cognitive-service
-                        docker build -t alzheimer-patient-service:latest ./backend/patient-service
-                        docker build -t alzheimer-discovery-server:latest ./backend/discovery-server
-                        docker build -t alzheimer-main-app:latest ./backend/AlzheimerApp
+                        # Build, Tag, and Push each backend service
+                        for service in user-service api-gateway cognitive-service patient-service discovery-server AlzheimerApp; do
+                            if [ "$service" == "AlzheimerApp" ]; then
+                                img_name="alzheimer-main-app"
+                                ctx="./backend/AlzheimerApp"
+                            else
+                                img_name="alzheimer-$service"
+                                ctx="./backend/$service"
+                            fi
+                            
+                            docker build -t $NEXUS_REGISTRY/$img_name:latest $ctx
+                            docker push $NEXUS_REGISTRY/$img_name:latest
+                        done
                     '''
                 }
             }
         }
-        stage('Build & Dockerize Frontend') {
+
+        stage('Build & Push Keycloak') {
+            when { expression { return env.KEYCLOAK_CHANGED == 'true' } }
+            steps {
+                container('docker') {
+                    sh '''
+                        docker build -t $NEXUS_REGISTRY/alzheimer-keycloak:latest -f keycloak/Dockerfile .
+                        docker push $NEXUS_REGISTRY/alzheimer-keycloak:latest
+                    '''
+                }
+            }
+        }
+
+        stage('Build & Push Frontend') {
+            when { expression { return env.FRONTEND_CHANGED == 'true' } }
             steps {
                 container('node') {
                     dir('frontend/alzheimer-angular') {
@@ -64,23 +119,22 @@ spec:
                     }
                 }
                 container('docker') {
-                    sh 'docker build -t alzheimer-frontend:latest ./frontend/alzheimer-angular'
+                    sh '''
+                        docker build -t $NEXUS_REGISTRY/alzheimer-frontend:latest ./frontend/alzheimer-angular
+                        docker push $NEXUS_REGISTRY/alzheimer-frontend:latest
+                    '''
                 }
             }
         }
+
         stage('Deploy to K8s') {
             steps {
                 container('kubectl') {
                     sh '''
-                        kubectl apply -f k8s/configmap.yaml -n alzheimer
-                        kubectl apply -f k8s/keycloak-realm-config.yaml -n alzheimer
-                        kubectl apply -f k8s/infrastructure.yaml -n alzheimer
-                        kubectl apply -f k8s/discovery-server.yaml -n alzheimer
-                        kubectl apply -f k8s/keycloak.yaml -n alzheimer
-                        kubectl apply -f k8s/microservices.yaml -n alzheimer
-                        kubectl apply -f k8s/frontend.yaml -n alzheimer
+                        # Apply all manifests
+                        kubectl apply -f k8s/ -n alzheimer
                         
-                        # Force refresh all pods to use the new images
+                        # Restart deployments to pull new images from Nexus
                         kubectl rollout restart deployment -n alzheimer
                     '''
                 }
