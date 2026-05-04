@@ -56,10 +56,9 @@
                         <label for="role">User Role</label>
                         <select id="role" name="user.attributes.role" class="custom-select" required>
                             <option value="" disabled selected>Select your role</option>
-                            <option value="DOCTOR">Doctor / Specialist</option>
+                            <option value="DOCTOR">Doctor</option>
                             <option value="CAREGIVER">Caregiver</option>
-                            <option value="FAMILY">Family Member</option>
-                            <option value="ADMIN">Administrator</option>
+                            <option value="PATIENT">Patient</option>
                         </select>
                     </div>
 

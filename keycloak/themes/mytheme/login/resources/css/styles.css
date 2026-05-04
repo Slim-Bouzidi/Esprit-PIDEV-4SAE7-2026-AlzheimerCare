@@ -163,19 +163,32 @@ input[type="text"],
 input[type="password"],
 input[type="email"],
 select {
-  padding: 0.875rem 1rem;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  font-size: 1rem;
-  transition: all 0.2s;
-  background: var(--bg-light);
+    width: 100%;
+    padding: 0.875rem 1rem;
+    background: var(--bg-light);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 1rem;
+    color: var(--text-main);
+    transition: all 0.2s ease;
+    appearance: none;
+    -webkit-appearance: none;
 }
 
-input:focus {
-  outline: none;
-  border-color: var(--primary);
-  background: white;
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1.25rem;
+    padding-right: 2.5rem !important;
+}
+
+input:focus,
+select:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
 }
 
 .checkbox-group {
