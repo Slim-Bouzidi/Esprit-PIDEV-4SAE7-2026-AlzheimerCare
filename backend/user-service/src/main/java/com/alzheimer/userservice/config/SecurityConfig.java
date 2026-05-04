@@ -7,7 +7,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -21,28 +20,21 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .cors().and()
-                .csrf().disable()
-                .sessionManagement()
+            .cors().and()
+            .csrf().disable()
+            .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
-                .authorizeHttpRequests(authorize -> authorize
-                        .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .antMatchers("/actuator/**").permitAll()
-                        .antMatchers("/api/users/register").permitAll()
-                        .antMatchers(HttpMethod.GET, "/api/users/**").hasRole("admin")
-                        .anyRequest().authenticated())
-                .oauth2ResourceServer()
-                .jwt()
-                .jwtAuthenticationConverter(jwtAuthenticationConverter());
+            .and()
+            .authorizeHttpRequests(authorize -> authorize
+                .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .antMatchers("/actuator/**").permitAll()
+                .antMatchers("/api/users/register").permitAll()
+                .anyRequest().authenticated()
+            )
+            .oauth2ResourceServer()
+                .jwt();
 
         return http.build();
-    }
-
-    private JwtAuthenticationConverter jwtAuthenticationConverter() {
-        JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
-        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(new KeycloakRoleConverter());
-        return jwtAuthenticationConverter;
     }
 
     @Bean
@@ -52,7 +44,7 @@ public class SecurityConfig {
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
-
+        
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
