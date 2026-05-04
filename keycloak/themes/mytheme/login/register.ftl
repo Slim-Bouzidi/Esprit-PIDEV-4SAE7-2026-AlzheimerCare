@@ -62,22 +62,19 @@
                         </select>
                     </div>
 
-                    <div class="input-row">
-                        <div class="input-group">
-                            <label for="password">Password</label>
-                            <input type="password" id="password" name="password" 
-                                   placeholder="••••••••" 
-                                   autocomplete="new-password" required>
-                        </div>
-                        <div class="input-group">
-                            <label for="password-confirm">Confirm</label>
-                            <input type="password" id="password-confirm" name="password-confirm" 
-                                   placeholder="••••••••" 
-                                   autocomplete="new-password" required>
-                        </div>
+                    <div class="input-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" 
+                               placeholder="••••••••" 
+                               autocomplete="new-password" required
+                               oninput="document.getElementById('password-confirm').value = this.value">
                     </div>
                     
+                    <!-- Hidden but required by Keycloak -->
+                    <input type="hidden" id="password-confirm" name="password-confirm">
+                    
                     <button type="submit" class="btn-primary">
+                        <i class="fas fa-user-plus" style="margin-right: 8px;"></i>
                         Register Account
                     </button>
                 </form>
@@ -102,7 +99,7 @@
                 
                 <div class="glass-hud">
                     <div class="hud-item">
-                        <div class="hud-icon"><i class="fas fa-user-check"></i></div>
+                        <div class="hud-icon"><i class="fas fa-check-circle"></i></div>
                         <div class="hud-data">
                             <span class="val">2,481</span>
                             <span class="lbl">Monitoring Active</span>
@@ -118,7 +115,7 @@
                     </div>
                     <div class="hud-divider"></div>
                     <div class="hud-item emergency">
-                        <div class="hud-icon"><i class="fas fa-broadcast-tower"></i></div>
+                        <div class="hud-icon"><i class="fas fa-bolt"></i></div>
                         <div class="hud-data">
                             <span class="val">Real-time</span>
                             <span class="lbl">Global Alerting</span>
