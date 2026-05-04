@@ -29,7 +29,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .antMatchers("/actuator/**").permitAll()
-                        .antMatchers("/api/users/register").hasRole("admin")
+                        .antMatchers("/api/users/register").permitAll()
                         .antMatchers(HttpMethod.GET, "/api/users/**").hasRole("admin")
                         .anyRequest().authenticated())
                 .oauth2ResourceServer()
