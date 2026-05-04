@@ -26,6 +26,8 @@ spec:
       labels:
         app: keycloak
     spec:
+      imagePullSecrets:
+      - name: nexus-creds
       containers:
       - name: keycloak
         image: 192.168.192.130:30083/alzheimer-keycloak:latest

@@ -23,6 +23,8 @@ spec:
       labels:
         app: user-service
     spec:
+      imagePullSecrets:
+      - name: nexus-creds
       containers:
       - name: user-service
         image: 192.168.192.130:30083/alzheimer-user-service:latest
@@ -64,6 +66,8 @@ spec:
       labels:
         app: api-gateway
     spec:
+      imagePullSecrets:
+      - name: nexus-creds
       containers:
       - name: api-gateway
         image: 192.168.192.130:30083/alzheimer-api-gateway:latest
@@ -104,6 +108,8 @@ spec:
       labels:
         app: cognitive-service
     spec:
+      imagePullSecrets:
+      - name: nexus-creds
       containers:
       - name: cognitive-service
         image: 192.168.192.130:30083/alzheimer-cognitive-service:latest
@@ -137,6 +143,8 @@ spec:
       labels:
         app: patient-service
     spec:
+      imagePullSecrets:
+      - name: nexus-creds
       containers:
       - name: patient-service
         image: 192.168.192.130:30083/alzheimer-patient-service:latest
