@@ -28,25 +28,27 @@ public class PatientServiceImpl implements PatientService {
 
     private final PatientRepository repository;
     private final RestTemplate restTemplate;
-    
+
     @Value("${user.service.url}")
     private String userServiceUrl;
 
     /**
      * Validates that a user exists in the User Service
+     * 
      * @param userId the user ID to validate
-     * @throws ValidationException if user doesn't exist
-     * @throws ServiceCommunicationException if unable to communicate with User Service
+     * @throws ValidationException           if user doesn't exist
+     * @throws ServiceCommunicationException if unable to communicate with User
+     *                                       Service
      */
     private void validateUserExists(Long userId) {
         if (userId == null) {
             throw new ValidationException("user_id is required");
         }
-        
+
         try {
             String url = userServiceUrl + "/api/users/" + userId;
             ResponseEntity<UserResponse> response = restTemplate.getForEntity(url, UserResponse.class);
-            
+
             if (response.getStatusCode() != HttpStatus.OK) {
                 throw new ValidationException("Invalid user_id: user does not exist");
             }
@@ -62,17 +64,18 @@ public class PatientServiceImpl implements PatientService {
         if (request.getUserId() == null) {
             throw new ValidationException("user_id is required");
         }
-        
+
         // Note: User existence is enforced by foreign key constraint at database level
         // No need to call User Service for validation
-        
+
         Patient patient = PatientMapper.toEntity(request);
-        
-        // If keycloakId is not provided, generate a unique one for backward compatibility
+
+        // If keycloakId is not provided, generate a unique one for backward
+        // compatibility
         if (patient.getKeycloakId() == null || patient.getKeycloakId().isEmpty()) {
             patient.setKeycloakId(java.util.UUID.randomUUID().toString());
         }
-        
+
         try {
             return PatientMapper.toResponse(repository.save(patient));
         } catch (Exception e) {
@@ -105,7 +108,7 @@ public class PatientServiceImpl implements PatientService {
                 .map(PatientMapper::toResponse)
                 .orElse(null);
     }
-    
+
     @Override
     public PatientResponse findByUserId(Long userId) {
         return repository.findByUserId(userId)
@@ -122,7 +125,7 @@ public class PatientServiceImpl implements PatientService {
     public PatientResponse saveOrUpdateByKeycloakId(String keycloakId, PatientRequest request) {
         Patient patient = repository.findByKeycloakId(keycloakId)
                 .orElse(new Patient());
-        
+
         patient.setKeycloakId(keycloakId);
         if (patient.getFirstName() == null || patient.getFirstName().isEmpty()) {
             patient.setFirstName(request.getFirstName() != null ? request.getFirstName() : "New");
@@ -133,7 +136,7 @@ public class PatientServiceImpl implements PatientService {
         if (request.getAge() != null) {
             patient.setAge(request.getAge());
         }
-        
+
         // Clinical Metrics
         patient.setBmi(request.getBmi());
         patient.setSystolicBP(request.getSystolicBP());
@@ -149,7 +152,7 @@ public class PatientServiceImpl implements PatientService {
         patient.setFamilyHistory(request.getFamilyHistory());
         patient.setDiabetes(request.getDiabetes());
         patient.setHypertension(request.getHypertension());
-        
+
         return PatientMapper.toResponse(repository.save(patient));
     }
 
@@ -157,11 +160,11 @@ public class PatientServiceImpl implements PatientService {
     public PatientResponse update(Long id, PatientRequest request) {
         Patient patient = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Patient not found"));
-        
+
         patient.setFirstName(request.getFirstName());
         patient.setLastName(request.getLastName());
         patient.setAge(request.getAge());
-        
+
         // Clinical Metrics
         patient.setBmi(request.getBmi());
         patient.setSystolicBP(request.getSystolicBP());
@@ -177,7 +180,7 @@ public class PatientServiceImpl implements PatientService {
         patient.setFamilyHistory(request.getFamilyHistory());
         patient.setDiabetes(request.getDiabetes());
         patient.setHypertension(request.getHypertension());
-        
+
         return PatientMapper.toResponse(repository.save(patient));
     }
 }
