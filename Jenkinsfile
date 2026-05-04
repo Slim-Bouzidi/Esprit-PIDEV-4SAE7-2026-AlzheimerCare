@@ -38,7 +38,7 @@ spec:
     environment {
         NEXUS_REGISTRY = "192.168.192.130:30083"
         // Replace with your real Nexus password if it's different
-        NEXUS_CREDS = "admin:admin1234" 
+        NEXUS_PASSWORD = "admin1234" 
     }
 
     triggers {
@@ -64,7 +64,7 @@ spec:
         stage('Login to Nexus') {
             steps {
                 container('docker') {
-                    sh "echo ${NEXUS_CREDS} | docker login ${NEXUS_REGISTRY} --username admin --password-stdin"
+                    sh "echo ${NEXUS_PASSWORD} | docker login ${NEXUS_REGISTRY} --username admin --password-stdin"
                 }
             }
         }
