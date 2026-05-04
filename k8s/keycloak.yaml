@@ -30,7 +30,8 @@ spec:
       - name: keycloak
         image: alzheimer-keycloak:latest
         imagePullPolicy: IfNotPresent
-        args: ["start-dev", "--import-realm"]
+        args: ["start-dev", "--import-realm", "--db=mysql", "--db-url=jdbc:mysql://mysql:3306/keycloak", "--db-username=root", "--db-password=root"]
+
         env:
         - name: KC_DB
           value: "mysql"
