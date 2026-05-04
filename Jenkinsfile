@@ -64,7 +64,7 @@ spec:
         stage('Login to Nexus') {
             steps {
                 container('docker') {
-                    sh "echo ${NEXUS_PASSWORD} | docker login ${NEXUS_REGISTRY} --username admin --password-stdin"
+                    sh "echo 'admin1234' | docker login ${NEXUS_REGISTRY} --username admin --password-stdin"
                 }
             }
         }
