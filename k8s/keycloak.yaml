@@ -32,6 +32,14 @@ spec:
         imagePullPolicy: IfNotPresent
         args: ["start-dev", "--import-realm"]
         env:
+        - name: KC_DB
+          value: "mysql"
+        - name: KC_DB_URL
+          value: "jdbc:mysql://mysql:3306/keycloak"
+        - name: KC_DB_USERNAME
+          value: "root"
+        - name: KC_DB_PASSWORD
+          value: "root"
         - name: KEYCLOAK_ADMIN
           value: "admin"
         - name: KEYCLOAK_ADMIN_PASSWORD
@@ -40,6 +48,7 @@ spec:
           value: "false"
         ports:
         - containerPort: 8080
+
         volumeMounts:
         - name: realm-config
           mountPath: /opt/keycloak/data/import
