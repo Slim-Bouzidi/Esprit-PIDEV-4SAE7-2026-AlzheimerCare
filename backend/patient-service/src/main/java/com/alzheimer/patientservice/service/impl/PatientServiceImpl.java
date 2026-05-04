@@ -32,31 +32,6 @@ public class PatientServiceImpl implements PatientService {
     @Value("${user.service.url}")
     private String userServiceUrl;
 
-    /**
-     * Validates that a user exists in the User Service
-     * 
-     * @param userId the user ID to validate
-     * @throws ValidationException           if user doesn't exist
-     * @throws ServiceCommunicationException if unable to communicate with User
-     *                                       Service
-     */
-    private void validateUserExists(Long userId) {
-        if (userId == null) {
-            throw new ValidationException("user_id is required");
-        }
-
-        try {
-            String url = userServiceUrl + "/api/users/" + userId;
-            ResponseEntity<UserResponse> response = restTemplate.getForEntity(url, UserResponse.class);
-
-            if (response.getStatusCode() != HttpStatus.OK) {
-                throw new ValidationException("Invalid user_id: user does not exist");
-            }
-        } catch (RestClientException e) {
-            log.error("Failed to validate user existence for userId: {}", userId, e);
-            throw new ServiceCommunicationException("Unable to validate user", e);
-        }
-    }
 
     @Override
     public PatientResponse create(PatientRequest request) {
