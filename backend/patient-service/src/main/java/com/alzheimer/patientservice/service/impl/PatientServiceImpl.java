@@ -60,31 +60,14 @@ public class PatientServiceImpl implements PatientService {
 
     @Override
     public PatientResponse create(PatientRequest request) {
-        // Validate that userId is provided
-        if (request.getUserId() == null) {
-            throw new ValidationException("user_id is required");
-        }
-
-        // Note: User existence is enforced by foreign key constraint at database level
-        // No need to call User Service for validation
-
         Patient patient = PatientMapper.toEntity(request);
-
-        // If keycloakId is not provided, generate a unique one for backward
-        // compatibility
+        
+        // If keycloakId is not provided, generate a unique one for backward compatibility
         if (patient.getKeycloakId() == null || patient.getKeycloakId().isEmpty()) {
             patient.setKeycloakId(java.util.UUID.randomUUID().toString());
         }
-
-        try {
-            return PatientMapper.toResponse(repository.save(patient));
-        } catch (Exception e) {
-            // If foreign key constraint fails, throw validation exception
-            if (e.getMessage() != null && e.getMessage().contains("foreign key constraint")) {
-                throw new ValidationException("Invalid user_id: user does not exist");
-            }
-            throw e;
-        }
+        
+        return PatientMapper.toResponse(repository.save(patient));
     }
 
     @Override
