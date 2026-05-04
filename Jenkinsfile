@@ -73,7 +73,6 @@ spec:
         }
 
         stage('Build & Push Backend') {
-            when { expression { return env.BACKEND_CHANGED == 'true' } }
             steps {
                 container('maven') {
                     dir('backend') {
@@ -101,7 +100,6 @@ spec:
         }
 
         stage('Build & Push Keycloak') {
-            when { expression { return env.KEYCLOAK_CHANGED == 'true' } }
             steps {
                 container('docker') {
                     sh '''
@@ -113,7 +111,6 @@ spec:
         }
 
         stage('Build & Push Frontend') {
-            when { expression { return env.FRONTEND_CHANGED == 'true' } }
             steps {
                 container('node') {
                     dir('frontend/alzheimer-angular') {
