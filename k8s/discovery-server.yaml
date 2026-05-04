@@ -26,6 +26,8 @@ spec:
       labels:
         app: discovery-server
     spec:
+      imagePullSecrets:
+      - name: nexus-creds
       containers:
       - name: discovery-server
         image: 192.168.192.130:30083/alzheimer-discovery-server:latest
