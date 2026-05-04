@@ -2,6 +2,7 @@ import { HttpInterceptorFn } from '@angular/common/http';
 import { from, switchMap, catchError, throwError } from 'rxjs';
 import keycloak from './keycloak';
 
+export const authInterceptor: HttpInterceptorFn = (req, next) => {
   // Skip token update for public endpoints
   if (req.url.includes('/register') || req.url.includes('/login')) {
     return next(req);
