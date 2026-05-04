@@ -8,4 +8,5 @@ export const environment = {
   keycloakClientId: 'alzheimer-angular-client',
   supportNetworkApiUrl: '/api',
   supportNetworkWebSocketUrl: `http://${vmIp}:30080/ws`
+  // Trigger rebuild to fix disk space issue
 };
