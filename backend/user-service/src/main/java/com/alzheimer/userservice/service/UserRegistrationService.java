@@ -135,8 +135,7 @@ public class UserRegistrationService {
         String keycloakId = keycloakAdminService.createKeycloakUser(
                 request.getEmail(),
                 request.getFirstName(),
-                request.getLastName()
-        );
+                request.getLastName());
 
         // Set password
         keycloakAdminService.setPassword(keycloakId, request.getPassword());
@@ -152,7 +151,7 @@ public class UserRegistrationService {
      * Creates user record in database with keycloak_id from JWT sub claim
      * 
      * @param keycloakId Keycloak user ID (from JWT sub claim)
-     * @param request User registration request
+     * @param request    User registration request
      * @return Created User entity
      */
     User createUserRecord(String keycloakId, UserRegistrationRequest request) {
@@ -168,7 +167,6 @@ public class UserRegistrationService {
         log.debug("Successfully created user record with ID: {}", user.getId());
         return user;
     }
-
 
     /**
      * Maps User entity to UserResponse DTO

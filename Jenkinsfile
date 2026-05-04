@@ -133,8 +133,8 @@ spec:
                         # Apply all manifests
                         kubectl apply -f k8s/ -n alzheimer
                         
-                        # Restart deployments to pull new images from Nexus
-                        kubectl rollout restart deployment -n alzheimer
+                        # Restart only the app deployments to pull new images
+                        kubectl rollout restart deployment user-service api-gateway cognitive-service patient-service discovery-server alzheimerapp frontend keycloak -n alzheimer
                     '''
                 }
             }
