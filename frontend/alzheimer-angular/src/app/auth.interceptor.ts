@@ -2,7 +2,11 @@ import { HttpInterceptorFn } from '@angular/common/http';
 import { from, switchMap, catchError, throwError } from 'rxjs';
 import keycloak from './keycloak';
 
-export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  // Skip token update for public endpoints
+  if (req.url.includes('/register') || req.url.includes('/login')) {
+    return next(req);
+  }
+
   // Refresh the token if it will expire in the next 30 seconds
   return from(keycloak.updateToken(30)).pipe(
     switchMap(() => {
