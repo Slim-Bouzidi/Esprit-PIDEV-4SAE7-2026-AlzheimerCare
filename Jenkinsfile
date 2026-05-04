@@ -35,14 +35,18 @@ spec:
         }
     }
 
+    options {
+        disableConcurrentBuilds()
+    }
+
     environment {
         NEXUS_REGISTRY = "192.168.192.130:30083"
         NEXUS_PASSWORD = "admin1234" 
     }
 
     triggers {
-        // Poll GitHub every minute for changes
-        pollSCM('* * * * *') 
+        // Poll GitHub every 5 minutes for changes
+        pollSCM('H/5 * * * *') 
     }
 
     stages {
