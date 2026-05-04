@@ -6,7 +6,7 @@ ENV KC_DB=mysql
 # Build Keycloak to include the mysql driver in the optimized image
 RUN /opt/keycloak/bin/kc.sh build
 
-# Commented out because the folder is missing
-# COPY themes/ /opt/keycloak/themes/
+# Copy custom themes
+COPY themes/ /opt/keycloak/themes/
 
 ENTRYPOINT ["/opt/keycloak/bin/kc.sh"]
