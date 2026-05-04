@@ -8,5 +8,5 @@ export const environment = {
   keycloakClientId: 'alzheimer-angular-client',
   supportNetworkApiUrl: '/api',
   supportNetworkWebSocketUrl: `http://${vmIp}:30080/ws`
-  // Trigger rebuild to fix disk space issue
+  // Trigger Jenkins frontend build #73 - Force rebuild
 };
