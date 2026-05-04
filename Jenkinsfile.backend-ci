@@ -85,7 +85,7 @@ spec:
         always {
             script {
                 echo "Cleaning up workspace to save disk space..."
-                cleanWs()
+                deleteDir()
             }
         }
     }
