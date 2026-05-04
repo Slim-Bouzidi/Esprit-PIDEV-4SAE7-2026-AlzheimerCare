@@ -79,5 +79,12 @@ spec:
                 build job: 'alzheimer-backend-cd', wait: false
             }
         }
+    post {
+        always {
+            script {
+                echo "Cleaning up workspace to save disk space..."
+                cleanWs()
+            }
+        }
     }
 }
