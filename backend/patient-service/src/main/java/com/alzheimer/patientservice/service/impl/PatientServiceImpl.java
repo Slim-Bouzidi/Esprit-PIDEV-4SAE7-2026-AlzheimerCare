@@ -32,16 +32,16 @@ public class PatientServiceImpl implements PatientService {
     @Value("${user.service.url}")
     private String userServiceUrl;
 
-
     @Override
     public PatientResponse create(PatientRequest request) {
         Patient patient = PatientMapper.toEntity(request);
-        
-        // If keycloakId is not provided, generate a unique one for backward compatibility
+
+        // If keycloakId is not provided, generate a unique one for backward
+        // compatibility
         if (patient.getKeycloakId() == null || patient.getKeycloakId().isEmpty()) {
             patient.setKeycloakId(java.util.UUID.randomUUID().toString());
         }
-        
+
         return PatientMapper.toResponse(repository.save(patient));
     }
 

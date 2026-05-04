@@ -144,3 +144,36 @@ spec:
         envFrom:
         - configMapRef:
             name: alzheimer-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: alzheimerapp
+  namespace: alzheimer
+spec:
+  ports:
+    - port: 8085
+  selector:
+    app: alzheimerapp
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alzheimerapp
+  namespace: alzheimer
+spec:
+  selector:
+    matchLabels:
+      app: alzheimerapp
+  template:
+    metadata:
+      labels:
+        app: alzheimerapp
+    spec:
+      containers:
+      - name: alzheimerapp
+        image: alzheimer-main-app:latest
+        imagePullPolicy: Never
+        envFrom:
+        - configMapRef:
+            name: alzheimer-config
