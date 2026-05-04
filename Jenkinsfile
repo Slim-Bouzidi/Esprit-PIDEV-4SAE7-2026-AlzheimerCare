@@ -105,7 +105,7 @@ spec:
             steps {
                 container('docker') {
                     sh '''
-                        docker build -t $NEXUS_REGISTRY/alzheimer-keycloak:latest -f keycloak/Dockerfile .
+                        docker build -t $NEXUS_REGISTRY/alzheimer-keycloak:latest ./keycloak
                         docker push $NEXUS_REGISTRY/alzheimer-keycloak:latest
                     '''
                 }
