@@ -9,4 +9,5 @@ RUN /opt/keycloak/bin/kc.sh build
 # Copy custom themes
 COPY themes/ /opt/keycloak/themes/
 
+# Trigger rebuild to restore theme
 ENTRYPOINT ["/opt/keycloak/bin/kc.sh"]
