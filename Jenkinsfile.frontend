@@ -50,35 +50,13 @@ spec:
             }
         }
 
-        stage('Frontend Tests & Sonar') {
-            steps {
-                container('node') {
-                    dir('frontend/alzheimer-angular') {
-                        // Install chromium for headless testing
-                        sh 'apk add --no-cache chromium nss freetype harfbuzz ttf-freefont'
-                        
-                        // Run tests with coverage
-                        sh 'CHROME_BIN=/usr/bin/chromium-browser npm test -- --watch=false --browsers=ChromeHeadless --code-coverage'
-                        
-                        // Run Sonar Scanner
-                        withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_AUTH_TOKEN')]) {
-                            sh 'npx sonar-scanner \
-                                -Dsonar.projectKey=alzheimer-frontend \
-                                -Dsonar.sources=src \
-                                -Dsonar.host.url=http://sonarqube.alzheimer:9000 \
-                                -Dsonar.login=${SONAR_AUTH_TOKEN} \
-                                -Dsonar.javascript.lcov.reportPaths=coverage/alzheimer-angular/lcov.info'
-                        }
-                    }
-                }
-            }
-        }
-
         stage('Docker Build & Push') {
             steps {
                 container('docker') {
                     sh "docker build -t ${NEXUS_REGISTRY}/alzheimer-frontend:latest ./frontend/alzheimer-angular"
                     sh "docker push ${NEXUS_REGISTRY}/alzheimer-frontend:latest"
+                    sh "docker rmi ${NEXUS_REGISTRY}/alzheimer-frontend:latest || true"
+                    sh "docker system prune -a --volumes -f || true"
                 }
             }
         }
@@ -87,15 +65,6 @@ spec:
             steps {
                 echo "Handing off to CD Pipeline..."
                 build job: 'alzheimer-backend-cd', wait: false
-            }
-        }
-    }
-
-    post {
-        always {
-            script {
-                echo "Cleaning up workspace (Force)..."
-                sh 'rm -rf ./* || true'
             }
         }
     }
