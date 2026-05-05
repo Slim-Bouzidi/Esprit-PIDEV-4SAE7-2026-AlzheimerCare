@@ -17,8 +17,8 @@ pipeline {
                     def changedFiles = sh(script: 'git diff --name-only HEAD~1', returnStdout: true).trim()
                     echo "Changed files detected: ${changedFiles}"
                     
-                    def backendChanged = changedFiles.contains('backend/')
-                    def frontendChanged = changedFiles.contains('frontend/')
+                    def backendChanged = changedFiles.contains('backend/') || changedFiles.contains('Jenkinsfile.backend-ci')
+                    def frontendChanged = changedFiles.contains('frontend/') || changedFiles.contains('Jenkinsfile.frontend')
                     def keycloakChanged = changedFiles.contains('keycloak/')
                     def k8sChanged = changedFiles.contains('k8s/')
 
