@@ -84,8 +84,8 @@ spec:
     post {
         always {
             script {
-                echo "Cleaning up workspace to save disk space..."
-                deleteDir()
+                echo "Cleaning up workspace (Force)..."
+                sh 'rm -rf ./* || true'
             }
         }
     }
