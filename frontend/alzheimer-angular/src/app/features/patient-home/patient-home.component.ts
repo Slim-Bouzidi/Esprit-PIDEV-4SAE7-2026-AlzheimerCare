@@ -19,6 +19,15 @@ export class PatientHomeComponent implements OnInit {
   userName: string = '';
   loadingReport = true;
   loadingProfile = true;
+  isAdmin: boolean = false;
+
+  adminStats = {
+    totalPatients: 124,
+    activeCaregivers: 45,
+    medicalStaff: 12,
+    systemUptime: '99.9%',
+    pendingAlerts: 3
+  };
 
   readonly games = [
     { label: 'Reaction Time', desc: 'Test your visual reflexes', icon: 'pi-bolt', color: '#6366f1', route: '/patient/dashboard', fragment: 'reflex' },
@@ -36,6 +45,15 @@ export class PatientHomeComponent implements OnInit {
     const patientId = keycloak.subject;
     const token = keycloak.tokenParsed as any;
     this.userName = token?.given_name || token?.preferred_username || 'there';
+    
+    // Check if user is Admin
+    this.isAdmin = keycloak.realmAccess?.roles?.includes('ADMIN') || false;
+
+    if (this.isAdmin) {
+      this.loadingReport = false;
+      this.loadingProfile = false;
+      return; // Skip patient-specific data fetching
+    }
 
     if (patientId) {
       this.cognitiveService.getReport(patientId).subscribe({

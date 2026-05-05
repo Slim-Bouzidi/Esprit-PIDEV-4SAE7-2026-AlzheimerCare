@@ -588,3 +588,130 @@
     text-decoration: underline;
   }
 }
+
+.admin-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.admin-stat-row {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.stat-val {
+  font-size: 2.25rem;
+  font-weight: 900;
+  color: #1e293b;
+  line-height: 1;
+}
+
+.stat-lbl {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.admin-status-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  &.online { background: #22c55e; box-shadow: 0 0 8px rgba(34, 197, 94, 0.5); }
+}
+
+.status-text {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.service-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.service-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #334155;
+  i { font-size: 1.1rem; }
+}
+
+.status-badge-mini {
+  margin-left: auto;
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  background: #f1f5f9;
+  color: #64748b;
+  &.success { background: #dcfce7 !important; color: #166534 !important; }
+  &.warning { background: #ffedd5 !important; color: #c2410c !important; }
+}
+
+.admin-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #334155;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  width: 100%;
+  i { color: #6366f1; }
+  &:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    transform: translateX(4px);
+  }
+}
+
+.admin-full {
+  grid-column: span 2;
+  @media (max-width: 700px) { grid-column: span 1; }
+}
+
+.act-icon-wrap.admin-icon {
+  background: #e0e7ff;
+  i { color: #4338ca; }
+  &.alert { background: #fee2e2; i { color: #dc2626; } }
+  &.success { background: #dcfce7; i { color: #059669; } }
+}
+
+.text-green-500 { color: #22c55e; }
+.text-amber-500 { color: #f59e0b; }
