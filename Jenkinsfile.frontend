@@ -39,7 +39,7 @@ spec:
             }
         }
 
-        stage('Build & Push Frontend') {
+        stage('Build Frontend') {
             steps {
                 container('node') {
                     dir('frontend/alzheimer-angular') {
@@ -47,6 +47,37 @@ spec:
                         sh 'npm run build'
                     }
                 }
+            }
+        }
+
+        stage('Frontend Tests & Sonar') {
+            steps {
+                container('node') {
+                    dir('frontend/alzheimer-angular') {
+                        // Install chromium for headless testing
+                        sh 'apk add --no-cache chromium nss freetype harfbuzz ttf-freefont'
+                        // Set Chrome binary for Karma
+                        env.CHROME_BIN = '/usr/bin/chromium-browser'
+                        
+                        // Run tests with coverage
+                        sh 'npm test -- --watch=false --browsers=ChromeHeadless --code-coverage'
+                        
+                        // Run Sonar Scanner
+                        withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_AUTH_TOKEN')]) {
+                            sh 'npx sonar-scanner \
+                                -Dsonar.projectKey=alzheimer-frontend \
+                                -Dsonar.sources=src \
+                                -Dsonar.host.url=http://sonarqube.alzheimer:9000 \
+                                -Dsonar.login=${SONAR_AUTH_TOKEN} \
+                                -Dsonar.javascript.lcov.reportPaths=coverage/alzheimer-angular/lcov.info'
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Docker Build & Push') {
+            steps {
                 container('docker') {
                     sh "docker build -t ${NEXUS_REGISTRY}/alzheimer-frontend:latest ./frontend/alzheimer-angular"
                     sh "docker push ${NEXUS_REGISTRY}/alzheimer-frontend:latest"
