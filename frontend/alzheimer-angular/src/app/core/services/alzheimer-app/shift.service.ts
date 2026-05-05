@@ -20,9 +20,11 @@ export interface ShiftRequest {
     endTime: string;
 }
 
+import { environment } from '../../../../environments/environment';
+
 @Injectable({ providedIn: 'root' })
 export class ShiftService {
-    private api = 'http://localhost:8082/patient-service/api/shifts';
+    private api = `${environment.apiUrl}/shifts`;
 
     constructor(private http: HttpClient) { }
 

@@ -47,9 +47,11 @@ export interface RouteStopRequest {
     notes?: string;
 }
 
+import { environment } from '../../../../environments/environment';
+
 @Injectable({ providedIn: 'root' })
 export class RouteService {
-    private api = 'http://localhost:8082/patient-service/api/routes';
+    private api = `${environment.apiUrl}/routes`;
 
     constructor(private http: HttpClient) { }
 

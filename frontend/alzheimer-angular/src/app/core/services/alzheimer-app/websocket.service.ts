@@ -17,7 +17,7 @@ export class WebSocketService {
 
   private readonly wsUrl =
     (environment as { supportNetworkWebSocketUrl?: string }).supportNetworkWebSocketUrl ??
-    'http://localhost:8082/ws';
+    `${environment.apiUrl.replace('/api', '')}/ws`;
 
   connect(): void {
     if (typeof window === 'undefined') {

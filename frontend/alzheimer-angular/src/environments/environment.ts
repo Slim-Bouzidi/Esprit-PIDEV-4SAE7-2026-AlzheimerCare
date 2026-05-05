@@ -1,11 +1,12 @@
 export const environment = {
   production: false,
-  /** API via Spring Cloud Gateway (see docker-compose api-gateway :8080) */
-  apiUrl: 'http://localhost:8080/api',
-  /** Keycloak public URL (host port 8081 → container 8080) */
-  keycloakUrl: 'http://localhost:8081',
+  // Use the VM IP for the API URL
+  apiUrl: `http://192.168.192.130:30080/api`,
+  keycloakUrl: 'http://192.168.192.130:30081',
   keycloakRealm: 'alzheimer-realm',
   keycloakClientId: 'alzheimer-angular-client',
-  supportNetworkApiUrl: 'http://localhost:8080/api',
-  supportNetworkWebSocketUrl: 'http://localhost:8080/ws',
+  supportNetworkApiUrl: 'http://192.168.192.130:30080/api',
+  supportNetworkWebSocketUrl: `http://192.168.192.130:30080/ws`,
+  // Build Trigger: Modular Pipeline Test #1
+  // Status: System Restored with 60GB Disk
 };

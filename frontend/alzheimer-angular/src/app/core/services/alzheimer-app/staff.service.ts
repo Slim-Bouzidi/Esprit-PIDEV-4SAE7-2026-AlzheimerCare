@@ -3,9 +3,11 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { StaffProfileResponse } from '../core/models/staff-profile.model';
 
+import { environment } from '../../../../environments/environment';
+
 @Injectable({ providedIn: 'root' })
 export class StaffService {
-    private api = 'http://localhost:8082/patient-service/api/staff-profiles';
+    private api = `${environment.apiUrl}/staff-profiles`;
 
     constructor(private http: HttpClient) { }
 

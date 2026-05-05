@@ -21,9 +21,11 @@ export interface MealSlotRequest {
     mealType: MealType;
 }
 
+import { environment } from '../../../../environments/environment';
+
 @Injectable({ providedIn: 'root' })
 export class MealSlotService {
-    private api = 'http://localhost:8082/patient-service/api/meal-slots';
+    private api = `${environment.apiUrl}/meal-slots`;
 
     constructor(private http: HttpClient) { }
 

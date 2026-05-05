@@ -1,9 +1,9 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:8080/api',
-  keycloakUrl: 'http://localhost:8081',
+  apiUrl: 'http://192.168.192.130:30080/api',
+  keycloakUrl: 'http://192.168.192.130:30081',
   keycloakRealm: 'alzheimer-realm',
   keycloakClientId: 'alzheimer-angular-client',
-  supportNetworkApiUrl: 'http://localhost:8080/api',
-  supportNetworkWebSocketUrl: 'http://localhost:8080/ws',
+  supportNetworkApiUrl: 'http://192.168.192.130:30080/api',
+  supportNetworkWebSocketUrl: 'http://192.168.192.130:30080/ws',
 };

@@ -8,10 +8,11 @@ import {
   DeliveryTaskUpdateRequest,
 } from '../core/models/delivery-task.model';
 
+import { environment } from '../../../../environments/environment';
+
 @Injectable({ providedIn: 'root' })
 export class DeliveryTaskService {
-  private readonly baseUrl =
-    'http://localhost:8082/patient-service/api/delivery-tasks';
+  private readonly baseUrl = `${environment.apiUrl}/delivery-tasks`;
 
   constructor(private http: HttpClient) { }
 

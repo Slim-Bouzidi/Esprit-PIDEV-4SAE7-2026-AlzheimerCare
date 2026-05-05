@@ -3,9 +3,11 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { RouteStopRequest, RouteStopResponse } from './route.service';
 
+import { environment } from '../../../../environments/environment';
+
 @Injectable({ providedIn: 'root' })
 export class RouteStopService {
-    private api = 'http://localhost:8082/patient-service/api/route-stops';
+    private api = `${environment.apiUrl}/route-stops`;
 
     constructor(private http: HttpClient) { }
 

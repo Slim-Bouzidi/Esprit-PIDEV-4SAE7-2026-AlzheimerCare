@@ -1,23 +1,24 @@
 #!/bin/bash
+echo "🚀 Starting Alzheimer System & DevOps Recovery..."
 
-echo "🚀 Starting Alzheimer System Cluster Recovery..."
-
-# 1. Disable swap just in case
+# 1. Turn off Swap (Kubernetes hates swap)
+echo "🔧 Disabling swap..."
 sudo swapoff -a
 
-# 2. Restart core engines
-sudo systemctl restart docker
-sudo systemctl restart kubelet
+# 2. Fix SonarQube memory requirement
+echo "🧠 Setting Elasticsearch memory map..."
+sudo sysctl -w vm.max_map_count=262144
 
-echo "🧹 Cleaning up 'Unknown' or 'Terminating' pods..."
+# 3. Kill Ghost Pods in ALL namespaces
+echo "👻 Deleting Ghost/Unknown pods..."
+kubectl delete pods --all-namespaces --field-selector=status.phase!=Running --force
 
-# Delete pods in 'Unknown' state across all namespaces
-kubectl get pods -A | grep -i 'Unknown' | awk '{print $1 " " $2}' | xargs -L1 kubectl delete pod -n
+# 4. Restart Jenkins to ensure it wakes up properly
+echo "🏗️ Waking up Jenkins..."
+kubectl delete pod -l app.kubernetes.io/name=jenkins -n jenkins --force
 
-# Delete pods in 'Terminating' state that are stuck
-kubectl get pods -A | grep -i 'Terminating' | awk '{print $1 " " $2}' | xargs -L1 kubectl delete pod -n --force --grace-period=0
+# 5. Restart Nexus to ensure microservices don't get stuck pulling images
+echo "📦 Restarting Nexus Registry..."
+kubectl delete pod -l app=nexus -n alzheimer --force
 
-# Force restart Jenkins if it's stuck
-kubectl delete pod jenkins-0 -n jenkins --force --grace-period=0 2>/dev/null
-
-echo "✅ Cluster should be healthy in 60 seconds. Check with: kubectl get pods -A"
+echo "✅ Recovery Complete! Wait 3 minutes for Jenkins and Nexus to fully boot up."
