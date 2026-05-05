@@ -29,6 +29,9 @@ export class SidebarComponent {
   }
 
   collapsed = signal(true);
+  userName: string = '';
+  userRole: string = '';
+  userAvatar: string = 'https://randomuser.me/api/portraits/lego/1.jpg'; // Default
 
   private readonly allNavItems: NavItem[] = [
     { label: 'Dashboard', icon: 'pi pi-th-large', route: '/', exact: true },
@@ -47,7 +50,16 @@ export class SidebarComponent {
     return this.allNavItems.filter(item => this.canShowNavItem(item));
   });
 
-  constructor(private router: Router) { }
+  constructor(private router: Router) { 
+    const token = keycloak.tokenParsed as any;
+    this.userName = token?.given_name || token?.preferred_username || 'User';
+    
+    const roles = this.getUserRoles().map(r => r.toUpperCase());
+    if (roles.includes('ADMIN')) this.userRole = 'Super Admin';
+    else if (roles.includes('DOCTOR')) this.userRole = 'Doctor';
+    else if (roles.includes('CAREGIVER')) this.userRole = 'Caregiver';
+    else this.userRole = 'Patient';
+  }
 
   readonly profileMenuItems: MenuItem[] = [
     {

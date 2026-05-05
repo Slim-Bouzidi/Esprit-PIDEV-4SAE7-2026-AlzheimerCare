@@ -117,43 +117,110 @@ import { PatientService } from '../../../services/patient.service';
       display: flex;
       flex-direction: column;
       gap: 1.5rem;
-      padding: 1.5rem 0.5rem;
+      padding: 0.5rem;
     }
 
     .input-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 1rem;
+      gap: 1.25rem;
     }
 
     .input-group {
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 0.6rem;
 
       label {
-        font-weight: 600;
-        font-size: 0.875rem;
-        color: var(--text-color-secondary);
+        font-weight: 700;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #64748b;
+        padding-left: 0.25rem;
       }
 
-      input, ::ng-deep .p-inputnumber, ::ng-deep .p-dropdown {
-        width: 100%;
+      ::ng-deep .p-inputtext, 
+      ::ng-deep .p-dropdown,
+      ::ng-deep .p-inputnumber-input {
+        width: 100% !important;
+        background: rgba(255, 255, 255, 0.5) !important;
+        border: 1px solid rgba(0, 0, 0, 0.05) !important;
+        border-radius: 14px !important;
+        padding: 0.8rem 1rem !important;
+        font-size: 0.95rem !important;
+        transition: all 0.2s ease !important;
+        color: #1e293b !important;
+
+        &:focus {
+          background: #fff !important;
+          border-color: #6366f1 !important;
+          box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1) !important;
+        }
       }
 
-      ::ng-deep .p-inputtext {
-        padding: 0.75rem;
-        border-radius: 8px;
-        border: 1px solid var(--surface-border);
+      ::ng-deep .p-dropdown {
+          padding: 0 !important;
+          .p-dropdown-label { padding: 0.8rem 1rem !important; }
+          .p-dropdown-trigger { width: 3rem !important; }
       }
     }
 
-    .dialog-footer {
-      display: flex;
-      justify-content: flex-end;
-      gap: 0.75rem;
-      padding-top: 1rem;
-      border-top: 1px solid var(--surface-border);
+    ::ng-deep .create-user-dialog {
+        .p-dialog {
+            background: rgba(255, 255, 255, 0.72) !important;
+            backdrop-filter: blur(20px) saturate(180%) !important;
+            -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+            border: 1px solid rgba(255, 255, 255, 0.4) !important;
+            border-radius: 24px !important;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1) !important;
+        }
+        
+        .p-dialog-header {
+            background: transparent !important;
+            padding: 2rem 2rem 1rem !important;
+            border-top-left-radius: 24px !important;
+            border-top-right-radius: 24px !important;
+            
+            .p-dialog-title {
+                font-weight: 800 !important;
+                font-size: 1.5rem !important;
+                color: #0f172a !important;
+                letter-spacing: -0.02em !important;
+            }
+        }
+        
+        .p-dialog-content {
+            background: transparent !important;
+            padding: 0 2rem 2rem !important;
+        }
+        
+        .p-dialog-footer {
+            background: rgba(255, 255, 255, 0.4) !important;
+            padding: 1.25rem 2rem !important;
+            border-bottom-left-radius: 24px !important;
+            border-bottom-right-radius: 24px !important;
+            border-top: 1px solid rgba(0, 0, 0, 0.05) !important;
+        }
+
+        .p-button.p-button-text {
+            color: #64748b !important;
+            font-weight: 700 !important;
+        }
+
+        .p-button:not(.p-button-text) {
+            background: #6366f1 !important;
+            border: none !important;
+            border-radius: 12px !important;
+            padding: 0.75rem 1.5rem !important;
+            font-weight: 700 !important;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2) !important;
+            
+            &:hover {
+                background: #4f46e5 !important;
+                transform: translateY(-1px) !important;
+            }
+        }
     }
   `]
 })

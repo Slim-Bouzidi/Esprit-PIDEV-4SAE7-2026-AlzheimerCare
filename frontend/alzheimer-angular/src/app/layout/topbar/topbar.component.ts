@@ -5,6 +5,7 @@ import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { TooltipModule } from 'primeng/tooltip';
 import { ViewChild } from '@angular/core';
+import keycloak from '../../keycloak';
 import { UserCreateDialogComponent } from '../../features/manage-users/user-create-dialog/user-create-dialog.component';
 
 @Component({
@@ -23,6 +24,11 @@ export class TopbarComponent {
   }
 
   searchValue = '';
+  isAdmin = false;
+
+  constructor() {
+    this.isAdmin = keycloak.realmAccess?.roles?.includes('ADMIN') || false;
+  }
 
   @ViewChild('createDialog') createDialog!: UserCreateDialogComponent;
 

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { CognitiveService, PatientCognitiveReport, ActivityResponse } from '../../services/cognitive.service';
 import { PatientService, PatientProfile } from '../../core/services/patient.service';
+import { UserService } from '../../services/user.service';
 import keycloak from '../../keycloak';
 
 @Component({
@@ -22,11 +23,11 @@ export class PatientHomeComponent implements OnInit {
   isAdmin: boolean = false;
 
   adminStats = {
-    totalPatients: 124,
-    activeCaregivers: 45,
-    medicalStaff: 12,
+    totalPatients: 0,
+    activeCaregivers: 0,
+    medicalStaff: 0,
     systemUptime: '99.9%',
-    pendingAlerts: 3
+    pendingAlerts: 0
   };
 
   readonly games = [
@@ -38,6 +39,7 @@ export class PatientHomeComponent implements OnInit {
   constructor(
     private cognitiveService: CognitiveService,
     private patientService: PatientService,
+    private userService: UserService,
     private router: Router
   ) {}
 
@@ -77,6 +79,17 @@ export class PatientHomeComponent implements OnInit {
     this.patientService.getMe().subscribe({
       next: (p) => { this.profile = p; this.loadingProfile = false; },
       error: () => { this.loadingProfile = false; }
+    });
+  }
+
+  private loadAdminStats(): void {
+    this.userService.getAllUsers().subscribe({
+      next: (users) => {
+        this.adminStats.totalPatients = users.filter(u => u.role === 'PATIENT').length;
+        this.adminStats.activeCaregivers = users.filter(u => u.role === 'CAREGIVER').length;
+        this.adminStats.medicalStaff = users.filter(u => u.role === 'DOCTOR' || u.role === 'DOCTEUR').length;
+      },
+      error: (err) => console.error('Failed to load admin stats', err)
     });
   }
 
