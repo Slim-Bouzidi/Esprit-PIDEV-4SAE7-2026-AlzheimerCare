@@ -53,7 +53,9 @@ spec:
             steps {
                 container('maven') {
                     dir('backend/cognitive-service') {
-                        sh 'mvn test jacoco:report sonar:sonar -Dsonar.host.url=http://sonarqube.alzheimer:9000 -Dsonar.projectKey=alzheimer-cognitive-service'
+                        withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_AUTH_TOKEN')]) {
+                            sh 'mvn test jacoco:report sonar:sonar -Dsonar.host.url=http://sonarqube.alzheimer:9000 -Dsonar.projectKey=alzheimer-cognitive-service -Dsonar.login=${SONAR_AUTH_TOKEN}'
+                        }
                     }
                 }
             }
