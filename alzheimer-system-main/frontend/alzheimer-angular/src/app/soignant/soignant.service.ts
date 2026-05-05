@@ -52,11 +52,14 @@ export class SoignantService {
   }
 
   constructor() {
+    console.log('SoignantService: Constructor appelé');
     this.loadDataFromApi();
   }
 
   /** Charge les données depuis les APIs backend */
   loadDataFromApi(): void {
+    console.log('SoignantService: loadDataFromApi appelé');
+    
     // Charger les événements agenda dynamiquement pour la semaine courante
     this.loadAgendaSemaine(new Date());
 
@@ -88,23 +91,56 @@ export class SoignantService {
     });
 
     // Charger les patients réels
+    console.log('SoignantService: Chargement des patients depuis', `${environment.apiUrl}/patients`);
     this.http.get<any[]>(`${environment.apiUrl}/patients`, { headers: this.apiHeaders() }).subscribe({
       next: (patients) => {
-        const mapped: PatientSoignant[] = patients.map((p: any) => ({
-          id: String(p.id),
-          nom: p.nomComplet?.split(' ').slice(1).join(' ') || p.nomComplet || '',
-          prenom: p.nomComplet?.split(' ')[0] || '',
-          niveauRisque: 'moyen' as any,
-          nbAlertesAujourdhui: 0,
-          medecinReferent: '',
-          age: p.age || 0,
-          sexe: 'M' as any
-        }));
+        console.log('SoignantService: Patients reçus de l\'API:', patients);
+        const mapped: PatientSoignant[] = patients
+          .filter((p: any) => p.actif !== false) // Filtrer les patients actifs
+          .map((p: any) => {
+            // Parser le nomComplet pour extraire prenom et nom
+            let prenom = '';
+            let nom = '';
+            
+            if (p.nomComplet) {
+              const parts = p.nomComplet.trim().split(' ');
+              if (parts.length >= 2) {
+                prenom = parts[0];
+                nom = parts.slice(1).join(' ');
+              } else if (parts.length === 1) {
+                prenom = parts[0];
+                nom = parts[0];
+              }
+            }
+            
+            // Utiliser les champs individuels s'ils existent
+            if (p.prenom) prenom = p.prenom;
+            if (p.nom) nom = p.nom;
+            
+            return {
+              id: String(p.id),
+              nom: nom || 'Patient',
+              prenom: prenom || 'Inconnu',
+              niveauRisque: 'moyen' as any,
+              nbAlertesAujourdhui: 0,
+              medecinReferent: '',
+              age: p.age || 0,
+              sexe: 'M' as any
+            };
+          });
+        
+        console.log('Patients chargés:', mapped);
+        
         if (mapped.length > 0) {
+          console.log('SoignantService: Émission des patients vers le subject');
           this.patientsSubject.next(mapped);
+        } else {
+          console.warn('Aucun patient actif trouvé');
         }
       },
-      error: () => {}
+      error: (err) => {
+        console.error('Erreur chargement patients:', err);
+      }
     });
   }
 
@@ -120,6 +156,11 @@ export class SoignantService {
 
   getPatientsAssignes(): PatientSoignant[] {
     return this.patientsSubject.value;
+  }
+
+  /** Observable réactif des patients assignés */
+  getPatientsObservable(): Observable<PatientSoignant[]> {
+    return this.patientsSubject.asObservable();
   }
 
   getReglesPatients(): ReglePatient[] {

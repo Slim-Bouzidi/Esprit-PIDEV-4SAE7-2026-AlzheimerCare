@@ -24,6 +24,15 @@ export interface Patient {
   showStatusDropdown?: boolean;
 }
 
+export interface MemoireAssistee {
+  patientId: number;
+  patientName?: string;
+  adresse: string;
+  conjoint: string;
+  infosCles: string;
+  photos: string[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class PatientService {
   // Aligne l'URL avec le backend Spring Boot (/api/patients)
@@ -133,6 +142,24 @@ export class PatientService {
 
   getBySoignant(soignantId: number): Observable<Patient[]> {
     return this.http.get<Patient[]>(`${this.baseUrl}/soignant/${soignantId}`, { headers: this.getHeaders() });
+  }
+
+  getMemoireAssistee(patientId: number): Observable<MemoireAssistee> {
+    return this.http.get<MemoireAssistee>(`${this.baseUrl}/${patientId}/memoire-assistee`, {
+      headers: this.getHeaders()
+    });
+  }
+
+  saveMemoireAssistee(patientId: number, memoire: Omit<MemoireAssistee, 'patientId' | 'patientName'>): Observable<MemoireAssistee> {
+    return this.http.put<MemoireAssistee>(`${this.baseUrl}/${patientId}/memoire-assistee`, memoire, {
+      headers: this.getHeaders()
+    });
+  }
+
+  getAllMemoiresAssistees(): Observable<MemoireAssistee[]> {
+    return this.http.get<MemoireAssistee[]>(`${this.baseUrl}/memoires-assistees`, {
+      headers: this.getHeaders()
+    });
   }
 
   // Gestion des erreurs

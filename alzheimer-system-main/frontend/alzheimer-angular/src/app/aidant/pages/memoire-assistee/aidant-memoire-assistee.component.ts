@@ -486,26 +486,22 @@ export class AidantMemoireAssisteeComponent implements OnInit {
 
   // Charge toutes les fiches sauvegardées pour le tableau
   loadConfiguredMemoires(): void {
-    this.configuredMemoires = [];
-    for (const p of this.patients) {
-      if (!p.id) continue;
-      const stored = localStorage.getItem('memoire_assistee_' + p.id);
-      if (stored) {
-        try {
-          const data: MemoireData = JSON.parse(stored);
-          this.configuredMemoires.push({
-            patientId: p.id,
-            patientName: p.nomComplet,
-            adresse: data.adresse || '',
-            conjoint: data.conjoint || '',
-            infosCles: data.infosCles || '',
-            photos: data.photos || []
-          });
-        } catch (e) {
-          console.error("Erreur lecture cache pour le patient_id " + p.id);
-        }
+    this.patientService.getAllMemoiresAssistees().subscribe({
+      next: (memoires) => {
+        this.configuredMemoires = memoires.map(mem => ({
+          patientId: mem.patientId,
+          patientName: mem.patientName || this.patients.find(p => p.id === mem.patientId)?.nomComplet || `Patient #${mem.patientId}`,
+          adresse: mem.adresse || '',
+          conjoint: mem.conjoint || '',
+          infosCles: mem.infosCles || '',
+          photos: mem.photos || []
+        }));
+      },
+      error: (err) => {
+        console.error('Erreur chargement memoires assistees:', err);
+        this.configuredMemoires = [];
       }
-    }
+    });
   }
 
   // Basculer vers la vue liste
@@ -538,21 +534,28 @@ export class AidantMemoireAssisteeComponent implements OnInit {
   }
 
   private loadData() {
-    const key = 'memoire_assistee_' + this.selectedPatientId;
-    const stored = localStorage.getItem(key);
-    if (stored) {
-      try {
-        this.formData = JSON.parse(stored);
-      } catch (e) {
-        this.resetForm();
-      }
-    } else {
+    if (!this.selectedPatientId) {
       this.resetForm();
-      const patient = this.patients.find(p => p.id === this.selectedPatientId);
-      if (patient && patient.adresse) {
-        this.formData.adresse = patient.adresse;
-      }
+      return;
     }
+
+    this.patientService.getMemoireAssistee(this.selectedPatientId).subscribe({
+      next: (memoire) => {
+        this.formData = {
+          adresse: memoire.adresse || '',
+          conjoint: memoire.conjoint || '',
+          infosCles: memoire.infosCles || '',
+          photos: memoire.photos || []
+        };
+      },
+      error: () => {
+        this.resetForm();
+        const patient = this.patients.find(p => p.id === this.selectedPatientId);
+        if (patient && patient.adresse) {
+          this.formData.adresse = patient.adresse;
+        }
+      }
+    });
   }
 
   resetForm() {
@@ -627,23 +630,23 @@ export class AidantMemoireAssisteeComponent implements OnInit {
 
   saveData() {
     if (this.selectedPatientId) {
-      const key = 'memoire_assistee_' + this.selectedPatientId;
-      try {
-        localStorage.setItem(key, JSON.stringify(this.formData));
-        this.saveSuccess = true;
-        setTimeout(() => {
-          this.saveSuccess = false;
-        }, 3000);
-        this.loadConfiguredMemoires();
-        
-        // Record backend interaction for cognitive engine
-        if (this.selectedPatientId) {
-          this.insightService.recordInteraction(this.selectedPatientId, 'SUCCESS', 'Fiche mémoire mise à jour').subscribe();
+      this.patientService.saveMemoireAssistee(this.selectedPatientId, this.formData).subscribe({
+        next: () => {
+          this.saveSuccess = true;
+          setTimeout(() => {
+            this.saveSuccess = false;
+          }, 3000);
+          this.loadConfiguredMemoires();
+
+          if (this.selectedPatientId) {
+            this.insightService.recordInteraction(this.selectedPatientId, 'SUCCESS', 'Fiche mémoire mise à jour').subscribe();
+          }
+        },
+        error: (err) => {
+          console.error('Erreur sauvegarde memoire assistee:', err);
+          alert("Erreur lors de l'enregistrement de la fiche mémoire.");
         }
-      } catch (e: any) {
-        // En cas de dépassement de limite localStorage (QuotaExceededError)
-        alert("Oups ! Vous avez mis trop d'images globalement et la mémoire du navigateur sature. Essayez d'en supprimer quelques-unes.");
-      }
+      });
     }
   }
 

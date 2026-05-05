@@ -29,6 +29,11 @@
       <span class="patient-avatar">{{ p.prenom[0] }}{{ p.nom[0] }}</span>
       {{ p.prenom }} {{ p.nom }}
     </button>
+    
+    <!-- Bouton Créer Fiche (visible uniquement si un patient est sélectionné) -->
+    <button *ngIf="agendaFilterPatientId !== null" class="btn-create-fiche" (click)="creerFicheDirecte()">
+      ➕ Créer une fiche
+    </button>
   </div>
 
   <!-- New 60/40 Layout -->

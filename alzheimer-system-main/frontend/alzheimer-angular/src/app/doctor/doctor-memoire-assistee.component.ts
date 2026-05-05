@@ -497,26 +497,22 @@ export class DoctorMemoireAssisteeComponent implements OnInit {
   }
 
   loadConfiguredMemoires(): void {
-    this.configuredMemoires = [];
-    for (const p of this.patients) {
-      if (!p.id) continue;
-      const stored = localStorage.getItem('memoire_assistee_' + p.id);
-      if (stored) {
-        try {
-          const data: MemoireData = JSON.parse(stored);
-          this.configuredMemoires.push({
-            patientId: p.id,
-            patientName: p.nomComplet,
-            adresse: data.adresse || '',
-            conjoint: data.conjoint || '',
-            infosCles: data.infosCles || '',
-            photos: data.photos || []
-          });
-        } catch (e) {
-          console.error("Erreur lecture cache pour le patient_id " + p.id);
-        }
+    this.patientService.getAllMemoiresAssistees().subscribe({
+      next: (memoires) => {
+        this.configuredMemoires = memoires.map(mem => ({
+          patientId: mem.patientId,
+          patientName: mem.patientName || this.patients.find(p => p.id === mem.patientId)?.nomComplet || `Patient #${mem.patientId}`,
+          adresse: mem.adresse || '',
+          conjoint: mem.conjoint || '',
+          infosCles: mem.infosCles || '',
+          photos: mem.photos || []
+        }));
+      },
+      error: (err) => {
+        console.error('Erreur chargement memoires assistees:', err);
+        this.configuredMemoires = [];
       }
-    }
+    });
   }
 
   viewMemoire(memoire: ConfiguredMemoire): void {

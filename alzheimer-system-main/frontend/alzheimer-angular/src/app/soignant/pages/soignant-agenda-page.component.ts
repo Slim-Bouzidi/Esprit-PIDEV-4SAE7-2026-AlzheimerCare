@@ -29,34 +29,47 @@ export class SoignantAgendaPageComponent implements OnInit, OnDestroy {
   isPanelOpen: boolean = false;
 
   private sub: Subscription = new Subscription();
+  private eventsSub: Subscription | null = null;
 
   constructor(private soignantService: SoignantService, private translate: TranslateService) { }
 
   ngOnInit(): void {
-    this.patients = this.soignantService.getPatientsAssignes();
+    console.log('AgendaPageComponent: ngOnInit appelé');
+    
+    // S'abonner aux patients pour les recevoir de manière réactive
+    const patientSub = this.soignantService.getPatientsObservable().subscribe(patients => {
+      console.log('AgendaPageComponent: Patients reçus dans le composant:', patients);
+      this.patients = patients;
+      console.log('AgendaPageComponent: this.patients =', this.patients);
+    });
+    this.sub.add(patientSub);
+    
     // Charger dynamiquement l'agenda pour la semaine courante
     this.loadWeekEvents();
   }
 
   ngOnDestroy(): void {
     this.sub.unsubscribe();
+    if (this.eventsSub) {
+      this.eventsSub.unsubscribe();
+    }
   }
 
   /** Charge les événements pour la semaine de currentDate depuis le backend */
   private loadWeekEvents(): void {
     this.soignantService.loadAgendaSemaine(this.currentDate);
-    // Attendre un peu que le subject soit mis à jour, puis rafraîchir
-    // On s'abonne au subject pour être réactif
-    this.sub.unsubscribe();
-    this.sub = new Subscription();
-    const eventSub = this.soignantService.getEvenementsAgenda$().subscribe(events => {
+    // Désabonner l'ancien abonnement aux événements seulement
+    if (this.eventsSub) {
+      this.eventsSub.unsubscribe();
+    }
+    // Créer un nouvel abonnement aux événements
+    this.eventsSub = this.soignantService.getEvenementsAgenda$().subscribe(events => {
       if (this.agendaFilterPatientId) {
         this.events = events.filter(e => e.patientId === this.agendaFilterPatientId);
       } else {
         this.events = events;
       }
     });
-    this.sub.add(eventSub);
   }
 
   refreshEvents(): void {
@@ -131,5 +144,16 @@ export class SoignantAgendaPageComponent implements OnInit, OnDestroy {
    */
   closePanelDrawer(): void {
     this.isPanelOpen = false;
+  }
+
+  /**
+   * Créer une fiche directement pour le patient sélectionné
+   */
+  creerFicheDirecte(): void {
+    if (this.agendaFilterPatientId) {
+      this.selectedPatientId = this.agendaFilterPatientId;
+      this.selectedEventId = null; // Pas d'événement spécifique
+      this.isPanelOpen = true;
+    }
   }
 }
