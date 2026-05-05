@@ -57,6 +57,7 @@ spec:
                             sh 'mvn test jacoco:report sonar:sonar -Dsonar.host.url=http://sonarqube.alzheimer:9000 -Dsonar.projectKey=alzheimer-cognitive-service -Dsonar.login=${SONAR_AUTH_TOKEN}'
                         }
                     }
+                    sh 'rm -rf /root/.m2/repository || true'
                 }
             }
         }
@@ -75,11 +76,16 @@ spec:
                             fi
                             docker build -t $NEXUS_REGISTRY/$img_name:latest $ctx
                             docker push $NEXUS_REGISTRY/$img_name:latest
+                            docker rmi $NEXUS_REGISTRY/$img_name:latest || true
                         done
                         
                         # Also build Keycloak if needed (merged into backend CI for simplicity)
                         docker build -t $NEXUS_REGISTRY/alzheimer-keycloak:latest ./keycloak
                         docker push $NEXUS_REGISTRY/alzheimer-keycloak:latest
+                        docker rmi $NEXUS_REGISTRY/alzheimer-keycloak:latest || true
+                        
+                        # Deep clean to prevent Kubernetes Eviction
+                        docker system prune -a --volumes -f || true
                     '''
                 }
             }
