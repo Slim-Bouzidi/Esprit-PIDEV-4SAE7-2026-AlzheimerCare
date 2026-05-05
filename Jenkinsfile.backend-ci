@@ -49,6 +49,16 @@ spec:
             }
         }
 
+        stage('Unit Tests & Sonar') {
+            steps {
+                container('maven') {
+                    dir('backend/cognitive-service') {
+                        sh 'mvn test jacoco:report sonar:sonar -Dsonar.host.url=http://sonarqube.alzheimer:9000 -Dsonar.projectKey=alzheimer-cognitive-service'
+                    }
+                }
+            }
+        }
+
         stage('Docker Build & Push') {
             steps {
                 container('docker') {
