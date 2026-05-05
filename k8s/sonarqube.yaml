@@ -44,7 +44,7 @@ spec:
       initContainers:
       - name: set-permissions
         image: busybox
-        command: ["sh", "-c", "chown -R 999:999 /opt/sonarqube/data"]
+        command: ["sh", "-c", "chown -R 999:999 /opt/sonarqube/data && chmod -R 777 /opt/sonarqube/data"]
         volumeMounts:
         - name: sonarqube-data
           mountPath: /opt/sonarqube/data
