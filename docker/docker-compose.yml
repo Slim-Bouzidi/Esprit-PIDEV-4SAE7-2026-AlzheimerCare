@@ -9,7 +9,7 @@ services:
       KEYCLOAK_ADMIN_PASSWORD: admin
     volumes:
       - keycloak_data:/opt/keycloak/data
-      - ../themes:/opt/keycloak/themes
+      - ../keycloak/themes:/opt/keycloak/themes
       - ../keycloak/realm-config:/opt/keycloak/data/import
     networks:
       - alzheimer-network

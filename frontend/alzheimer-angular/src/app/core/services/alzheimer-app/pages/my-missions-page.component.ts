@@ -2,28 +2,30 @@ import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { trySupportNetworkDemoSafeMessage } from '../../core/support-network-demo-error';
+import { trySupportNetworkDemoSafeMessage } from '../../../support-network-demo-error';
 import { HttpErrorResponse } from '@angular/common/http';
-import { getSupportNetworkHttpErrorMessage } from '../../core/support-network-http-error';
+import { getSupportNetworkHttpErrorMessage } from '../../../support-network-http-error';
 import { RouterModule } from '@angular/router';
-import { MissionService } from '../../services/mission.service';
-import { MembersService } from '../../services/members.service';
-import { SupportMember } from '../../models/support-member.model';
-import { Mission } from '../../models/mission.model';
-import { ReportService } from '../../services/report.service';
-import { InterventionReport } from '../../models/report.model';
-import { WebSocketService } from '../../services/websocket.service';
+import { MissionService } from '../mission.service';
+import { MembersService } from '../members.service';
+import { SupportMember } from '../../../models/alzheimer-app/support-member.model';
+import { Mission } from '../../../models/alzheimer-app/mission.model';
+import { ReportService } from '../report.service';
+import { InterventionReport } from '../../../models/alzheimer-app/report.model';
+import { WebSocketService } from '../websocket.service';
 import { Subscription } from 'rxjs';
-import { ToastrService } from 'ngx-toastr';
-import { MissionTimelineEvent } from '../../models/mission-timeline-event.model';
-import { TablePaginationComponent } from '../../shared/components/table-pagination/table-pagination.component';
+import { MissionTimelineEvent } from '../../../models/alzheimer-app/mission-timeline-event.model';
+import { TablePaginationComponent } from '../../../../shared/components/table-pagination/table-pagination.component';
 
 @Component({
   selector: 'app-my-missions-page',
   standalone: true,
   imports: [CommonModule, FormsModule, TranslateModule, RouterModule, TablePaginationComponent],
   templateUrl: './my-missions-page.component.html',
-  styleUrls: ['../soignant-pages.css', './my-missions-page.component.scss'],
+  styleUrls: [
+    '../../../../features/alzheimer-app/doctor-portal/doctor-patients.component.css',
+    './my-missions-page.component.scss',
+  ],
 })
 export class MyMissionsPageComponent implements OnInit, OnDestroy {
   members: SupportMember[] = [];
@@ -74,8 +76,7 @@ export class MyMissionsPageComponent implements OnInit, OnDestroy {
     private translate: TranslateService,
     private reportService: ReportService,
     private cdr: ChangeDetectorRef,
-    private websocketService: WebSocketService,
-    private toastr: ToastrService
+    private websocketService: WebSocketService
   ) {}
 
   ngOnInit(): void {
@@ -280,7 +281,7 @@ export class MyMissionsPageComponent implements OnInit, OnDestroy {
           console.log('🔄 WS Mission update:', event);
           this.playNotificationSound();
           this.showSuccess(this.translate.instant('COMMON.NEW_UPDATE_RECEIVED'));
-          this.toastr.success('Mission updated');
+          console.log('Mission updated');
           this.loadMissions();
         }
       })
@@ -298,7 +299,7 @@ export class MyMissionsPageComponent implements OnInit, OnDestroy {
             event && typeof event === 'object' && 'message' in (event as Record<string, unknown>)
               ? String((event as Record<string, unknown>)['message'] ?? 'New notification')
               : 'New notification';
-          this.toastr.info(txt || 'New notification');
+          console.log(txt || 'New notification');
         }
       })
     );

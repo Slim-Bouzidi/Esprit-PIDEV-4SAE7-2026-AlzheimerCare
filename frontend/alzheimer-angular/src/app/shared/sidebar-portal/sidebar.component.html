@@ -78,6 +78,42 @@
         <i class="nav-icon" [class]="item.icon" aria-hidden="true"></i>
         <span class="nav-label">{{ item.label }}</span>
       </a>
+
+      <div class="nav-group" *ngIf="isDoctorRole()">
+        <button type="button" class="nav-item nav-item-toggle" (click)="toggleSupportNetworkMenu()"
+          [class.open]="supportNetworkMenuOpen">
+          <i class="nav-icon pi pi-share-alt" aria-hidden="true"></i>
+          <span class="nav-label">Support Network</span>
+          <span class="nav-chevron">{{ supportNetworkMenuOpen ? '▲' : '▼' }}</span>
+        </button>
+        <div class="nav-submenu" *ngIf="supportNetworkMenuOpen">
+          <a routerLink="/doctor-support-network/dashboard" routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }" class="nav-subitem">
+            <i class="nav-icon pi pi-chart-line" aria-hidden="true"></i>
+            <span>Dashboard</span>
+          </a>
+          <a routerLink="/doctor-support-network/add-member" routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }" class="nav-subitem">
+            <i class="nav-icon pi pi-user-plus" aria-hidden="true"></i>
+            <span>Add Member</span>
+          </a>
+          <a routerLink="/doctor-support-network/support-network" routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }" class="nav-subitem">
+            <i class="nav-icon pi pi-share-alt" aria-hidden="true"></i>
+            <span>Link Support Network</span>
+          </a>
+          <a routerLink="/doctor-support-network/availability" routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }" class="nav-subitem">
+            <i class="nav-icon pi pi-clock" aria-hidden="true"></i>
+            <span>Availability</span>
+          </a>
+          <a routerLink="/doctor-support-network/missions" routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }" class="nav-subitem">
+            <i class="nav-icon pi pi-briefcase" aria-hidden="true"></i>
+            <span>Missions</span>
+          </a>
+        </div>
+      </div>
     </nav>
     <div class="sidebar-footer">
       <div class="user-mini-profile">

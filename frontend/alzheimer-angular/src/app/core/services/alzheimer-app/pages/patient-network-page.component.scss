@@ -1,53 +1,13 @@
-/* Patient Network page – improved design: hierarchy, cards, badges */
-:host {
-  display: block;
-}
-
-:host .page-container {
-  max-width: 960px;
-}
-
-/* ----- Breadcrumb ----- */
-.breadcrumb {
-  font-size: 0.875rem;
-  color: var(--soignant-text-muted);
-  margin-bottom: 1.25rem;
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.25rem;
-}
-
-.breadcrumb a {
-  color: var(--soignant-primary);
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.15s;
-}
-
-.breadcrumb a:hover {
-  color: #0f766e;
-  text-decoration: underline;
-}
-
-.breadcrumb-sep {
-  margin: 0 0.15rem;
-  color: #94a3b8;
-  user-select: none;
-}
-
-.breadcrumb-current {
-  color: var(--soignant-text);
-  font-weight: 600;
-}
+@import './support-network-portal-layout.scss';
 
 /* ----- Patient hero card ----- */
 .patient-card-hero {
-  background: linear-gradient(145deg, #f0fdfa 0%, #ecfdf5 40%, #f0fdf4 100%);
-  border-radius: 16px;
+  background: linear-gradient(135deg, var(--surface-card) 0%, var(--primary-50) 42%, var(--slate-50) 100%);
+  border-radius: 14px;
   padding: 1.5rem 1.75rem;
   margin-bottom: 1.75rem;
-  box-shadow: 0 4px 14px rgba(13, 148, 136, 0.08);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
   border: 1px solid rgba(13, 148, 136, 0.12);
   display: flex;
   align-items: center;
@@ -59,7 +19,7 @@
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--soignant-primary) 0%, #0f766e 100%);
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-600) 100%);
   color: #fff;
   display: flex;
   align-items: center;
@@ -83,7 +43,7 @@
   display: block;
   font-size: 0.8rem;
   font-weight: 600;
-  color: var(--soignant-text-muted);
+  color: var(--text-secondary);
   margin-bottom: 0.4rem;
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -101,12 +61,12 @@
 .patient-geo-lead {
   margin: 0 0 1rem 0;
   font-size: 0.875rem;
-  color: var(--soignant-text-muted);
+  color: var(--text-secondary);
   line-height: 1.45;
 }
 
 .patient-geo-form {
-  max-width: 640px;
+  max-width: 860px;
 }
 
 .dispatch-history-card {
@@ -125,7 +85,7 @@
 .dispatch-history-detail {
   margin-top: 1.25rem;
   padding-top: 1rem;
-  border-top: 1px dashed var(--soignant-border);
+  border-top: 1px dashed var(--border-color);
 }
 
 .detail-header-row {
@@ -191,82 +151,25 @@
   color: #4b5563;
 }
 
-/* View file / dossier button: secondary, rounded, icon + label */
+/* Dossier button: layout from .sn-action-btn; pin to end of hero row */
 .view-file-btn {
   margin-left: auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.6rem 1.25rem;
-  background: #fff;
-  border: 1px solid var(--soignant-border);
-  border-radius: 12px;
-  color: var(--soignant-text);
-  font-weight: 600;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.2s;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
-}
-
-.view-file-btn:hover {
-  background: #f8fafc;
-  border-color: #94a3b8;
-  color: var(--soignant-text);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .view-file-btn .view-file-icon {
-  font-size: 1.25rem;
-  width: 1.25rem;
-  height: 1.25rem;
-  color: var(--soignant-text-muted);
-}
-
-.view-file-btn:hover .view-file-icon {
-  color: var(--soignant-primary);
+  font-size: 1.15rem;
+  width: 1.15rem;
+  height: 1.15rem;
 }
 
 .view-file-label {
   white-space: nowrap;
 }
 
-/* ----- Form card ----- */
-.form-card {
-  background: #fff;
-  border-radius: 16px;
-  padding: 1.75rem;
-  margin-bottom: 1.75rem;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-  border: 1px solid var(--soignant-border);
-}
-
-.form-card.card-editing {
-  border-color: #d97706;
-  box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.15);
-}
-
-.form-card .card-title {
-  font-size: 1.125rem;
-  font-weight: 700;
-  margin: 0 0 1.25rem 0;
-  color: var(--soignant-text);
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--soignant-border);
-}
-
 .form-card .required-hint {
   font-size: 0.8rem;
   color: #b45309;
   margin: 0 0 1rem 0;
-}
-
-.form-card .form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  margin-top: 1.25rem;
-  flex-wrap: wrap;
 }
 
 .form-card .btn-add-network {
@@ -281,53 +184,24 @@
   font-weight: 700;
 }
 
-/* ----- Members list card ----- */
+/* ----- Members list card (doctor-alerts card shell) ----- */
 .members-list-card {
   background: #fff;
-  border-radius: 16px;
-  padding: 1.75rem;
-  margin-bottom: 1.75rem;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-  border: 1px solid var(--soignant-border);
+  border-radius: 18px;
+  padding: 20px;
+  margin-bottom: 18px;
+  border: none;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+  border-top: 5px solid #94a3b8;
 }
 
 .members-list-card .card-title {
-  font-size: 1.125rem;
+  font-size: 1.1rem;
   font-weight: 700;
-  margin: 0 0 1.25rem 0;
-  color: var(--soignant-text);
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--soignant-border);
-}
-
-.members-list-card .members-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.9rem;
-}
-
-.members-list-card .members-table th,
-.members-list-card .members-table td {
-  padding: 0.8rem 1rem;
-  text-align: left;
-  border-bottom: 1px solid var(--soignant-border);
-}
-
-.members-list-card .members-table th {
-  font-weight: 600;
-  color: var(--soignant-text);
-  background: #f8fafc;
-  font-size: 0.8rem;
-  text-transform: none;
-  letter-spacing: 0.02em;
-}
-
-.members-list-card .members-table tbody tr {
-  transition: background 0.15s;
-}
-
-.members-list-card .members-table tbody tr:hover {
-  background: #f8fafc;
+  margin: 0 0 14px;
+  color: #0f172a;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .members-list-card .action-cell {
@@ -336,6 +210,16 @@
 
 .members-list-card .skills-cell {
   max-width: 14rem;
+}
+
+.permissions-row .checkbox-group {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(180px, 1fr));
+  gap: 0.5rem 1rem;
+  padding: 0.75rem;
+  border: 1px dashed var(--border-color);
+  border-radius: 12px;
+  background: #fbfdff;
 }
 
 .members-list-card .skill-badge {
@@ -350,26 +234,31 @@
 
 .member-name {
   font-weight: 500;
-  color: var(--soignant-text);
+  color: var(--text-primary);
 }
 
 .role-badge {
   display: inline-block;
-  padding: 0.25rem 0.6rem;
-  border-radius: 8px;
-  font-size: 0.85rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   background: #f1f5f9;
-  color: var(--soignant-text);
+  color: #475569;
 }
 
 .trust-badge {
   display: inline-block;
-  padding: 0.25rem 0.6rem;
-  border-radius: 8px;
-  font-size: 0.8rem;
-  font-weight: 600;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   background: #e2e8f0;
-  color: var(--soignant-text-muted);
+  color: #475569;
 }
 
 .trust-badge.trust-trusted {
@@ -385,11 +274,12 @@
 /* ----- Feature cards (Best Intervenants, Dispatch) ----- */
 .feature-card {
   background: #fff;
-  border-radius: 16px;
-  padding: 1.75rem;
-  margin-bottom: 1.75rem;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-  border: 1px solid var(--soignant-border);
+  border-radius: 18px;
+  padding: 20px;
+  margin-bottom: 18px;
+  border: none;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+  border-top: 5px solid #94a3b8;
 }
 
 .card-header-row {
@@ -400,14 +290,14 @@
   gap: 1rem;
   margin-bottom: 1.25rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid var(--soignant-border);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .feature-card .card-title {
-  font-size: 1.125rem;
+  font-size: 1.1rem;
   font-weight: 700;
   margin: 0;
-  color: var(--soignant-text);
+  color: #0f172a;
 }
 
 .btn-compute {
@@ -425,36 +315,11 @@
 .dispatch-label {
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--soignant-text-muted);
+  color: var(--text-secondary);
 }
 
 .dispatch-select {
   min-width: 120px;
-}
-
-/* Ranking table */
-.feature-card .members-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.9rem;
-}
-
-.feature-card .members-table th,
-.feature-card .members-table td {
-  padding: 0.8rem 1rem;
-  text-align: left;
-  border-bottom: 1px solid var(--soignant-border);
-}
-
-.feature-card .members-table th {
-  font-weight: 600;
-  background: #f8fafc;
-  color: var(--soignant-text);
-  font-size: 0.8rem;
-}
-
-.feature-card .members-table tbody tr:hover {
-  background: #f8fafc;
 }
 
 .ranking-table th,
@@ -475,7 +340,7 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: var(--soignant-primary);
+  background: var(--primary-color);
   color: #fff;
   font-size: 0.85rem;
   font-weight: 700;
@@ -490,14 +355,6 @@
   font-size: 0.95rem;
 }
 
-.type-badge {
-  font-size: 0.85rem;
-  color: var(--soignant-text-muted);
-  background: #f1f5f9;
-  padding: 0.2rem 0.5rem;
-  border-radius: 6px;
-}
-
 .rating-cell {
   white-space: nowrap;
 }
@@ -505,7 +362,7 @@
 .rating-text {
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--soignant-text);
+  color: var(--text-primary);
 }
 
 .top-rated-badge {
@@ -527,7 +384,7 @@
   margin: 0;
   padding-left: 1.25rem;
   font-size: 0.82rem;
-  color: var(--soignant-text-muted);
+  color: var(--text-secondary);
   line-height: 1.5;
 }
 
@@ -551,7 +408,7 @@
 .dispatch-step-block {
   padding: 1.25rem;
   border-radius: 12px;
-  border: 1px solid var(--soignant-border);
+  border: 1px solid var(--border-color);
   background: #fafbfc;
   transition: border-color 0.2s;
 }
@@ -574,7 +431,7 @@
   align-items: center;
   padding: 0.35rem 0.75rem;
   border-radius: 10px;
-  background: var(--soignant-primary);
+  background: var(--primary-color);
   color: #fff;
   font-size: 0.85rem;
   font-weight: 700;
@@ -582,7 +439,7 @@
 
 .step-timeout {
   font-size: 0.9rem;
-  color: var(--soignant-text-muted);
+  color: var(--text-secondary);
 }
 
 .step-assignees {
@@ -596,21 +453,21 @@
   margin-bottom: 0.35rem;
   border-radius: 8px;
   background: #fff;
-  border: 1px solid var(--soignant-border);
+  border: 1px solid var(--border-color);
   font-size: 0.9rem;
   font-weight: 500;
-  color: var(--soignant-text);
+  color: var(--text-primary);
 }
 
 .no-assignees {
-  color: var(--soignant-text-muted);
+  color: var(--text-secondary);
   font-style: italic;
 }
 
 .assignee-reasons {
   margin-top: 0.5rem;
   padding: 0.6rem 0;
-  border-top: 1px dashed var(--soignant-border);
+  border-top: 1px dashed var(--border-color);
 }
 
 .assignee-reasons:first-child {
@@ -661,48 +518,8 @@
 .escalation-msg {
   margin: 0.5rem 0 0 0;
   font-size: 0.875rem;
-  color: var(--soignant-text-muted);
+  color: var(--text-secondary);
   font-style: italic;
-}
-
-/* ----- Icon buttons ----- */
-.btn-icon {
-  width: 36px;
-  height: 36px;
-  padding: 0;
-  border: 1px solid var(--soignant-border);
-  border-radius: 8px;
-  background: #fff;
-  color: var(--soignant-text-muted);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1rem;
-  margin-right: 0.5rem;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
-}
-
-.btn-icon:last-child {
-  margin-right: 0;
-}
-
-.btn-icon:hover {
-  background: #f8fafc;
-  color: var(--soignant-primary);
-  border-color: var(--soignant-primary);
-}
-
-.btn-icon.btn-edit-icon:hover {
-  color: #b45309;
-  border-color: #d97706;
-  background: #fffbeb;
-}
-
-.btn-icon.btn-delete-icon:hover {
-  color: var(--soignant-danger);
-  border-color: var(--soignant-danger);
-  background: #fef2f2;
 }
 
 /* ----- Messages & empty states ----- */
@@ -714,7 +531,7 @@
 
 .empty-msg {
   margin: 0.5rem 0;
-  color: var(--soignant-text-muted);
+  color: var(--text-secondary);
 }
 
 .empty-state {
@@ -722,11 +539,7 @@
   text-align: center;
   background: #f8fafc;
   border-radius: 10px;
-  border: 1px dashed var(--soignant-border);
-}
-
-.table-wrap {
-  overflow-x: auto;
+  border: 1px dashed var(--border-color);
 }
 
 .skills-cell-rank {
@@ -759,6 +572,10 @@
 }
 
 @media (max-width: 980px) {
+  .permissions-row .checkbox-group {
+    grid-template-columns: 1fr;
+  }
+
   .members-list-card,
   .feature-card {
     padding: 1.25rem;

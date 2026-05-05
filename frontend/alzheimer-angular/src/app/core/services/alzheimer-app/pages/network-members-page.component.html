@@ -1,15 +1,15 @@
-<header class="topbar-page topbar-page--hero">
-  <div class="topbar-page-inner">
-    <h1>{{ 'NETWORK_MEMBERS.PAGE_TITLE' | translate }}</h1>
-    <p class="topbar-subtitle">{{ 'NETWORK_MEMBERS.PAGE_SUBTITLE' | translate }}</p>
+<header class="topbar sn-support-topbar">
+  <div class="sn-topbar-left">
+    <h1 class="page-title-small">{{ 'NETWORK_MEMBERS.PAGE_TITLE' | translate }}</h1>
+    <p class="sn-page-subtitle">{{ 'NETWORK_MEMBERS.PAGE_SUBTITLE' | translate }}</p>
   </div>
 </header>
-<main class="content-area">
+<main class="patients-content">
   <div class="page-container">
     <nav class="breadcrumb" aria-label="Breadcrumb">
-      <a routerLink="/soignant-dashboard">{{ 'NETWORK_MEMBERS.BREADCRUMB_DASHBOARD' | translate }}</a>
+      <a routerLink="/doctor-dashboard">{{ 'NETWORK_MEMBERS.BREADCRUMB_DASHBOARD' | translate }}</a>
       <span class="breadcrumb-sep" aria-hidden="true">›</span>
-      <a routerLink="/soignant-dashboard/network/members">{{ 'NETWORK_MEMBERS.BREADCRUMB_NETWORK' | translate }}</a>
+      <a routerLink="/doctor-support-network/dashboard">{{ 'NETWORK_MEMBERS.BREADCRUMB_NETWORK' | translate }}</a>
       <span class="breadcrumb-sep" aria-hidden="true">›</span>
       <span class="breadcrumb-current">{{ 'NETWORK_MEMBERS.BREADCRUMB_PAGE' | translate }}</span>
     </nav>
@@ -17,8 +17,8 @@
     <!-- Form card -->
     <section class="form-card" [class.card-editing]="editingMemberId != null">
       <h2 class="card-title">{{ 'NETWORK_MEMBERS.ADD_SECTION' | translate }}</h2>
-      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="members-form form-grid">
-        <div class="form-row">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="members-form sn-form-grid add-member-grid">
+        <div class="form-row sn-field-group">
           <label class="form-label" for="fullName">{{ 'NETWORK_MEMBERS.FULL_NAME' | translate }}</label>
           <input
             id="fullName"
@@ -43,7 +43,7 @@
             </span>
           </div>
         </div>
-        <div class="form-row">
+        <div class="form-row sn-field-group">
           <label class="form-label" for="phone">{{ 'NETWORK_MEMBERS.PHONE' | translate }}</label>
           <div class="phone-input-group">
             <div class="country-dropdown">
@@ -103,7 +103,7 @@
             Final phone: {{ phoneCtrl.value }}
           </p>
         </div>
-        <div class="form-row">
+        <div class="form-row sn-field-group">
           <label class="form-label" for="email">{{ 'NETWORK_MEMBERS.EMAIL' | translate }}</label>
           <input
             id="email"
@@ -124,7 +124,7 @@
             </span>
           </div>
         </div>
-        <div class="form-row">
+        <div class="form-row sn-field-group">
           <label class="form-label" for="type">{{ 'NETWORK_MEMBERS.TYPE' | translate }}</label>
           <select
             id="type"
@@ -140,7 +140,7 @@
             {{ 'NETWORK_MEMBERS.VALIDATION.TYPE_REQUIRED' | translate }}
           </span>
         </div>
-        <div class="form-row">
+        <div class="form-row sn-field-group">
           <label class="form-label" for="zone">{{ 'NETWORK_MEMBERS.ZONE' | translate }}</label>
           <input
             id="zone"
@@ -162,7 +162,7 @@
             </span>
           </div>
         </div>
-        <div class="form-row">
+        <div class="form-row sn-field-group">
           <label class="form-label" for="latitude">{{ 'NETWORK_MEMBERS.LATITUDE' | translate }}</label>
           <input
             id="latitude"
@@ -183,7 +183,7 @@
             </span>
           </div>
         </div>
-        <div class="form-row">
+        <div class="form-row sn-field-group">
           <label class="form-label" for="longitude">{{ 'NETWORK_MEMBERS.LONGITUDE' | translate }}</label>
           <input
             id="longitude"
@@ -204,7 +204,8 @@
             </span>
           </div>
         </div>
-        <div class="form-row form-row-full">
+        <div class="form-row sn-field-group field-spacer" aria-hidden="true"></div>
+        <div class="form-row form-row-full sn-field-group">
           <label class="form-label" for="skills-select">{{ 'NETWORK_MEMBERS.SKILLS_LABEL' | translate }}</label>
           <select
             id="skills-select"
@@ -219,7 +220,7 @@
           </select>
           <p class="skills-hint">{{ 'NETWORK_MEMBERS.SKILLS_HINT' | translate }}</p>
         </div>
-        <div class="form-row form-row-full">
+        <div class="form-row form-row-full sn-field-group">
           <label class="form-label" for="notes">{{ 'NETWORK_MEMBERS.NOTES' | translate }}</label>
           <textarea
             id="notes"
@@ -233,13 +234,13 @@
           </span>
         </div>
         <p class="required-hint form-row-full">{{ 'NETWORK_MEMBERS.REQUIRED_FIELDS_HINT' | translate }}</p>
-        <div class="form-actions form-row-full">
-          <button *ngIf="editingMemberId != null" type="button" class="btn-outline" (click)="cancelEdit()" [disabled]="loading">
+        <div class="sn-form-actions form-row-full">
+          <button *ngIf="editingMemberId != null" type="button" class="sn-action-btn sn-secondary" (click)="cancelEdit()" [disabled]="loading">
             {{ 'COMMON.CANCEL' | translate }}
           </button>
           <button
             type="submit"
-            class="btn-primary btn-add-member"
+            class="sn-action-btn btn-add-member"
             [disabled]="loading || form.invalid"
           >
             {{ editingMemberId == null ? ('NETWORK_MEMBERS.ADD_BTN' | translate) : ('NETWORK_MEMBERS.UPDATE_BTN' | translate) }}

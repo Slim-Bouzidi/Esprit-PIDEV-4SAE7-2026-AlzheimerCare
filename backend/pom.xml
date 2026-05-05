@@ -13,6 +13,7 @@
         <module>patient-service</module>
         <module>user-service</module>
         <module>AlzheimerApp</module>
+        <module>support-network</module>
     </modules>
     <dependencies>
         <dependency>
@@ -34,4 +35,4 @@
             <scope>compile</scope>
         </dependency>
     </dependencies>
-</project>
+</project>

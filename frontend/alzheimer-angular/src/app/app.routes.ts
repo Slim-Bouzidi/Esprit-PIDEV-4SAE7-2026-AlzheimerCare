@@ -1,10 +1,7 @@
-import { inject } from '@angular/core';
-import { Router, Routes, UrlTree } from '@angular/router';
+import { Routes } from '@angular/router';
 import { AppShellComponent } from './layout/app-shell/app-shell.component';
 import { roleGuard } from './core/guards/role.guard';
-import keycloak from './keycloak';
-
-type KeycloakResourceAccessEntry = { roles?: string[] };
+import { appShellGuard } from './core/guards/app-shell.guard';
 
 export const routes: Routes = [
   {
@@ -70,25 +67,44 @@ export const routes: Routes = [
     data: { roles: ['DOCTOR'] }
   },
   {
+    path: 'doctor-support-network',
+    loadComponent: () =>
+      import('./features/alzheimer-app/doctor-portal/support-network-shell.component').then(m => m.SupportNetworkShellComponent),
+    canActivate: [roleGuard],
+    data: { title: 'Support Network', icon: 'pi-share-alt', roles: ['DOCTOR', 'DOCTEUR'] },
+    children: [
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      {
+        path: 'support-network',
+        loadComponent: () =>
+          import('./core/services/alzheimer-app/pages/patient-network-page.component').then(m => m.PatientNetworkPageComponent),
+      },
+      {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./core/services/alzheimer-app/pages/network-dashboard-page.component').then(m => m.NetworkDashboardPageComponent),
+      },
+      {
+        path: 'availability',
+        loadComponent: () =>
+          import('./core/services/alzheimer-app/pages/availabilities-page.component').then(m => m.AvailabilitiesPageComponent),
+      },
+      {
+        path: 'missions',
+        loadComponent: () =>
+          import('./core/services/alzheimer-app/pages/my-missions-page.component').then(m => m.MyMissionsPageComponent),
+      },
+      {
+        path: 'add-member',
+        loadComponent: () =>
+          import('./core/services/alzheimer-app/pages/network-members-page.component').then(m => m.NetworkMembersPageComponent),
+      }
+    ]
+  },
+  {
     path: '',
     component: AppShellComponent,
-    canActivate: [(): boolean | UrlTree => {
-      const router = inject(Router);
-      const realmRoles = keycloak.realmAccess?.roles || [];
-      const resourceRoles = Object.values(keycloak.resourceAccess || {})
-        .flatMap((resource) => (resource as KeycloakResourceAccessEntry).roles || []);
-      const tokenRoles =
-        (keycloak.tokenParsed && 'roles' in keycloak.tokenParsed
-          ? (keycloak.tokenParsed['roles'] as string[] | undefined)
-          : []) || [];
-
-      const allRoles = [...realmRoles, ...resourceRoles, ...tokenRoles].map(r => r.toUpperCase());
-
-      if (allRoles.some(r => r.includes('DOCTOR') || r.includes('DOCTEUR'))) {
-        return router.createUrlTree(['/doctor-dashboard']);
-      }
-      return true;
-    }],
+    canActivate: [appShellGuard],
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       {
@@ -151,6 +167,32 @@ export const routes: Routes = [
         loadComponent: () => import('./shared/components/placeholder/placeholder.component').then(m => m.PlaceholderComponent),
         canActivate: [roleGuard],
         data: { title: 'System Settings', icon: 'pi-cog', roles: ['ADMIN'] }
+      },
+      {
+        path: 'support-network',
+        redirectTo: 'support-network/patient-network',
+        pathMatch: 'full',
+      },
+      {
+        path: 'support-network/patient-network',
+        loadComponent: () =>
+          import('./core/services/alzheimer-app/pages/patient-network-page.component').then(m => m.PatientNetworkPageComponent),
+        canActivate: [roleGuard],
+        data: { title: 'Patient Network', icon: 'pi-share-alt', roles: ['DOCTOR', 'CAREGIVER', 'ADMIN'] }
+      },
+      {
+        path: 'support-network/my-missions',
+        loadComponent: () =>
+          import('./core/services/alzheimer-app/pages/my-missions-page.component').then(m => m.MyMissionsPageComponent),
+        canActivate: [roleGuard],
+        data: { title: 'My Missions', icon: 'pi-briefcase', roles: ['DOCTOR', 'CAREGIVER', 'ADMIN'] }
+      },
+      {
+        path: 'support-network/availabilities',
+        loadComponent: () =>
+          import('./core/services/alzheimer-app/pages/availabilities-page.component').then(m => m.AvailabilitiesPageComponent),
+        canActivate: [roleGuard],
+        data: { title: 'Availabilities', icon: 'pi-clock', roles: ['DOCTOR', 'CAREGIVER', 'ADMIN'] }
       },
       {
         path: 'patient/dashboard',

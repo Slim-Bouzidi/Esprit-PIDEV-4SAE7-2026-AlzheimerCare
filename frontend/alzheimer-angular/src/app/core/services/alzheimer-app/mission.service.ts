@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { supportNetworkHttpHeaders } from '../core/support-network-headers';
+import { supportNetworkHttpHeaders } from '../../support-network-headers';
 import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
-import { Mission } from '../models/mission.model';
-import { MissionDispatchRequest } from '../models/mission-dispatch-request.model';
-import { MissionTimelineEvent } from '../models/mission-timeline-event.model';
+import { environment } from '../../../../environments/environment';
+import { Mission } from '../../models/alzheimer-app/mission.model';
+import { MissionDispatchRequest } from '../../models/alzheimer-app/mission-dispatch-request.model';
+import { MissionTimelineEvent } from '../../models/alzheimer-app/mission-timeline-event.model';
 
 const BASE = (environment as { supportNetworkApiUrl?: string }).supportNetworkApiUrl ?? '/api';
 

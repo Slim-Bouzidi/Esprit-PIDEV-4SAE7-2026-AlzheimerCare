@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
-import { supportNetworkHttpHeaders } from '../core/support-network-headers';
-import { Mission } from '../models/mission.model';
+import { environment } from '../../../../environments/environment';
+import { supportNetworkHttpHeaders } from '../../support-network-headers';
+import { Mission } from '../../models/alzheimer-app/mission.model';
 
 const BASE = (environment as { supportNetworkApiUrl?: string }).supportNetworkApiUrl ?? '/api';
 

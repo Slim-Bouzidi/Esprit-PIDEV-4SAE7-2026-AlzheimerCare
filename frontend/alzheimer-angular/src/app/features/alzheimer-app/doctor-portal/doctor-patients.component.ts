@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { SidebarComponent } from '../../../shared/sidebar-portal/sidebar.component';
 import { PatientService, Patient } from '../../../core/services/alzheimer-app/patient.service';
+import { PatientSupportLinkService } from '../../../core/services/alzheimer-app/patient-support-link.service';
 import { UserService, User } from '../../../core/services/alzheimer-app/user.service';
 import { EmergencyContactService } from '../../../core/services/alzheimer-app/emergency-contact.service';
 import { MedicalRecordService } from '../../../core/services/alzheimer-app/medical-record.service';
@@ -91,6 +92,7 @@ export class DoctorPatientsComponent implements OnInit {
     constructor(
         private router: Router,
         private patientService: PatientService,
+        private patientSupportLinkService: PatientSupportLinkService,
         private userService: UserService,
         private emergencyContactService: EmergencyContactService,
         private medicalRecordService: MedicalRecordService,
@@ -485,6 +487,11 @@ export class DoctorPatientsComponent implements OnInit {
         this.patientService.create(patientBody).subscribe({
             next: (createdPatient: any) => {
                 console.log('Patient created:', createdPatient);
+                // Keep support-network selector in sync with newly created main patient records.
+                this.patientSupportLinkService.syncSupportPatient(createdPatient).subscribe({
+                    next: () => console.log('Support-network patient synced:', createdPatient?.idPatient ?? createdPatient?.id),
+                    error: (syncErr) => console.warn('Support-network sync skipped:', syncErr?.message ?? syncErr),
+                });
                 alert('Patient added successfully.');
                 this.isLoading = false;
 

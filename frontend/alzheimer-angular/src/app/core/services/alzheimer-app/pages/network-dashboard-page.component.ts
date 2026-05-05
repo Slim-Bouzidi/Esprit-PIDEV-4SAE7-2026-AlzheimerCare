@@ -3,20 +3,23 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { translateOrFallback } from '../../core/i18n-fallback';
-import { DashboardService } from '../../services/dashboard.service';
-import { NetworkDashboard } from '../../models/dashboard.model';
-import { getSupportNetworkHttpErrorMessage } from '../../core/support-network-http-error';
-import { WebSocketService } from '../../services/websocket.service';
+import { translateOrFallback } from '../../../i18n-fallback';
+import { DashboardService } from '../dashboard.service';
+import { NetworkDashboard } from '../../../models/alzheimer-app/dashboard.model';
+import { getSupportNetworkHttpErrorMessage } from '../../../support-network-http-error';
+import { WebSocketService } from '../websocket.service';
 import { Subscription } from 'rxjs';
-import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-network-dashboard-page',
   standalone: true,
   imports: [CommonModule, RouterModule, TranslateModule],
   templateUrl: './network-dashboard-page.component.html',
-  styleUrls: ['../soignant-pages.css', './network-dashboard-page.component.scss'],
+  styleUrls: [
+    '../../../../features/alzheimer-app/doctor-portal/doctor-patients.component.css',
+    '../../../../features/alzheimer-app/doctor-portal/doctor-dashboard.component.css',
+    './network-dashboard-page.component.scss',
+  ],
 })
 export class NetworkDashboardPageComponent implements OnInit, OnDestroy {
   loading = true;
@@ -27,8 +30,7 @@ export class NetworkDashboardPageComponent implements OnInit, OnDestroy {
   constructor(
     private dashboardService: DashboardService,
     private translate: TranslateService,
-    private websocketService: WebSocketService,
-    private toastr: ToastrService
+    private websocketService: WebSocketService
   ) {}
 
   ngOnInit(): void {
@@ -36,7 +38,7 @@ export class NetworkDashboardPageComponent implements OnInit, OnDestroy {
     this.wsSubscriptions.push(
       this.websocketService.onMissionUpdate().subscribe((event) => {
         console.log('🔄 WS Mission update:', event);
-        this.toastr.success('Dashboard updated');
+        console.log('Dashboard updated');
         this.refresh();
       })
     );
@@ -47,13 +49,13 @@ export class NetworkDashboardPageComponent implements OnInit, OnDestroy {
           event && typeof event === 'object' && 'message' in (event as Record<string, unknown>)
             ? String((event as Record<string, unknown>)['message'] ?? 'New notification')
             : 'New notification';
-        this.toastr.info(txt || 'New notification');
+        console.log(txt || 'New notification');
       })
     );
     this.wsSubscriptions.push(
       this.websocketService.onDispatchUpdate().subscribe((event) => {
         console.log('📩 WS dispatch update:', event);
-        this.toastr.success('Dispatch updated');
+        console.log('Dispatch updated');
         this.refresh();
       })
     );

@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { supportNetworkHttpHeaders } from '../core/support-network-headers';
+import { supportNetworkHttpHeaders } from '../../support-network-headers';
 import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
-import { AvailabilitySlot, AvailabilityCreateDto } from '../models/availability.model';
+import { environment } from '../../../../environments/environment';
+import { AvailabilitySlot, AvailabilityCreateDto } from '../../models/alzheimer-app/availability.model';
 
 const BASE = (environment as { supportNetworkApiUrl?: string }).supportNetworkApiUrl ?? '/api';
 
