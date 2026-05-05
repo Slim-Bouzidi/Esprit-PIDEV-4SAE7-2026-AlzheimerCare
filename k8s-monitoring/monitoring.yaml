@@ -116,6 +116,19 @@ spec:
   selector:
     app: prometheus
 ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: grafana-pvc
+  namespace: monitoring
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+  storageClassName: local-path
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -131,6 +144,9 @@ spec:
       labels:
         app: grafana
     spec:
+      securityContext:
+        fsGroup: 472
+        runAsUser: 472
       containers:
       - name: grafana
         image: grafana/grafana:latest
@@ -143,6 +159,13 @@ spec:
           requests:
             memory: "512Mi"
             cpu: "250m"
+        volumeMounts:
+        - name: grafana-storage
+          mountPath: /var/lib/grafana
+      volumes:
+      - name: grafana-storage
+        persistentVolumeClaim:
+          claimName: grafana-pvc
 ---
 apiVersion: v1
 kind: Service
