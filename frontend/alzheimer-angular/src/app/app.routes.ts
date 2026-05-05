@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { AppShellComponent } from './layout/app-shell/app-shell.component';
 import { roleGuard } from './core/guards/role.guard';
 import { appShellGuard } from './core/guards/app-shell.guard';
+import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -104,7 +105,7 @@ export const routes: Routes = [
   {
     path: '',
     component: AppShellComponent,
-    canActivate: [appShellGuard],
+    canActivate: [authGuard, appShellGuard],
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       {

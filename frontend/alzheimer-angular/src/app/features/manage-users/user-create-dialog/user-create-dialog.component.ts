@@ -117,43 +117,118 @@ import { PatientService } from '../../../services/patient.service';
       display: flex;
       flex-direction: column;
       gap: 1.5rem;
-      padding: 1.5rem 0.5rem;
+      padding: 0.5rem;
     }
 
     .input-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 1rem;
+      gap: 1.25rem;
     }
 
     .input-group {
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 0.4rem;
 
       label {
         font-weight: 600;
         font-size: 0.875rem;
-        color: var(--text-color-secondary);
+        color: #000;
+        padding-left: 0.1rem;
       }
 
-      input, ::ng-deep .p-inputnumber, ::ng-deep .p-dropdown {
-        width: 100%;
+      ::ng-deep .p-inputtext, 
+      ::ng-deep .p-dropdown,
+      ::ng-deep .p-inputnumber-input {
+        width: 100% !important;
+        background: #ffffff !important;
+        border: 1px solid #e2e2e2 !important;
+        border-radius: 6px !important; /* Sharper corners like Shadcn */
+        padding: 0.6rem 0.75rem !important;
+        font-size: 0.875rem !important;
+        color: #000 !important;
+        box-shadow: none !important;
+        transition: border-color 0.15s ease;
+
+        &:focus {
+          border-color: #000 !important;
+          outline: none !important;
+        }
       }
 
-      ::ng-deep .p-inputtext {
-        padding: 0.75rem;
-        border-radius: 8px;
-        border: 1px solid var(--surface-border);
+      ::ng-deep .p-dropdown {
+          padding: 0 !important;
+          .p-dropdown-label { padding: 0.6rem 0.75rem !important; }
       }
     }
 
-    .dialog-footer {
-      display: flex;
-      justify-content: flex-end;
-      gap: 0.75rem;
-      padding-top: 1rem;
-      border-top: 1px solid var(--surface-border);
+    /* SHADCN / VERCEL DIALOG OVERRIDE */
+    ::ng-deep .create-user-dialog {
+        &.p-dialog-mask {
+            background: rgba(0, 0, 0, 0.4) !important;
+            backdrop-filter: blur(4px) !important;
+        }
+
+        .p-dialog {
+            background: #ffffff !important;
+            border: 1px solid #eaeaea !important;
+            border-radius: 8px !important;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.12) !important;
+        }
+        
+        .p-dialog-header {
+            background: #ffffff !important;
+            padding: 1.5rem 1.5rem 0.5rem !important;
+            border-bottom: none !important;
+            
+            .p-dialog-title {
+                font-weight: 700 !important;
+                font-size: 1.25rem !important;
+                color: #000 !important;
+                letter-spacing: -0.02em !important;
+            }
+
+            .p-dialog-header-icons .p-dialog-header-close {
+                color: #666 !important;
+                &:hover { color: #000 !important; background: #f5f5f5 !important; }
+            }
+        }
+        
+        .p-dialog-content {
+            background: #ffffff !important;
+            padding: 1rem 1.5rem 1.5rem !important;
+        }
+        
+        .p-dialog-footer {
+            background: #fafafa !important;
+            padding: 1rem 1.5rem !important;
+            border-top: 1px solid #eaeaea !important;
+            border-bottom-left-radius: 8px !important;
+            border-bottom-right-radius: 8px !important;
+            
+            .p-button.p-button-text {
+                color: #666 !important;
+                font-weight: 500 !important;
+                &:hover { color: #000 !important; }
+            }
+
+            .p-button:not(.p-button-text) {
+                background: #000 !important; /* Vercel Black */
+                color: #fff !important;
+                border: 1px solid #000 !important;
+                border-radius: 6px !important;
+                padding: 0.5rem 1rem !important;
+                font-weight: 500 !important;
+                font-size: 0.875rem !important;
+                transition: all 0.2s;
+                
+                &:hover {
+                    background: #fff !important;
+                    color: #000 !important;
+                }
+            }
+        }
     }
   `]
 })

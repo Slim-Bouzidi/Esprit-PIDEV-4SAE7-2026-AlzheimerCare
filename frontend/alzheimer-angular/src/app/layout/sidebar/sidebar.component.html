@@ -54,14 +54,14 @@
   <!-- Footer: User profile -->
   <div class="sidebar-footer">
     <div class="user-profile">
-      <div class="profile-avatar-wrap" [attr.title]="collapsed() ? 'Dr. Sarah Chen — Super Admin' : null">
-        <p-avatar image="https://randomuser.me/api/portraits/women/44.jpg" shape="circle" size="large"
+      <div class="profile-avatar-wrap" [attr.title]="collapsed() ? (userName + ' — ' + userRole) : null">
+        <p-avatar [image]="userAvatar" shape="circle" size="large"
           styleClass="profile-avatar" />
       </div>
       @if (!collapsed()) {
       <div class="user-info">
-        <span class="user-name">Dr. Sarah Chen</span>
-        <span class="user-role">Super Admin</span>
+        <span class="user-name">{{ userName }}</span>
+        <span class="user-role">{{ userRole }}</span>
       </div>
       }
       <button type="button" class="profile-menu-btn" [class.profile-menu-btn--collapsed]="collapsed()"

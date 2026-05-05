@@ -117,6 +117,12 @@ spec:
         envFrom:
         - configMapRef:
             name: alzheimer-config
+        env:
+        - name: SPRING_DATASOURCE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: alzheimer-config
+              key: SPRING_DATASOURCE_URL_COGNITIVE
 ---
 apiVersion: v1
 kind: Service
@@ -152,6 +158,12 @@ spec:
         envFrom:
         - configMapRef:
             name: alzheimer-config
+        env:
+        - name: SPRING_DATASOURCE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: alzheimer-config
+              key: SPRING_DATASOURCE_URL_PATIENT
 ---
 apiVersion: v1
 kind: Service
@@ -185,3 +197,9 @@ spec:
         envFrom:
         - configMapRef:
             name: alzheimer-config
+        env:
+        - name: SPRING_DATASOURCE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: alzheimer-config
+              key: SPRING_DATASOURCE_URL_APP

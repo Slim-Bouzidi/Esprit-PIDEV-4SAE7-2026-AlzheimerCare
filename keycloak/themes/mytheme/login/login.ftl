@@ -23,7 +23,11 @@
                 
                 <#if message?has_content>
                     <div class="alert alert-${message.type}">
-                        <i class="fas fa-${message.type == 'error'?then('exclamation-circle', 'check-circle')}"></i>
+                        <#if message.type == 'error'>
+                            <i class="fas fa-exclamation-circle"></i>
+                        <#else>
+                            <i class="fas fa-check-circle"></i>
+                        </#if>
                         <span>${kcSanitize(message.summary)?no_esc}</span>
                     </div>
                 </#if>
@@ -63,7 +67,7 @@
                 </form>
                 
                 <footer class="form-footer">
-                    <p>Don't have an account? <a href="${url.registrationUrl}">Create Account</a></p>
+                    <p>Don't have an account? <a href="http://192.168.192.130:30420/register">Create Account</a></p>
                 </footer>
             </div>
             <div class="footer-legal">

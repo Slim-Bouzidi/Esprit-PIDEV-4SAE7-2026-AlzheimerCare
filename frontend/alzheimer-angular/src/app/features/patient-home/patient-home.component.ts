@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { CognitiveService, PatientCognitiveReport, ActivityResponse } from '../../services/cognitive.service';
 import { PatientService, PatientProfile } from '../../core/services/patient.service';
+import { UserService } from '../../services/user.service';
 import keycloak from '../../keycloak';
 
 @Component({
@@ -19,6 +20,15 @@ export class PatientHomeComponent implements OnInit {
   userName: string = '';
   loadingReport = true;
   loadingProfile = true;
+  isAdmin: boolean = false;
+
+  adminStats = {
+    totalPatients: 0,
+    activeCaregivers: 0,
+    medicalStaff: 0,
+    systemUptime: '99.9%',
+    pendingAlerts: 0
+  };
 
   readonly games = [
     { label: 'Reaction Time', desc: 'Test your visual reflexes', icon: 'pi-bolt', color: '#6366f1', route: '/patient/dashboard', fragment: 'reflex' },
@@ -29,6 +39,7 @@ export class PatientHomeComponent implements OnInit {
   constructor(
     private cognitiveService: CognitiveService,
     private patientService: PatientService,
+    private userService: UserService,
     private router: Router
   ) {}
 
@@ -36,6 +47,15 @@ export class PatientHomeComponent implements OnInit {
     const patientId = keycloak.subject;
     const token = keycloak.tokenParsed as any;
     this.userName = token?.given_name || token?.preferred_username || 'there';
+    
+    // Check if user is Admin
+    this.isAdmin = keycloak.realmAccess?.roles?.includes('ADMIN') || false;
+
+    if (this.isAdmin) {
+      this.loadingReport = false;
+      this.loadingProfile = false;
+      return; // Skip patient-specific data fetching
+    }
 
     if (patientId) {
       this.cognitiveService.getReport(patientId).subscribe({
@@ -59,6 +79,17 @@ export class PatientHomeComponent implements OnInit {
     this.patientService.getMe().subscribe({
       next: (p) => { this.profile = p; this.loadingProfile = false; },
       error: () => { this.loadingProfile = false; }
+    });
+  }
+
+  private loadAdminStats(): void {
+    this.userService.getAllUsers().subscribe({
+      next: (users) => {
+        this.adminStats.totalPatients = users.filter(u => u.role === 'PATIENT').length;
+        this.adminStats.activeCaregivers = users.filter(u => u.role === 'CAREGIVER').length;
+        this.adminStats.medicalStaff = users.filter(u => u.role === 'DOCTOR' || u.role === 'DOCTEUR').length;
+      },
+      error: (err) => console.error('Failed to load admin stats', err)
     });
   }
 

@@ -39,7 +39,7 @@ spec:
             }
         }
 
-        stage('Build & Push Frontend') {
+        stage('Build Frontend') {
             steps {
                 container('node') {
                     dir('frontend/alzheimer-angular') {
@@ -47,9 +47,16 @@ spec:
                         sh 'npm run build'
                     }
                 }
+            }
+        }
+
+        stage('Docker Build & Push') {
+            steps {
                 container('docker') {
                     sh "docker build -t ${NEXUS_REGISTRY}/alzheimer-frontend:latest ./frontend/alzheimer-angular"
                     sh "docker push ${NEXUS_REGISTRY}/alzheimer-frontend:latest"
+                    sh "docker rmi ${NEXUS_REGISTRY}/alzheimer-frontend:latest || true"
+                    sh "docker system prune -a --volumes -f || true"
                 }
             }
         }
@@ -58,13 +65,6 @@ spec:
             steps {
                 echo "Handing off to CD Pipeline..."
                 build job: 'alzheimer-backend-cd', wait: false
-            }
-        }
-    post {
-        always {
-            script {
-                echo "Cleaning up workspace to save disk space..."
-                cleanWs()
             }
         }
     }

@@ -13,31 +13,34 @@ pipeline {
         stage('Detect & Trigger') {
             steps {
                 script {
-                    // Check which files changed in the last commit
-                    def changedFiles = sh(script: 'git diff --name-only HEAD~1', returnStdout: true).trim()
+                    // Get changed files in last commit
+                    def changedFiles = sh(script: 'git diff --name-only HEAD~1', returnStdout: true).trim().split('\n')
                     echo "Changed files detected: ${changedFiles}"
                     
-                    def backendChanged = changedFiles.contains('backend/')
-                    def frontendChanged = changedFiles.contains('frontend/')
-                    def keycloakChanged = changedFiles.contains('keycloak/')
-                    def k8sChanged = changedFiles.contains('k8s/')
+                    def backendChanged = false
+                    def frontendChanged = false
+                    def keycloakChanged = false
+                    def k8sChanged = false
 
-                    // Trigger Frontend Pipeline
+                    for (file in changedFiles) {
+                        if (file.startsWith('backend/') || file == 'Jenkinsfile.backend-ci') backendChanged = true
+                        if (file.startsWith('frontend/') || file == 'Jenkinsfile.frontend') frontendChanged = true
+                        if (file.startsWith('keycloak/')) keycloakChanged = true
+                        if (file.startsWith('k8s/')) k8sChanged = true
+                    }
+
                     if (frontendChanged) {
-                        echo "Triggering Frontend Pipeline..."
+                        echo ">>> TRIGGERING FRONTEND PIPELINE"
                         build job: 'alzheimer-frontend', wait: false
                     }
 
-                    // Trigger Backend CI Pipeline
                     if (backendChanged || keycloakChanged) {
-                        echo "Triggering Backend CI Pipeline..."
+                        echo ">>> TRIGGERING BACKEND CI PIPELINE"
                         build job: 'alzheimer-backend-ci', wait: false
                     }
 
-                    // Trigger CD Pipeline if only K8s changed
-                    // (Note: Backend/Frontend pipelines also trigger CD at their end)
                     if (k8sChanged && !backendChanged && !frontendChanged) {
-                        echo "Triggering Deployment (CD) Pipeline..."
+                        echo ">>> TRIGGERING DEPLOYMENT (CD) PIPELINE"
                         build job: 'alzheimer-backend-cd', wait: false
                     }
                 }
