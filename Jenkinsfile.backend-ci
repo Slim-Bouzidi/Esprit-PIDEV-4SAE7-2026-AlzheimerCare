@@ -93,15 +93,4 @@ spec:
         }
     }
 
-    post {
-        always {
-            script {
-                echo "Cleaning up workspace..."
-                // Try to clean using a container to avoid permission issues
-                container('maven') {
-                    sh 'rm -rf ./* || true'
-                }
-            }
-        }
-    }
 }

@@ -56,11 +56,9 @@ spec:
                     dir('frontend/alzheimer-angular') {
                         // Install chromium for headless testing
                         sh 'apk add --no-cache chromium nss freetype harfbuzz ttf-freefont'
-                        // Set Chrome binary for Karma
-                        env.CHROME_BIN = '/usr/bin/chromium-browser'
                         
                         // Run tests with coverage
-                        sh 'npm test -- --watch=false --browsers=ChromeHeadless --code-coverage'
+                        sh 'CHROME_BIN=/usr/bin/chromium-browser npm test -- --watch=false --browsers=ChromeHeadless --code-coverage'
                         
                         // Run Sonar Scanner
                         withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_AUTH_TOKEN')]) {
