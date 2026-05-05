@@ -2,6 +2,7 @@ import { inject } from '@angular/core';
 import { Router, Routes, UrlTree } from '@angular/router';
 import { AppShellComponent } from './layout/app-shell/app-shell.component';
 import { roleGuard } from './core/guards/role.guard';
+import { authGuard } from './core/guards/auth.guard';
 import keycloak from './keycloak';
 
 type KeycloakResourceAccessEntry = { roles?: string[] };
@@ -72,23 +73,26 @@ export const routes: Routes = [
   {
     path: '',
     component: AppShellComponent,
-    canActivate: [(): boolean | UrlTree => {
-      const router = inject(Router);
-      const realmRoles = keycloak.realmAccess?.roles || [];
-      const resourceRoles = Object.values(keycloak.resourceAccess || {})
-        .flatMap((resource) => (resource as KeycloakResourceAccessEntry).roles || []);
-      const tokenRoles =
-        (keycloak.tokenParsed && 'roles' in keycloak.tokenParsed
-          ? (keycloak.tokenParsed['roles'] as string[] | undefined)
-          : []) || [];
+    canActivate: [
+      authGuard,
+      (): boolean | UrlTree => {
+        const router = inject(Router);
+        const realmRoles = keycloak.realmAccess?.roles || [];
+        const resourceRoles = Object.values(keycloak.resourceAccess || {})
+          .flatMap((resource) => (resource as KeycloakResourceAccessEntry).roles || []);
+        const tokenRoles =
+          (keycloak.tokenParsed && 'roles' in keycloak.tokenParsed
+            ? (keycloak.tokenParsed['roles'] as string[] | undefined)
+            : []) || [];
 
-      const allRoles = [...realmRoles, ...resourceRoles, ...tokenRoles].map(r => r.toUpperCase());
+        const allRoles = [...realmRoles, ...resourceRoles, ...tokenRoles].map(r => r.toUpperCase());
 
-      if (allRoles.some(r => r.includes('DOCTOR') || r.includes('DOCTEUR'))) {
-        return router.createUrlTree(['/doctor-dashboard']);
+        if (allRoles.some(r => r.includes('DOCTOR') || r.includes('DOCTEUR'))) {
+          return router.createUrlTree(['/doctor-dashboard']);
+        }
+        return true;
       }
-      return true;
-    }],
+    ],
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       {
