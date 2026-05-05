@@ -31,7 +31,7 @@ export class SidebarComponent {
   collapsed = signal(true);
   userName: string = '';
   userRole: string = '';
-  userAvatar: string = 'https://randomuser.me/api/portraits/lego/1.jpg'; // Default
+  userAvatar: string = 'https://randomuser.me/api/portraits/women/44.jpg'; // Real person PFP
 
   private readonly allNavItems: NavItem[] = [
     { label: 'Dashboard', icon: 'pi pi-th-large', route: '/', exact: true },

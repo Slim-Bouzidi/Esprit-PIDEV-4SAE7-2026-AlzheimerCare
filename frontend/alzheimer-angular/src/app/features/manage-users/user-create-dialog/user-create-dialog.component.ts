@@ -129,96 +129,104 @@ import { PatientService } from '../../../services/patient.service';
     .input-group {
       display: flex;
       flex-direction: column;
-      gap: 0.6rem;
+      gap: 0.4rem;
 
       label {
-        font-weight: 700;
-        font-size: 0.8rem;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: #64748b;
-        padding-left: 0.25rem;
+        font-weight: 600;
+        font-size: 0.875rem;
+        color: #000;
+        padding-left: 0.1rem;
       }
 
       ::ng-deep .p-inputtext, 
       ::ng-deep .p-dropdown,
       ::ng-deep .p-inputnumber-input {
         width: 100% !important;
-        background: rgba(255, 255, 255, 0.5) !important;
-        border: 1px solid rgba(0, 0, 0, 0.05) !important;
-        border-radius: 14px !important;
-        padding: 0.8rem 1rem !important;
-        font-size: 0.95rem !important;
-        transition: all 0.2s ease !important;
-        color: #1e293b !important;
+        background: #ffffff !important;
+        border: 1px solid #e2e2e2 !important;
+        border-radius: 6px !important; /* Sharper corners like Shadcn */
+        padding: 0.6rem 0.75rem !important;
+        font-size: 0.875rem !important;
+        color: #000 !important;
+        box-shadow: none !important;
+        transition: border-color 0.15s ease;
 
         &:focus {
-          background: #fff !important;
-          border-color: #6366f1 !important;
-          box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1) !important;
+          border-color: #000 !important;
+          outline: none !important;
         }
       }
 
       ::ng-deep .p-dropdown {
           padding: 0 !important;
-          .p-dropdown-label { padding: 0.8rem 1rem !important; }
-          .p-dropdown-trigger { width: 3rem !important; }
+          .p-dropdown-label { padding: 0.6rem 0.75rem !important; }
       }
     }
 
+    /* SHADCN / VERCEL DIALOG OVERRIDE */
     ::ng-deep .create-user-dialog {
+        &.p-dialog-mask {
+            background: rgba(0, 0, 0, 0.4) !important;
+            backdrop-filter: blur(4px) !important;
+        }
+
         .p-dialog {
-            background: rgba(255, 255, 255, 0.72) !important;
-            backdrop-filter: blur(20px) saturate(180%) !important;
-            -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-            border: 1px solid rgba(255, 255, 255, 0.4) !important;
-            border-radius: 24px !important;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1) !important;
+            background: #ffffff !important;
+            border: 1px solid #eaeaea !important;
+            border-radius: 8px !important;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.12) !important;
         }
         
         .p-dialog-header {
-            background: transparent !important;
-            padding: 2rem 2rem 1rem !important;
-            border-top-left-radius: 24px !important;
-            border-top-right-radius: 24px !important;
+            background: #ffffff !important;
+            padding: 1.5rem 1.5rem 0.5rem !important;
+            border-bottom: none !important;
             
             .p-dialog-title {
-                font-weight: 800 !important;
-                font-size: 1.5rem !important;
-                color: #0f172a !important;
+                font-weight: 700 !important;
+                font-size: 1.25rem !important;
+                color: #000 !important;
                 letter-spacing: -0.02em !important;
+            }
+
+            .p-dialog-header-icons .p-dialog-header-close {
+                color: #666 !important;
+                &:hover { color: #000 !important; background: #f5f5f5 !important; }
             }
         }
         
         .p-dialog-content {
-            background: transparent !important;
-            padding: 0 2rem 2rem !important;
+            background: #ffffff !important;
+            padding: 1rem 1.5rem 1.5rem !important;
         }
         
         .p-dialog-footer {
-            background: rgba(255, 255, 255, 0.4) !important;
-            padding: 1.25rem 2rem !important;
-            border-bottom-left-radius: 24px !important;
-            border-bottom-right-radius: 24px !important;
-            border-top: 1px solid rgba(0, 0, 0, 0.05) !important;
-        }
-
-        .p-button.p-button-text {
-            color: #64748b !important;
-            font-weight: 700 !important;
-        }
-
-        .p-button:not(.p-button-text) {
-            background: #6366f1 !important;
-            border: none !important;
-            border-radius: 12px !important;
-            padding: 0.75rem 1.5rem !important;
-            font-weight: 700 !important;
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2) !important;
+            background: #fafafa !important;
+            padding: 1rem 1.5rem !important;
+            border-top: 1px solid #eaeaea !important;
+            border-bottom-left-radius: 8px !important;
+            border-bottom-right-radius: 8px !important;
             
-            &:hover {
-                background: #4f46e5 !important;
-                transform: translateY(-1px) !important;
+            .p-button.p-button-text {
+                color: #666 !important;
+                font-weight: 500 !important;
+                &:hover { color: #000 !important; }
+            }
+
+            .p-button:not(.p-button-text) {
+                background: #000 !important; /* Vercel Black */
+                color: #fff !important;
+                border: 1px solid #000 !important;
+                border-radius: 6px !important;
+                padding: 0.5rem 1rem !important;
+                font-weight: 500 !important;
+                font-size: 0.875rem !important;
+                transition: all 0.2s;
+                
+                &:hover {
+                    background: #fff !important;
+                    color: #000 !important;
+                }
             }
         }
     }
