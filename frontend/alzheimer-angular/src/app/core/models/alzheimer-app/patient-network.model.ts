@@ -39,7 +39,7 @@ export interface LinkCreateDto {
   canAccessHome: boolean;
 }
 
-/** PUT /api/patients/{id} — matches backend PatientCreateDto (id comes from URL). */
+/** PUT /api/support-patients/{id} — matches backend PatientCreateDto (id comes from URL). */
 export interface SupportNetworkPatientUpdateDto {
   fullName: string;
   zone?: string;

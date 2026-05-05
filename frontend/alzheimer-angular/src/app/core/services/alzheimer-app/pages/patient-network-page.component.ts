@@ -13,38 +13,37 @@ import {
 } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { HttpErrorResponse } from '@angular/common/http';
-import { MembersService } from '../../services/members.service';
-import { PatientSupportLinkService } from '../../services/patient-support-link.service';
+import { MembersService } from '../members.service';
+import { PatientSupportLinkService } from '../patient-support-link.service';
 import {
   AlertType,
   ALERT_TYPES,
   DispatchPlan,
   RankedIntervenant,
-} from '../../network/models/support-network-advanced.types';
-import { EngineApiService } from '../../network/services/engine-api.service';
-import { DispatchPlannerApiService } from '../../network/services/dispatch-planner-api.service';
-import { MissionService } from '../../services/mission.service';
-import { AlertService } from '../../services/alert.service';
-import { DispatchHistoryService } from '../../services/dispatch-history.service';
-import { DispatchHistoryDetail, DispatchHistoryItem } from '../../models/dispatch-history.model';
-import { MissionDispatchRequest } from '../../models/mission-dispatch-request.model';
-import { SupportMember } from '../../models/support-member.model';
+} from '../../../../network/models/support-network-advanced.types';
+import { EngineApiService } from '../../../../network/services/engine-api.service';
+import { DispatchPlannerApiService } from '../../../../network/services/dispatch-planner-api.service';
+import { MissionService } from '../mission.service';
+import { AlertService } from '../alert.service';
+import { DispatchHistoryService } from '../dispatch-history.service';
+import { DispatchHistoryDetail, DispatchHistoryItem } from '../../../models/alzheimer-app/dispatch-history.model';
+import { MissionDispatchRequest } from '../../../models/alzheimer-app/mission-dispatch-request.model';
+import { SupportMember } from '../../../models/alzheimer-app/support-member.model';
 import {
   NetworkPatient,
   PatientSupportLink,
   LinkCreateDto,
   TRUST_LEVELS,
   PERMISSION_OPTIONS,
-} from '../../models/patient-network.model';
+} from '../../../models/alzheimer-app/patient-network.model';
 import { RouterModule } from '@angular/router';
-import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
-import { skillChipLabel } from '../../utils/skill-display';
-import { trySupportNetworkDemoSafeMessage } from '../../core/support-network-demo-error';
-import { getSupportNetworkHttpErrorMessage } from '../../core/support-network-http-error';
-import { WebSocketService } from '../../services/websocket.service';
+import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { skillChipLabel } from '../../../../utils/skill-display';
+import { trySupportNetworkDemoSafeMessage } from '../../../support-network-demo-error';
+import { getSupportNetworkHttpErrorMessage } from '../../../support-network-http-error';
+import { WebSocketService } from '../websocket.service';
 import { Subscription } from 'rxjs';
-import { ToastrService } from 'ngx-toastr';
-import { TablePaginationComponent } from '../../shared/components/table-pagination/table-pagination.component';
+import { TablePaginationComponent } from '../../../../shared/components/table-pagination/table-pagination.component';
 
 function optionalPatientGeoLatitude(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
@@ -79,7 +78,10 @@ function normalizePatientCoordinate(v: unknown): number | undefined {
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, FormsModule, TranslateModule, RouterModule, ConfirmDialogComponent, TablePaginationComponent],
   templateUrl: './patient-network-page.component.html',
-  styleUrls: ['../soignant-pages.css', './patient-network-page.component.scss'],
+  styleUrls: [
+    '../../../../features/alzheimer-app/doctor-portal/doctor-patients.component.css',
+    './patient-network-page.component.scss',
+  ],
 })
 export class PatientNetworkPageComponent implements OnInit, OnDestroy {
   form: FormGroup;
@@ -134,7 +136,7 @@ export class PatientNetworkPageComponent implements OnInit, OnDestroy {
   private readonly dispatchRealtimeSubscriptions = new Map<number, Subscription>();
   private wsSubscriptions: Subscription[] = [];
 
-  /** WGS84 for selected patient (PUT /api/patients/{id}) — used for distance ranking on the backend. */
+  /** WGS84 for selected patient (PUT /api/support-patients/{id}) — used for distance ranking on the backend. */
   patientGeoForm: FormGroup;
   patientGeoSaving = false;
 
@@ -148,8 +150,7 @@ export class PatientNetworkPageComponent implements OnInit, OnDestroy {
     private alertService: AlertService,
     private dispatchHistoryService: DispatchHistoryService,
     private translate: TranslateService,
-    private websocketService: WebSocketService,
-    private toastr: ToastrService
+    private websocketService: WebSocketService
   ) {
     this.form = this.fb.group({
       memberId: [null as number | null, Validators.required],
@@ -171,7 +172,7 @@ export class PatientNetworkPageComponent implements OnInit, OnDestroy {
     this.wsSubscriptions.push(
       this.websocketService.onMissionUpdate().subscribe((event) => {
         console.log('🔄 WS Mission update:', event);
-        this.toastr.success('Mission updated');
+        console.log('Mission updated');
         this.loadLinks();
         if (this.dispatchHistoryQueried) {
           this.refreshDispatchHistory();
@@ -185,13 +186,13 @@ export class PatientNetworkPageComponent implements OnInit, OnDestroy {
           event && typeof event === 'object' && 'message' in (event as Record<string, unknown>)
             ? String((event as Record<string, unknown>)['message'] ?? 'New notification')
             : 'New notification';
-        this.toastr.info(txt || 'New notification');
+        console.log(txt || 'New notification');
       })
     );
     this.wsSubscriptions.push(
       this.websocketService.onDispatchUpdate().subscribe((event) => {
         console.log('📩 WS dispatch update:', event);
-        this.toastr.success('Dispatch updated');
+        console.log('Dispatch updated');
         if (this.dispatchHistoryQueried) {
           this.refreshDispatchHistory();
         }

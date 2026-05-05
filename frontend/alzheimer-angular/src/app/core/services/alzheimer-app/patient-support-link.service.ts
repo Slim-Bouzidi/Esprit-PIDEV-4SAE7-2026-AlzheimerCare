@@ -1,14 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { supportNetworkHttpHeaders } from '../core/support-network-headers';
+import { supportNetworkHttpHeaders } from '../../support-network-headers';
 import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { environment } from '../../../../environments/environment';
 import {
   NetworkPatient,
   PatientSupportLink,
   LinkCreateDto,
   SupportNetworkPatientUpdateDto,
-} from '../models/patient-network.model';
+} from '../../models/alzheimer-app/patient-network.model';
 
 const BASE = (environment as { supportNetworkApiUrl?: string }).supportNetworkApiUrl ?? '/api';
 
@@ -18,18 +18,41 @@ export class PatientSupportLinkService {
 
   constructor(private http: HttpClient) {}
 
-  /** GET /api/patients - list patients (support-network backend) */
+  /** GET /api/support-patients — support-network PatientController (not patient-service /api/patients). */
   getPatients(): Observable<NetworkPatient[]> {
-    console.log('Calling API:', `${this.api}/patients`);
-    return this.http.get<NetworkPatient[]>(`${this.api}/patients`, {
+    console.log('Calling API:', `${this.api}/support-patients`);
+    return this.http.get<NetworkPatient[]>(`${this.api}/support-patients`, {
       headers: supportNetworkHttpHeaders(),
     });
   }
 
-  /** PUT /api/patients/{id} — update name, zone, WGS84 coordinates (for distance ranking). */
+  /**
+   * POST /api/support-patients — mirrors a patient from doctor/admin flow into support-network store.
+   * This does not change main patient-service data; it only ensures selector visibility.
+   */
+  syncSupportPatient(patient: {
+    id?: number;
+    idPatient?: number;
+    fullName?: string;
+    firstName?: string;
+    lastName?: string;
+  }): Observable<NetworkPatient> {
+    const id = patient.idPatient ?? patient.id;
+    const fullName =
+      (patient.fullName && patient.fullName.trim()) ||
+      `${patient.firstName ?? ''} ${patient.lastName ?? ''}`.trim() ||
+      `Patient #${id ?? ''}`.trim();
+    return this.http.post<NetworkPatient>(
+      `${this.api}/support-patients`,
+      { id, fullName },
+      { headers: supportNetworkHttpHeaders() }
+    );
+  }
+
+  /** PUT /api/support-patients/{id} — update name, zone, WGS84 (PatientCreateDto on backend). */
   updatePatient(id: number, body: SupportNetworkPatientUpdateDto): Observable<NetworkPatient> {
-    console.log('Calling API:', `${this.api}/patients/${id}`);
-    return this.http.put<NetworkPatient>(`${this.api}/patients/${id}`, body, {
+    console.log('Calling API:', `${this.api}/support-patients/${id}`);
+    return this.http.put<NetworkPatient>(`${this.api}/support-patients/${id}`, body, {
       headers: supportNetworkHttpHeaders(),
     });
   }

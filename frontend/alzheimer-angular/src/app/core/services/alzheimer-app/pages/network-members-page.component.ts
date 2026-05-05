@@ -12,19 +12,18 @@ import {
 } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { HttpErrorResponse } from '@angular/common/http';
-import { MembersService } from '../../services/members.service';
-import { SkillService } from '../../services/skill.service';
-import { SupportMember, SUPPORT_MEMBER_TYPES } from '../../models/support-member.model';
-import { Skill } from '../../models/skill.model';
-import { skillChipLabel } from '../../utils/skill-display';
+import { MembersService } from '../members.service';
+import { SkillService } from '../skill.service';
+import { SupportMember, SUPPORT_MEMBER_TYPES } from '../../../models/alzheimer-app/support-member.model';
+import { Skill } from '../../../models/alzheimer-app/skill.model';
+import { skillChipLabel } from '../../../../utils/skill-display';
 import { RouterModule } from '@angular/router';
-import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
-import { trySupportNetworkDemoSafeMessage } from '../../core/support-network-demo-error';
-import { getSupportNetworkHttpErrorMessage } from '../../core/support-network-http-error';
-import { WebSocketService } from '../../services/websocket.service';
+import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { trySupportNetworkDemoSafeMessage } from '../../../support-network-demo-error';
+import { getSupportNetworkHttpErrorMessage } from '../../../support-network-http-error';
+import { WebSocketService } from '../websocket.service';
 import { Subscription } from 'rxjs';
-import { ToastrService } from 'ngx-toastr';
-import { TablePaginationComponent } from '../../shared/components/table-pagination/table-pagination.component';
+import { TablePaginationComponent } from '../../../../shared/components/table-pagination/table-pagination.component';
 
 interface PhoneCountryOption {
   iso: string;
@@ -79,7 +78,10 @@ function optionalEmail(): ValidatorFn {
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, FormsModule, TranslateModule, RouterModule, ConfirmDialogComponent, TablePaginationComponent],
   templateUrl: './network-members-page.component.html',
-  styleUrls: ['../soignant-pages.css', './network-members-page.component.scss'],
+  styleUrls: [
+    '../../../../features/alzheimer-app/doctor-portal/doctor-patients.component.css',
+    './network-members-page.component.scss',
+  ],
 })
 export class NetworkMembersPageComponent implements OnInit, OnDestroy {
   form: FormGroup;
@@ -149,8 +151,7 @@ export class NetworkMembersPageComponent implements OnInit, OnDestroy {
     private membersService: MembersService,
     private skillService: SkillService,
     private translate: TranslateService,
-    private websocketService: WebSocketService,
-    private toastr: ToastrService
+    private websocketService: WebSocketService
   ) {
     this.form = this.fb.group({
       fullName: [
@@ -194,7 +195,7 @@ export class NetworkMembersPageComponent implements OnInit, OnDestroy {
       this.websocketService.onMissionUpdate().subscribe((event) => {
         console.log('🔄 WS Mission update:', event);
         this.showSuccess(this.translate.instant('COMMON.NEW_UPDATE_RECEIVED'));
-        this.toastr.success('Members updated');
+        console.log('Members updated');
         this.loadMembers();
       })
     );
@@ -205,7 +206,7 @@ export class NetworkMembersPageComponent implements OnInit, OnDestroy {
           event && typeof event === 'object' && 'message' in (event as Record<string, unknown>)
             ? String((event as Record<string, unknown>)['message'] ?? 'New notification')
             : 'New notification';
-        this.toastr.info(txt || 'New notification');
+        console.log(txt || 'New notification');
       })
     );
   }

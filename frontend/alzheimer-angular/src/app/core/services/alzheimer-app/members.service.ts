@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { supportNetworkHttpHeaders } from '../core/support-network-headers';
+import { supportNetworkHttpHeaders } from '../../support-network-headers';
 import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
-import { SupportMember } from '../models/support-member.model';
+import { environment } from '../../../../environments/environment';
+import { SupportMember } from '../../models/alzheimer-app/support-member.model';
 
 /** Base path for members API. Must be relative '/api' when using proxy (ng serve), so requests go to same origin and proxy forwards to backend. */
 const MEMBERS_API_BASE = (environment as { supportNetworkApiUrl?: string }).supportNetworkApiUrl ?? '/api';

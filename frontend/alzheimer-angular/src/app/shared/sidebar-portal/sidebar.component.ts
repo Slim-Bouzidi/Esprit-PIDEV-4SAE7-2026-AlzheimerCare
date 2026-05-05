@@ -26,6 +26,7 @@ export class SidebarComponent implements OnInit, OnChanges, OnDestroy {
 
   menuItems: { label: string; icon: string; route: string }[] = [];
   rappelsMenuOpen = false;
+  supportNetworkMenuOpen = false;
   private readonly destroy$ = new Subject<void>();
 
   constructor(private router: Router) {}
@@ -33,6 +34,7 @@ export class SidebarComponent implements OnInit, OnChanges, OnDestroy {
   ngOnInit() {
     this.updateMenu();
     this.rappelsMenuOpen = /\/soignant-rappels/.test(this.router.url);
+    this.supportNetworkMenuOpen = this.isSupportNetworkRoute(this.router.url);
     this.router.events
       .pipe(
         filter((e): e is NavigationEnd => e instanceof NavigationEnd),
@@ -40,6 +42,7 @@ export class SidebarComponent implements OnInit, OnChanges, OnDestroy {
       )
       .subscribe(() => {
         this.rappelsMenuOpen = /\/soignant-rappels/.test(this.router.url);
+        this.supportNetworkMenuOpen = this.isSupportNetworkRoute(this.router.url);
       });
   }
 
@@ -56,6 +59,19 @@ export class SidebarComponent implements OnInit, OnChanges, OnDestroy {
 
   toggleRappelsMenu(): void {
     this.rappelsMenuOpen = !this.rappelsMenuOpen;
+  }
+
+  toggleSupportNetworkMenu(): void {
+    this.supportNetworkMenuOpen = !this.supportNetworkMenuOpen;
+  }
+
+  isDoctorRole(): boolean {
+    const role = (this.role || '').toUpperCase();
+    return role === 'DOCTOR' || role === 'DOCTEUR';
+  }
+
+  private isSupportNetworkRoute(url: string): boolean {
+    return /\/doctor-support-network(\/|$)/.test(url);
   }
 
   getBadgeCount(route: string): number {

@@ -3,28 +3,31 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { HttpErrorResponse } from '@angular/common/http';
-import { MembersService } from '../../services/members.service';
-import { AvailabilityService } from '../../services/availability.service';
-import { SupportMember } from '../../models/support-member.model';
+import { MembersService } from '../members.service';
+import { AvailabilityService } from '../availability.service';
+import { SupportMember } from '../../../models/alzheimer-app/support-member.model';
 import {
   AvailabilitySlot,
   AvailabilityCreateDto,
   DAYS_OF_WEEK,
   dayLabel,
   toTimeInputValue,
-} from '../../models/availability.model';
+} from '../../../models/alzheimer-app/availability.model';
 import { RouterModule } from '@angular/router';
-import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
-import { trySupportNetworkDemoSafeMessage } from '../../core/support-network-demo-error';
-import { getSupportNetworkHttpErrorMessage } from '../../core/support-network-http-error';
-import { TablePaginationComponent } from '../../shared/components/table-pagination/table-pagination.component';
+import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { trySupportNetworkDemoSafeMessage } from '../../../support-network-demo-error';
+import { getSupportNetworkHttpErrorMessage } from '../../../support-network-http-error';
+import { TablePaginationComponent } from '../../../../shared/components/table-pagination/table-pagination.component';
 
 @Component({
   selector: 'app-availabilities-page',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, FormsModule, TranslateModule, RouterModule, ConfirmDialogComponent, TablePaginationComponent],
   templateUrl: './availabilities-page.component.html',
-  styleUrls: ['../soignant-pages.css', './availabilities-page.component.scss'],
+  styleUrls: [
+    '../../../../features/alzheimer-app/doctor-portal/doctor-patients.component.css',
+    './availabilities-page.component.scss',
+  ],
 })
 export class AvailabilitiesPageComponent implements OnInit {
   form: FormGroup;

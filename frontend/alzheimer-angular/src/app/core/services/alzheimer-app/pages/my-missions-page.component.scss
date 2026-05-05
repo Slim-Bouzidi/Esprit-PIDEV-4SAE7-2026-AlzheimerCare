@@ -1,36 +1,4 @@
-:host {
-  display: block;
-}
-
-:host .page-container {
-  max-width: 960px;
-}
-
-.breadcrumb {
-  font-size: 0.875rem;
-  color: var(--soignant-text-muted);
-  margin-bottom: 1.25rem;
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.25rem;
-}
-
-.breadcrumb a {
-  color: var(--soignant-primary);
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.breadcrumb-sep {
-  margin: 0 0.15rem;
-  color: #94a3b8;
-}
-
-.breadcrumb-current {
-  color: var(--soignant-text);
-  font-weight: 600;
-}
+@import './support-network-portal-layout.scss';
 
 .missions-toolbar .toolbar-row {
   display: flex;
@@ -40,18 +8,22 @@
 }
 
 .missions-toolbar .form-label {
-  width: 100%;
-  margin-bottom: 0.25rem;
+  width: auto;
+  margin-bottom: 0;
 }
 
-.missions-toolbar .form-select {
-  min-width: 220px;
-  flex: 1;
+.missions-toolbar .member-filter {
+  min-width: min(100%, 320px);
+  flex: 1 1 320px;
+}
+
+.missions-toolbar .member-filter .form-select {
+  min-width: 0;
 }
 
 .toolbar-row-filters {
   margin-top: 0.75rem;
-  align-items: stretch;
+  align-items: end;
 }
 
 .filter-group {
@@ -89,20 +61,26 @@
 }
 
 .muted {
-  color: var(--soignant-text-muted, #64748b);
+  color: var(--text-secondary);
 }
 
-.type-badge {
-  display: inline-block;
-  padding: 0.2rem 0.5rem;
-  border-radius: 6px;
-  background: #f1f5f9;
-  font-size: 0.8rem;
-  font-weight: 600;
+.members-list-card {
+  background: #fff;
+  border-radius: 18px;
+  padding: 20px;
+  margin-bottom: 18px;
+  border: none;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+  border-top: 5px solid #94a3b8;
 }
 
-.muted {
-  color: var(--soignant-text-muted);
+.members-list-card .card-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 14px;
+  color: #0f172a;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .report-form-block,
@@ -124,6 +102,7 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 0.35rem;
+  min-width: 9rem;
 }
 
 .report-secondary-btn {
@@ -149,7 +128,7 @@
 
 .missions-pending-badge {
   font-weight: 700;
-  color: var(--soignant-primary, #2563eb);
+  color: var(--primary-color);
 }
 
 .new-mission-banner {
@@ -159,11 +138,11 @@
   justify-content: space-between;
   gap: 0.75rem;
   margin-bottom: 1rem;
-  padding: 0.65rem 1rem;
-  border-radius: 8px;
-  background: #dbeafe;
-  border: 1px solid #93c5fd;
-  color: #1e3a8a;
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: #fff7db;
+  border: 1px solid #f2d68a;
+  color: #6b560f;
   font-size: 0.9rem;
 }
 
@@ -236,8 +215,7 @@
     gap: 0.3rem;
   }
 
-  .toolbar-row .btn-primary,
-  .toolbar-row .btn-outline {
+  .toolbar-row .sn-action-btn {
     min-height: 2.15rem;
   }
 }

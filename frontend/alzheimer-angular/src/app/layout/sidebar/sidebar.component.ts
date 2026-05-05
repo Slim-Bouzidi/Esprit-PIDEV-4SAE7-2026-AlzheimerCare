@@ -38,6 +38,7 @@ export class SidebarComponent {
     { label: 'Manage Users', icon: 'pi pi-users', route: '/manage-users', exact: false, excludeRoles: ['patient'] },
     { label: 'Patients', icon: 'pi pi-users', route: '/patients', exact: false, excludeRoles: ['patient'] },
     { label: 'Appointments', icon: 'pi pi-calendar', route: '/appointments', exact: false },
+    { label: 'Support Network', icon: 'pi pi-share-alt', route: '/support-network', exact: false, roles: ['DOCTOR', 'CAREGIVER', 'ADMIN'] },
     { label: 'Report History', icon: 'pi pi-file', route: '/clinical-reports/history', exact: false, excludeRoles: ['admin'] },
     { label: 'New Clinical Report', icon: 'pi pi-plus-circle', route: '/clinical-reports/new', exact: false, excludeRoles: ['admin'] },
     { label: 'System Settings', icon: 'pi pi-cog', route: '/settings', exact: false, excludeRoles: ['patient'] },
