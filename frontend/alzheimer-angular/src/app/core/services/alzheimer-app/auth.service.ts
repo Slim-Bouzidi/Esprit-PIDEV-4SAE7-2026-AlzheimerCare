@@ -26,20 +26,21 @@ export class AuthService {
             // Set initial profile immediately from token
             this.profileSignal.set({ username, roles });
 
-            // Load the full profile (async) for first/last name
-            keycloak.loadUserProfile().then((profile: { email?: string; firstName?: string; lastName?: string }) => {
-                const userProfile = {
-                    username,
-                    email: profile.email,
-                    firstName: profile.firstName,
-                    lastName: profile.lastName,
-                    roles
-                };
-                console.log('[AuthService] User profile loaded:', userProfile);
-                this.profileSignal.set(userProfile);
-            }).catch((err: unknown) => {
-                console.error('Failed to load user profile from Keycloak', err);
-            });
+            // Only try to load full profile if we have a token
+            if (keycloak.token) {
+                keycloak.loadUserProfile().then((profile: any) => {
+                    const userProfile = {
+                        username,
+                        email: profile.email,
+                        firstName: profile.firstName,
+                        lastName: profile.lastName,
+                        roles
+                    };
+                    this.profileSignal.set(userProfile);
+                }).catch((err: any) => {
+                    console.warn('[AuthService] Could not load extended profile, using token data only');
+                });
+            }
         }
     }
 

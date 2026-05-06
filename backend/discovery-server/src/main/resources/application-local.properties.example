@@ -1,0 +1,7 @@
+# -------------------------------------------------------------------------
+# LOCAL CONFIGURATION OVERRIDES (GIT-IGNORED)
+# -------------------------------------------------------------------------
+# Copy this file to 'application-local.properties' to customize your local settings.
+# -------------------------------------------------------------------------
+
+# server.port=8761

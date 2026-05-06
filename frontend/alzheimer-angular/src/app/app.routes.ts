@@ -130,6 +130,15 @@ export const routes: Routes = [
         data: { roles: ['ADMIN'] }
       },
       {
+        path: 'risk-assessment',
+        loadComponent: () =>
+          import('./features/risk-assessment/risk-assessment.component').then(
+            m => m.RiskAssessmentComponent
+          ),
+        canActivate: [roleGuard],
+        data: { roles: ['PATIENT'], title: 'Risk Assessment', icon: 'pi-chart-line' }
+      },
+      {
         path: 'patients',
         loadComponent: () =>
           import('./features/patients/patient-list/patient-list.component').then(
@@ -179,21 +188,21 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./core/services/alzheimer-app/pages/patient-network-page.component').then(m => m.PatientNetworkPageComponent),
         canActivate: [roleGuard],
-        data: { title: 'Patient Network', icon: 'pi-share-alt', roles: ['DOCTOR', 'CAREGIVER', 'ADMIN'] }
+        data: { title: 'Patient Network', icon: 'pi-share-alt', roles: ['DOCTOR'] }
       },
       {
         path: 'support-network/my-missions',
         loadComponent: () =>
           import('./core/services/alzheimer-app/pages/my-missions-page.component').then(m => m.MyMissionsPageComponent),
         canActivate: [roleGuard],
-        data: { title: 'My Missions', icon: 'pi-briefcase', roles: ['DOCTOR', 'CAREGIVER', 'ADMIN'] }
+        data: { title: 'My Missions', icon: 'pi-briefcase', roles: ['DOCTOR'] }
       },
       {
         path: 'support-network/availabilities',
         loadComponent: () =>
           import('./core/services/alzheimer-app/pages/availabilities-page.component').then(m => m.AvailabilitiesPageComponent),
         canActivate: [roleGuard],
-        data: { title: 'Availabilities', icon: 'pi-clock', roles: ['DOCTOR', 'CAREGIVER', 'ADMIN'] }
+        data: { title: 'Availabilities', icon: 'pi-clock', roles: ['DOCTOR'] }
       },
       {
         path: 'patient/dashboard',

@@ -23,7 +23,9 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     }),
     catchError((error) => {
       if (error.status === 401) {
-        keycloak.login();
+        console.error('[AuthInterceptor] 401 Unauthorized - Token may be invalid or issuer mismatch');
+        // We avoid calling keycloak.login() here because it can cause infinite redirect loops 
+        // if the backend is rejecting valid tokens (e.g. issuer mismatch).
       }
       return throwError(() => error);
     })

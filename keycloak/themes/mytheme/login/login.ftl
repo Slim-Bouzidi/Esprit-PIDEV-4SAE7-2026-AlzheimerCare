@@ -67,8 +67,20 @@
                 </form>
                 
                 <footer class="form-footer">
-                    <p>Don't have an account? <a href="http://192.168.192.130:30420/register">Create Account</a></p>
+                    <p>Don't have an account? <a id="register-link" href="/register">Create Account</a></p>
                 </footer>
+
+                <script>
+                    (function() {
+                        var hostname = window.location.hostname;
+                        var registerLink = document.getElementById('register-link');
+                        if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                            registerLink.href = 'http://localhost:4200/register';
+                        } else {
+                            registerLink.href = window.location.protocol + '//' + hostname + ':30420/register';
+                        }
+                    })();
+                </script>
             </div>
             <div class="footer-legal">
                 &copy; 2026 Alzheimer Support. All rights reserved.

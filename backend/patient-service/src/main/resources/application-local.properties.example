@@ -1,0 +1,12 @@
+# -------------------------------------------------------------------------
+# LOCAL CONFIGURATION OVERRIDES (GIT-IGNORED)
+# -------------------------------------------------------------------------
+# Copy this file to 'application-local.properties' to customize your local settings.
+# -------------------------------------------------------------------------
+
+# Database Credentials
+# spring.datasource.password=your_db_password
+
+# RabbitMQ Credentials
+# spring.rabbitmq.username=guest
+# spring.rabbitmq.password=guest

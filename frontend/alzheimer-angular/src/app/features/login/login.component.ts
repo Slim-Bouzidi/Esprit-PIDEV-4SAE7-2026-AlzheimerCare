@@ -65,8 +65,13 @@ export class LoginComponent implements OnInit {
             // Initialize keycloak with the received tokens
             const authenticated = await this.authService.initKeycloakWithTokens(tokens);
             if (authenticated) {
-              // Navigate to dashboard
-              window.location.href = '/dashboard';
+              // Persist tokens so they survive a hard refresh
+              sessionStorage.setItem('kc_token', tokens.access_token);
+              sessionStorage.setItem('kc_id_token', tokens.id_token);
+              sessionStorage.setItem('kc_refresh_token', tokens.refresh_token);
+
+              // Use Angular Router to navigate WITHOUT a full page reload
+              this.router.navigate(['/doctor-dashboard']);
             } else {
               this.errorMessage = 'Authentication succeeded but session could not be established. Please try again.';
               this.isSubmitting = false;

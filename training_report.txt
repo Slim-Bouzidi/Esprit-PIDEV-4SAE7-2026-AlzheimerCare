@@ -1,0 +1,32 @@
+================================================================================
+ALZHEIMER AI - MODEL TRAINING EVALUATION REPORT
+================================================================================
+Model Type: Random Forest Classifier (Ensemble Method)
+Dataset: 2,149 Clinical Records
+Features: 32 Bio-markers (MMSE, ADL, BMI, Lifestyle, etc.)
+--------------------------------------------------------------------------------
+
+FINAL PERFORMANCE METRICS:
+-------------------------
+OVERALL ACCURACY: 93.72%  (Excellent)
+F1-SCORE:         90.85%  (Very high precision/recall balance)
+
+DETAILED CLASSIFICATION REPORT:
+------------------------------
+              precision    recall  f1-score   support
+   Healthy:      0.94      0.97      0.95       278
+   At Risk:      0.94      0.88      0.91       152
+
+KEY INSIGHTS FOR THE TEACHER:
+----------------------------
+1. PRECISION (94%): When the AI says "High Risk", it is correct 94% of the time.
+2. RECALL (88%): The AI catches 88% of all actual Alzheimer's cases in the test set.
+3. DATA BALANCE: We used 'class_weight=balanced' to ensure the AI doesn't ignore 
+   the minority group of High Risk patients.
+
+TRAINING LOG:
+-------------
+- Preprocessing: StandardScaler (Normalization of BMI, BP, MMSE)
+- Validation: 80/20 Train-Test Split
+- Random Forest: 100 estimators, max_depth=12
+================================================================================

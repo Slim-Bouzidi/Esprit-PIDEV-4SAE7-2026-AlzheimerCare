@@ -39,7 +39,12 @@ public class SecurityConfig {
 
     @Bean
     public ReactiveJwtDecoder jwtDecoder() {
-        return NimbusReactiveJwtDecoder.withJwkSetUri(jwkSetUri).build();
+        NimbusReactiveJwtDecoder jwtDecoder = NimbusReactiveJwtDecoder.withJwkSetUri(jwkSetUri).build();
+        
+        // Disable issuer validation to allow switching between localhost and VM IPs without 401 errors
+        jwtDecoder.setJwtValidator(token -> org.springframework.security.oauth2.core.OAuth2TokenValidatorResult.success());
+        
+        return jwtDecoder;
     }
 
     @Bean

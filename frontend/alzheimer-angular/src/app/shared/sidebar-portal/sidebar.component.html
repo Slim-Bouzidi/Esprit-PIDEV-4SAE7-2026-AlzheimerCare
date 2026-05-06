@@ -1,54 +1,64 @@
 <aside class="sidebar" [class.role-soignant]="role === 'SOIGNANT'">
+
+  <!-- Brand -->
   <div class="brand">
     <span class="brand-icon"><i class="pi pi-heart-fill" aria-hidden="true"></i></span>
     <h2 class="brand-text">NeuroMed</h2>
   </div>
 
-  <!-- Menu SOIGNANT : structure complète -->
+  <!-- ─── SOIGNANT menu ──────────────────────────────────────────────────────── -->
   <ng-container *ngIf="role === 'SOIGNANT'">
     <nav class="sidebar-nav">
-      <a *ngFor="let item of menuItems" [routerLink]="item.route" routerLinkActive="active"
-        [routerLinkActiveOptions]="{ exact: true }" class="nav-item">
+      <a *ngFor="let item of menuItems"
+         [routerLink]="item.route"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: true }"
+         class="nav-item">
         <i class="nav-icon" [class]="item.icon" aria-hidden="true"></i>
         <span class="nav-label">{{ item.label }}</span>
-        <span *ngIf="getBadgeCount(item.route) > 0" class="nav-badge nav-badge-{{ getBadgeType(item.route) }}">{{
-          getBadgeCount(item.route) }}</span>
-        <span *ngIf="getBadgeCount(item.route) === 0 && getBadgeDot(item.route)" class="nav-badge-dot"
-          [title]="'SIDEBAR.TODO' | translate"></span>
+        <span *ngIf="getBadgeCount(item.route) > 0"
+              class="nav-badge nav-badge-{{ getBadgeType(item.route) }}">
+          {{ getBadgeCount(item.route) }}
+        </span>
+        <span *ngIf="getBadgeCount(item.route) === 0 && getBadgeDot(item.route)"
+              class="nav-badge-dot"
+              [title]="'SIDEBAR.TODO' | translate">
+        </span>
       </a>
 
-      <!-- Sous-menu Gestion des Rappels -->
+      <!-- Reminders submenu -->
       <div class="nav-group">
-        <button type="button" class="nav-item nav-item-toggle" (click)="toggleRappelsMenu()"
-          [class.open]="rappelsMenuOpen">
+        <button type="button"
+                class="nav-item nav-item-toggle"
+                (click)="toggleRappelsMenu()"
+                [class.open]="rappelsMenuOpen">
           <i class="nav-icon pi pi-clock" aria-hidden="true"></i>
-          <span class="nav-label">Reminders Management</span>
-          <span class="nav-chevron">{{ rappelsMenuOpen ? '▲' : '▼' }}</span>
+          <span class="nav-label">Reminders</span>
+          <span class="nav-chevron">▾</span>
         </button>
         <div class="nav-submenu" *ngIf="rappelsMenuOpen">
           <a routerLink="/soignant-rappels-medicaments" routerLinkActive="active"
-            [routerLinkActiveOptions]="{ exact: true }" class="nav-subitem">
+             [routerLinkActiveOptions]="{ exact: true }" class="nav-subitem">
             <i class="nav-icon pi pi-tablet" aria-hidden="true"></i>
-            <span>Medication Reminders</span>
+            <span>Medications</span>
           </a>
           <a routerLink="/soignant-rappels-repas" routerLinkActive="active"
-            [routerLinkActiveOptions]="{ exact: true }" class="nav-subitem">
+             [routerLinkActiveOptions]="{ exact: true }" class="nav-subitem">
             <i class="nav-icon pi pi-shop" aria-hidden="true"></i>
-            <span>Meal Reminders</span>
+            <span>Meals</span>
           </a>
           <a routerLink="/soignant-rappels-rendez-vous" routerLinkActive="active"
-            [routerLinkActiveOptions]="{ exact: true }" class="nav-subitem">
+             [routerLinkActiveOptions]="{ exact: true }" class="nav-subitem">
             <i class="nav-icon pi pi-calendar" aria-hidden="true"></i>
-            <span>Appointment Reminders</span>
+            <span>Appointments</span>
           </a>
         </div>
       </div>
     </nav>
 
-    <!-- Section inférieure -->
     <div class="sidebar-footer">
       <a routerLink="/soignant-notifications" routerLinkActive="active" class="nav-item nav-item-footer">
-        <i class="nav-icon pi pi-comments" aria-hidden="true"></i>
+        <i class="nav-icon pi pi-bell" aria-hidden="true"></i>
         <span class="nav-label">Notifications</span>
         <span *ngIf="notificationsCount > 0" class="nav-badge nav-badge-default">{{ notificationsCount }}</span>
       </a>
@@ -70,51 +80,58 @@
     </div>
   </ng-container>
 
-  <!-- Autres rôles : menu simple -->
+  <!-- ─── Other roles menu ───────────────────────────────────────────────────── -->
   <ng-container *ngIf="role !== 'SOIGNANT'">
     <nav class="sidebar-nav">
-      <a *ngFor="let item of menuItems" [routerLink]="item.route" routerLinkActive="active"
-        [routerLinkActiveOptions]="{ exact: true }" class="nav-item">
+      <a *ngFor="let item of menuItems"
+         [routerLink]="item.route"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: true }"
+         class="nav-item">
         <i class="nav-icon" [class]="item.icon" aria-hidden="true"></i>
         <span class="nav-label">{{ item.label }}</span>
       </a>
 
+      <!-- Support Network submenu (doctor only) -->
       <div class="nav-group" *ngIf="isDoctorRole()">
-        <button type="button" class="nav-item nav-item-toggle" (click)="toggleSupportNetworkMenu()"
-          [class.open]="supportNetworkMenuOpen">
+        <button type="button"
+                class="nav-item nav-item-toggle"
+                (click)="toggleSupportNetworkMenu()"
+                [class.open]="supportNetworkMenuOpen">
           <i class="nav-icon pi pi-share-alt" aria-hidden="true"></i>
           <span class="nav-label">Support Network</span>
-          <span class="nav-chevron">{{ supportNetworkMenuOpen ? '▲' : '▼' }}</span>
+          <span class="nav-chevron">▾</span>
         </button>
         <div class="nav-submenu" *ngIf="supportNetworkMenuOpen">
           <a routerLink="/doctor-support-network/dashboard" routerLinkActive="active"
-            [routerLinkActiveOptions]="{ exact: true }" class="nav-subitem">
+             [routerLinkActiveOptions]="{ exact: true }" class="nav-subitem">
             <i class="nav-icon pi pi-chart-line" aria-hidden="true"></i>
             <span>Dashboard</span>
           </a>
           <a routerLink="/doctor-support-network/add-member" routerLinkActive="active"
-            [routerLinkActiveOptions]="{ exact: true }" class="nav-subitem">
+             [routerLinkActiveOptions]="{ exact: true }" class="nav-subitem">
             <i class="nav-icon pi pi-user-plus" aria-hidden="true"></i>
             <span>Add Member</span>
           </a>
           <a routerLink="/doctor-support-network/support-network" routerLinkActive="active"
-            [routerLinkActiveOptions]="{ exact: true }" class="nav-subitem">
+             [routerLinkActiveOptions]="{ exact: true }" class="nav-subitem">
             <i class="nav-icon pi pi-share-alt" aria-hidden="true"></i>
-            <span>Link Support Network</span>
+            <span>Link Network</span>
           </a>
           <a routerLink="/doctor-support-network/availability" routerLinkActive="active"
-            [routerLinkActiveOptions]="{ exact: true }" class="nav-subitem">
+             [routerLinkActiveOptions]="{ exact: true }" class="nav-subitem">
             <i class="nav-icon pi pi-clock" aria-hidden="true"></i>
             <span>Availability</span>
           </a>
           <a routerLink="/doctor-support-network/missions" routerLinkActive="active"
-            [routerLinkActiveOptions]="{ exact: true }" class="nav-subitem">
+             [routerLinkActiveOptions]="{ exact: true }" class="nav-subitem">
             <i class="nav-icon pi pi-briefcase" aria-hidden="true"></i>
             <span>Missions</span>
           </a>
         </div>
       </div>
     </nav>
+
     <div class="sidebar-footer">
       <div class="user-mini-profile">
         <div class="avatar">{{ userName.charAt(0) }}</div>
@@ -125,4 +142,5 @@
       </div>
     </div>
   </ng-container>
+
 </aside>

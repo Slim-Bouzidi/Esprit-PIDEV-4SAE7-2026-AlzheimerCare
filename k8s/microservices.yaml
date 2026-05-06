@@ -118,6 +118,8 @@ spec:
         - configMapRef:
             name: alzheimer-config
         env:
+        - name: ML_SERVICE_URL
+          value: "http://ml-service:5000"
         - name: SPRING_DATASOURCE_URL
           valueFrom:
             configMapKeyRef:
@@ -168,31 +170,33 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: alzheimerapp
+  name: doctor-service
   namespace: alzheimer
 spec:
   ports:
     - port: 8085
   selector:
-    app: alzheimerapp
+    app: doctor-service
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: alzheimerapp
+  name: doctor-service
   namespace: alzheimer
 spec:
   selector:
     matchLabels:
-      app: alzheimerapp
+      app: doctor-service
   template:
     metadata:
       labels:
-        app: alzheimerapp
+        app: doctor-service
     spec:
+      imagePullSecrets:
+      - name: nexus-creds
       containers:
-      - name: alzheimerapp
-        image: 192.168.192.130:30083/alzheimer-main-app:latest
+      - name: doctor-service
+        image: 192.168.192.130:30083/alzheimer-doctor-service:latest
         imagePullPolicy: Always
         envFrom:
         - configMapRef:
@@ -203,3 +207,52 @@ spec:
             configMapKeyRef:
               name: alzheimer-config
               key: SPRING_DATASOURCE_URL_APP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: support-network
+  namespace: alzheimer
+spec:
+  ports:
+    - port: 8089
+  selector:
+    app: support-network
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: support-network
+  namespace: alzheimer
+spec:
+  selector:
+    matchLabels:
+      app: support-network
+  template:
+    metadata:
+      labels:
+        app: support-network
+    spec:
+      imagePullSecrets:
+      - name: nexus-creds
+      containers:
+      - name: support-network
+        image: 192.168.192.130:30083/alzheimer-support-network:latest
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: alzheimer-config
+        env:
+        - name: DB_HOST
+          value: "mysql"
+        - name: DB_PORT
+          value: "3306"
+        - name: DB_USER
+          value: "root"
+        - name: DB_PASSWORD
+          value: ""
+        - name: SPRING_DATASOURCE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: alzheimer-config
+              key: SPRING_DATASOURCE_URL_NETWORK

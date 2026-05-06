@@ -1,0 +1,8 @@
+# -------------------------------------------------------------------------
+# LOCAL CONFIGURATION OVERRIDES (GIT-IGNORED)
+# -------------------------------------------------------------------------
+# Copy this file to 'application-local.properties' to customize your local settings.
+# -------------------------------------------------------------------------
+
+# Keycloak / OAuth2 Configuration
+# spring.security.oauth2.resourceserver.jwt.issuer-uri=http://localhost:8081/realms/alzheimer-realm

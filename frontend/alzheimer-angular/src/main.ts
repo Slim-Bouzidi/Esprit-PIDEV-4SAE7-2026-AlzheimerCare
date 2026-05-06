@@ -78,10 +78,18 @@ async function syncUserIfNeeded() {
   }
 }
 
+const savedToken = sessionStorage.getItem('kc_token');
+const savedRefreshToken = sessionStorage.getItem('kc_refresh_token');
+const savedIdToken = sessionStorage.getItem('kc_id_token');
+
 keycloak.init({
   onLoad: 'check-sso',
+  silentCheckSsoRedirectUri: window.location.origin + '/assets/silent-check-sso.html',
   checkLoginIframe: false,
-  pkceMethod: 'S256'
+  pkceMethod: 'S256',
+  token: savedToken || undefined,
+  refreshToken: savedRefreshToken || undefined,
+  idToken: savedIdToken || undefined
 }).then(async (authenticated) => {
   if (authenticated) {
     await syncUserIfNeeded();

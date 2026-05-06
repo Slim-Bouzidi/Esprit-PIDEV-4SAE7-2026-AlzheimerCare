@@ -35,14 +35,15 @@ export class SidebarComponent {
 
   private readonly allNavItems: NavItem[] = [
     { label: 'Dashboard', icon: 'pi pi-th-large', route: '/', exact: true },
-    { label: 'Manage Users', icon: 'pi pi-users', route: '/manage-users', exact: false, excludeRoles: ['patient'] },
-    { label: 'Patients', icon: 'pi pi-users', route: '/patients', exact: false, excludeRoles: ['patient'] },
+    { label: 'Manage Users', icon: 'pi pi-users', route: '/manage-users', exact: false, excludeRoles: ['PATIENT'] },
+    { label: 'Patients', icon: 'pi pi-users', route: '/patients', exact: false, excludeRoles: ['PATIENT'] },
     { label: 'Appointments', icon: 'pi pi-calendar', route: '/appointments', exact: false },
-    { label: 'Support Network', icon: 'pi pi-share-alt', route: '/support-network', exact: false, roles: ['DOCTOR', 'CAREGIVER', 'ADMIN'] },
+    { label: 'Support Network', icon: 'pi pi-share-alt', route: '/support-network', exact: false, roles: ['DOCTOR'] },
+    { label: 'Risk Assessment', icon: 'pi pi-chart-line', route: '/risk-assessment', exact: false, roles: ['PATIENT'] },
     { label: 'Report History', icon: 'pi pi-file', route: '/clinical-reports/history', exact: false, excludeRoles: ['admin'] },
     { label: 'New Clinical Report', icon: 'pi pi-plus-circle', route: '/clinical-reports/new', exact: false, excludeRoles: ['admin'] },
-    { label: 'System Settings', icon: 'pi pi-cog', route: '/settings', exact: false, excludeRoles: ['patient'] },
-    { label: 'My Workspace', icon: 'pi pi-home', route: '/patient/dashboard', exact: false, roles: ['patient'] },
+    { label: 'System Settings', icon: 'pi pi-cog', route: '/settings', exact: false, excludeRoles: ['PATIENT'] },
+    { label: 'My Workspace', icon: 'pi pi-home', route: '/patient/dashboard', exact: false, roles: ['PATIENT'] },
     { label: 'Profile', icon: 'pi pi-user', route: '/profile', exact: false },
   ];
 

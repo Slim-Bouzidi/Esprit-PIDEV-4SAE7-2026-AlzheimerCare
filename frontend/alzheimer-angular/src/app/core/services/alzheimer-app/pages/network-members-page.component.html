@@ -1,11 +1,16 @@
-<header class="topbar sn-support-topbar">
+<!-- ─── Page header ──────────────────────────────────────────────────────────── -->
+<header class="sn-support-topbar">
   <div class="sn-topbar-left">
     <h1 class="page-title-small">{{ 'NETWORK_MEMBERS.PAGE_TITLE' | translate }}</h1>
     <p class="sn-page-subtitle">{{ 'NETWORK_MEMBERS.PAGE_SUBTITLE' | translate }}</p>
   </div>
 </header>
+
+<!-- ─── Main content ─────────────────────────────────────────────────────────── -->
 <main class="patients-content">
   <div class="page-container">
+
+    <!-- Breadcrumb -->
     <nav class="breadcrumb" aria-label="Breadcrumb">
       <a routerLink="/doctor-dashboard">{{ 'NETWORK_MEMBERS.BREADCRUMB_DASHBOARD' | translate }}</a>
       <span class="breadcrumb-sep" aria-hidden="true">›</span>
@@ -14,10 +19,15 @@
       <span class="breadcrumb-current">{{ 'NETWORK_MEMBERS.BREADCRUMB_PAGE' | translate }}</span>
     </nav>
 
-    <!-- Form card -->
+    <!-- ─── Add / Edit form card ──────────────────────────────────────────────── -->
     <section class="form-card" [class.card-editing]="editingMemberId != null">
-      <h2 class="card-title">{{ 'NETWORK_MEMBERS.ADD_SECTION' | translate }}</h2>
+      <h2 class="card-title">
+        {{ editingMemberId == null ? ('NETWORK_MEMBERS.ADD_SECTION' | translate) : ('NETWORK_MEMBERS.UPDATE_BTN' | translate) }}
+      </h2>
+
       <form [formGroup]="form" (ngSubmit)="onSubmit()" class="members-form sn-form-grid add-member-grid">
+
+        <!-- Full Name -->
         <div class="form-row sn-field-group">
           <label class="form-label" for="fullName">{{ 'NETWORK_MEMBERS.FULL_NAME' | translate }}</label>
           <input
@@ -27,22 +37,17 @@
             class="form-input"
             [class.invalid]="fullNameCtrl.invalid && fullNameCtrl.touched"
             [disabled]="loading"
+            autocomplete="name"
           />
           <div class="form-error" *ngIf="fullNameCtrl.invalid && fullNameCtrl.touched">
-            <span *ngIf="fullNameCtrl.hasError('required')">
-              {{ 'NETWORK_MEMBERS.VALIDATION.REQUIRED' | translate }}
-            </span>
-            <span *ngIf="fullNameCtrl.hasError('minlength')">
-              {{ 'NETWORK_MEMBERS.VALIDATION.MIN_LENGTH' | translate:{ min: 3 } }}
-            </span>
-            <span *ngIf="fullNameCtrl.hasError('maxlength')">
-              {{ 'NETWORK_MEMBERS.VALIDATION.MAX_LENGTH' | translate:{ max: 60 } }}
-            </span>
-            <span *ngIf="fullNameCtrl.hasError('pattern')">
-              {{ 'NETWORK_MEMBERS.VALIDATION.NAME_PATTERN' | translate }}
-            </span>
+            <span *ngIf="fullNameCtrl.hasError('required')">{{ 'NETWORK_MEMBERS.VALIDATION.REQUIRED' | translate }}</span>
+            <span *ngIf="fullNameCtrl.hasError('minlength')">{{ 'NETWORK_MEMBERS.VALIDATION.MIN_LENGTH' | translate:{ min: 3 } }}</span>
+            <span *ngIf="fullNameCtrl.hasError('maxlength')">{{ 'NETWORK_MEMBERS.VALIDATION.MAX_LENGTH' | translate:{ max: 60 } }}</span>
+            <span *ngIf="fullNameCtrl.hasError('pattern')">{{ 'NETWORK_MEMBERS.VALIDATION.NAME_PATTERN' | translate }}</span>
           </div>
         </div>
+
+        <!-- Phone -->
         <div class="form-row sn-field-group">
           <label class="form-label" for="phone">{{ 'NETWORK_MEMBERS.PHONE' | translate }}</label>
           <div class="phone-input-group">
@@ -89,20 +94,16 @@
             </div>
           </div>
           <div class="form-error" *ngIf="phoneLocalCtrl.invalid && phoneLocalCtrl.touched">
-            <span *ngIf="phoneLocalCtrl.hasError('required')">
-              {{ 'NETWORK_MEMBERS.VALIDATION.REQUIRED' | translate }}
-            </span>
-            <span *ngIf="phoneLocalCtrl.hasError('pattern')">
-              Digits only for local number.
-            </span>
-            <span *ngIf="phoneLocalCtrl.hasError('minlength') || phoneLocalCtrl.hasError('maxlength')">
-              {{ phoneLengthHint() }}
-            </span>
+            <span *ngIf="phoneLocalCtrl.hasError('required')">{{ 'NETWORK_MEMBERS.VALIDATION.REQUIRED' | translate }}</span>
+            <span *ngIf="phoneLocalCtrl.hasError('pattern')">Digits only for local number.</span>
+            <span *ngIf="phoneLocalCtrl.hasError('minlength') || phoneLocalCtrl.hasError('maxlength')">{{ phoneLengthHint() }}</span>
           </div>
           <p class="phone-preview" *ngIf="phoneCtrl.value">
-            Final phone: {{ phoneCtrl.value }}
+            Full number: {{ phoneCtrl.value }}
           </p>
         </div>
+
+        <!-- Email -->
         <div class="form-row sn-field-group">
           <label class="form-label" for="email">{{ 'NETWORK_MEMBERS.EMAIL' | translate }}</label>
           <input
@@ -116,14 +117,12 @@
             [disabled]="loading"
           />
           <div class="form-error" *ngIf="emailCtrl.invalid && emailCtrl.touched">
-            <span *ngIf="emailCtrl.hasError('maxlength')">
-              {{ 'NETWORK_MEMBERS.VALIDATION.MAX_LENGTH' | translate:{ max: 320 } }}
-            </span>
-            <span *ngIf="emailCtrl.hasError('email')">
-              {{ 'NETWORK_MEMBERS.VALIDATION.EMAIL_INVALID' | translate }}
-            </span>
+            <span *ngIf="emailCtrl.hasError('maxlength')">{{ 'NETWORK_MEMBERS.VALIDATION.MAX_LENGTH' | translate:{ max: 320 } }}</span>
+            <span *ngIf="emailCtrl.hasError('email')">{{ 'NETWORK_MEMBERS.VALIDATION.EMAIL_INVALID' | translate }}</span>
           </div>
         </div>
+
+        <!-- Type -->
         <div class="form-row sn-field-group">
           <label class="form-label" for="type">{{ 'NETWORK_MEMBERS.TYPE' | translate }}</label>
           <select
@@ -133,13 +132,15 @@
             [class.invalid]="typeCtrl.invalid && typeCtrl.touched"
             [disabled]="loading"
           >
-            <option value="">-- {{ 'NETWORK_MEMBERS.SELECT_TYPE' | translate }} --</option>
+            <option value="">{{ 'NETWORK_MEMBERS.SELECT_TYPE' | translate }}</option>
             <option *ngFor="let t of types" [value]="t">{{ t }}</option>
           </select>
           <span class="form-error" *ngIf="typeCtrl.invalid && typeCtrl.touched">
             {{ 'NETWORK_MEMBERS.VALIDATION.TYPE_REQUIRED' | translate }}
           </span>
         </div>
+
+        <!-- Zone -->
         <div class="form-row sn-field-group">
           <label class="form-label" for="zone">{{ 'NETWORK_MEMBERS.ZONE' | translate }}</label>
           <input
@@ -151,17 +152,13 @@
             [disabled]="loading"
           />
           <div class="form-error" *ngIf="locationZoneCtrl.invalid && locationZoneCtrl.touched">
-            <span *ngIf="locationZoneCtrl.hasError('required')">
-              {{ 'NETWORK_MEMBERS.VALIDATION.ZONE_REQUIRED' | translate }}
-            </span>
-            <span *ngIf="!locationZoneCtrl.hasError('required') && locationZoneCtrl.hasError('minlength')">
-              {{ 'NETWORK_MEMBERS.VALIDATION.MIN_LENGTH' | translate:{ min: 2 } }}
-            </span>
-            <span *ngIf="!locationZoneCtrl.hasError('required') && locationZoneCtrl.hasError('maxlength')">
-              {{ 'NETWORK_MEMBERS.VALIDATION.MAX_LENGTH' | translate:{ max: 30 } }}
-            </span>
+            <span *ngIf="locationZoneCtrl.hasError('required')">{{ 'NETWORK_MEMBERS.VALIDATION.ZONE_REQUIRED' | translate }}</span>
+            <span *ngIf="!locationZoneCtrl.hasError('required') && locationZoneCtrl.hasError('minlength')">{{ 'NETWORK_MEMBERS.VALIDATION.MIN_LENGTH' | translate:{ min: 2 } }}</span>
+            <span *ngIf="!locationZoneCtrl.hasError('required') && locationZoneCtrl.hasError('maxlength')">{{ 'NETWORK_MEMBERS.VALIDATION.MAX_LENGTH' | translate:{ max: 30 } }}</span>
           </div>
         </div>
+
+        <!-- Latitude -->
         <div class="form-row sn-field-group">
           <label class="form-label" for="latitude">{{ 'NETWORK_MEMBERS.LATITUDE' | translate }}</label>
           <input
@@ -175,14 +172,12 @@
             [disabled]="loading"
           />
           <div class="form-error" *ngIf="latitudeCtrl.invalid && latitudeCtrl.touched">
-            <span *ngIf="latitudeCtrl.hasError('latRange')">
-              {{ 'NETWORK_MEMBERS.VALIDATION.LAT_RANGE' | translate }}
-            </span>
-            <span *ngIf="latitudeCtrl.hasError('geoNumber')">
-              {{ 'NETWORK_MEMBERS.VALIDATION.GEO_NUMBER' | translate }}
-            </span>
+            <span *ngIf="latitudeCtrl.hasError('latRange')">{{ 'NETWORK_MEMBERS.VALIDATION.LAT_RANGE' | translate }}</span>
+            <span *ngIf="latitudeCtrl.hasError('geoNumber')">{{ 'NETWORK_MEMBERS.VALIDATION.GEO_NUMBER' | translate }}</span>
           </div>
         </div>
+
+        <!-- Longitude -->
         <div class="form-row sn-field-group">
           <label class="form-label" for="longitude">{{ 'NETWORK_MEMBERS.LONGITUDE' | translate }}</label>
           <input
@@ -196,15 +191,15 @@
             [disabled]="loading"
           />
           <div class="form-error" *ngIf="longitudeCtrl.invalid && longitudeCtrl.touched">
-            <span *ngIf="longitudeCtrl.hasError('lonRange')">
-              {{ 'NETWORK_MEMBERS.VALIDATION.LON_RANGE' | translate }}
-            </span>
-            <span *ngIf="longitudeCtrl.hasError('geoNumber')">
-              {{ 'NETWORK_MEMBERS.VALIDATION.GEO_NUMBER' | translate }}
-            </span>
+            <span *ngIf="longitudeCtrl.hasError('lonRange')">{{ 'NETWORK_MEMBERS.VALIDATION.LON_RANGE' | translate }}</span>
+            <span *ngIf="longitudeCtrl.hasError('geoNumber')">{{ 'NETWORK_MEMBERS.VALIDATION.GEO_NUMBER' | translate }}</span>
           </div>
         </div>
+
+        <!-- Spacer (keeps grid aligned) -->
         <div class="form-row sn-field-group field-spacer" aria-hidden="true"></div>
+
+        <!-- Skills -->
         <div class="form-row form-row-full sn-field-group">
           <label class="form-label" for="skills-select">{{ 'NETWORK_MEMBERS.SKILLS_LABEL' | translate }}</label>
           <select
@@ -220,6 +215,8 @@
           </select>
           <p class="skills-hint">{{ 'NETWORK_MEMBERS.SKILLS_HINT' | translate }}</p>
         </div>
+
+        <!-- Notes -->
         <div class="form-row form-row-full sn-field-group">
           <label class="form-label" for="notes">{{ 'NETWORK_MEMBERS.NOTES' | translate }}</label>
           <textarea
@@ -233,9 +230,17 @@
             {{ 'NETWORK_MEMBERS.VALIDATION.MAX_LENGTH' | translate:{ max: 200 } }}
           </span>
         </div>
+
+        <!-- Required hint + actions -->
         <p class="required-hint form-row-full">{{ 'NETWORK_MEMBERS.REQUIRED_FIELDS_HINT' | translate }}</p>
         <div class="sn-form-actions form-row-full">
-          <button *ngIf="editingMemberId != null" type="button" class="sn-action-btn sn-secondary" (click)="cancelEdit()" [disabled]="loading">
+          <button
+            *ngIf="editingMemberId != null"
+            type="button"
+            class="sn-action-btn sn-secondary"
+            (click)="cancelEdit()"
+            [disabled]="loading"
+          >
             {{ 'COMMON.CANCEL' | translate }}
           </button>
           <button
@@ -246,15 +251,24 @@
             {{ editingMemberId == null ? ('NETWORK_MEMBERS.ADD_BTN' | translate) : ('NETWORK_MEMBERS.UPDATE_BTN' | translate) }}
           </button>
         </div>
+
       </form>
     </section>
 
-    <!-- Members list card -->
+    <!-- ─── Members list card ─────────────────────────────────────────────────── -->
     <section class="members-list-card">
       <h2 class="card-title">{{ 'NETWORK_MEMBERS.LIST_TITLE' | translate }}</h2>
-      <p *ngIf="message" class="msg-inline" [class.msg-success]="message.type === 'success'" [class.msg-error]="message.type === 'error'">{{ message.text }}</p>
+
+      <p *ngIf="message"
+         class="msg-inline"
+         [class.msg-success]="message.type === 'success'"
+         [class.msg-error]="message.type === 'error'">
+        {{ message.text }}
+      </p>
+
       <p *ngIf="loading && members.length === 0" class="empty-msg">{{ 'COMMON.LOADING' | translate }}</p>
       <p *ngIf="!loading && members.length === 0" class="empty-msg empty-state">{{ 'NETWORK_MEMBERS.NO_MEMBERS' | translate }}</p>
+
       <div *ngIf="members.length > 0" class="table-wrap">
         <table class="members-table">
           <thead>
@@ -295,19 +309,24 @@
                   [title]="'NETWORK_MEMBERS.TOOLTIP_EDIT' | translate"
                   (click)="editMember(m)"
                   [disabled]="loading"
-                >&#9998;</button>
+                >
+                  <i class="pi pi-pencil"></i>
+                </button>
                 <button
                   type="button"
                   class="btn-icon btn-delete-icon"
                   [title]="'NETWORK_MEMBERS.TOOLTIP_DELETE' | translate"
                   (click)="deleteMember(m.id!)"
                   [disabled]="loading"
-                >&#128465;</button>
+                >
+                  <i class="pi pi-trash"></i>
+                </button>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
+
       <app-table-pagination
         *ngIf="members.length > 0"
         [totalItems]="members.length"
@@ -318,6 +337,7 @@
         (pageSizeChange)="onMembersPageSizeChange($event)"
       />
     </section>
+
   </div>
 
   <app-confirm-dialog

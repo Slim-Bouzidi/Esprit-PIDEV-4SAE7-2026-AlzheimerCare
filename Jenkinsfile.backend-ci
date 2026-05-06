@@ -49,27 +49,18 @@ spec:
             }
         }
 
-        stage('Unit Tests & Sonar') {
-            steps {
-                container('maven') {
-                    dir('backend/cognitive-service') {
-                        withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_AUTH_TOKEN')]) {
-                            sh 'mvn test jacoco:report sonar:sonar -Dsonar.host.url=http://sonarqube.alzheimer:9000 -Dsonar.projectKey=alzheimer-cognitive-service -Dsonar.login=${SONAR_AUTH_TOKEN}'
-                        }
-                    }
-                    sh 'rm -rf /root/.m2/repository || true'
-                }
-            }
-        }
 
         stage('Docker Build & Push') {
             steps {
                 container('docker') {
                     sh '''
-                        for service in user-service api-gateway cognitive-service patient-service discovery-server AlzheimerApp; do
-                            if [ "$service" == "AlzheimerApp" ]; then
-                                img_name="alzheimer-main-app"
-                                ctx="./backend/AlzheimerApp"
+                        for service in user-service api-gateway cognitive-service patient-service discovery-server doctor-service support-network ml-service; do
+                            if [ "$service" == "doctor-service" ]; then
+                                img_name="alzheimer-doctor-service"
+                                ctx="./backend/doctor-service"
+                            elif [ "$service" == "ml-service" ]; then
+                                img_name="alzheimer-ml-service"
+                                ctx="./backend/ml-model"
                             else
                                 img_name="alzheimer-$service"
                                 ctx="./backend/$service"

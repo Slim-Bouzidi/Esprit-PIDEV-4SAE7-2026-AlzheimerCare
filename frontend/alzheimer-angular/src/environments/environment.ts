@@ -1,12 +1,10 @@
 export const environment = {
   production: false,
-  // Use the VM IP for the API URL
-  apiUrl: `http://192.168.192.130:30080/api`,
-  keycloakUrl: 'http://192.168.192.130:30081',
+  // Local Development (using Docker Compose or local installs)
+  apiUrl: 'http://localhost:8080/api',
+  keycloakUrl: 'http://localhost:8081',
   keycloakRealm: 'alzheimer-realm',
   keycloakClientId: 'alzheimer-angular-client',
-  supportNetworkApiUrl: 'http://192.168.192.130:30080/api',
-  supportNetworkWebSocketUrl: `http://192.168.192.130:30080/ws`,
-  // Build Trigger: Modular Pipeline Test #1
-  // Status: System Restored with 60GB Disk
+  supportNetworkApiUrl: 'http://localhost:8080/api',
+  supportNetworkWebSocketUrl: 'ws://localhost:8080/ws',
 };

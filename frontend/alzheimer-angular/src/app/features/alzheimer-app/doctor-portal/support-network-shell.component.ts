@@ -7,14 +7,31 @@ import { SidebarComponent as SidebarPortalComponent } from '../../../shared/side
   standalone: true,
   imports: [RouterOutlet, SidebarPortalComponent],
   template: `
-    <div class="dashboard-layout">
+    <div class="sn-shell-layout">
       <app-sidebar-portal [role]="'DOCTEUR'" [userName]="'Dr. Doctor'" [userRole]="'Médecin Référent'"></app-sidebar-portal>
-      <div class="main-wrapper">
+      <div class="sn-shell-main">
         <router-outlet></router-outlet>
       </div>
     </div>
   `,
-  styleUrls: ['./doctor-patients.component.css'],
+  styles: [`
+    .sn-shell-layout {
+      display: flex;
+      height: 100vh;
+      background: #f8fafc;
+      font-family: 'Inter', -apple-system, sans-serif;
+      overflow: hidden;
+    }
+    .sn-shell-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      overflow-x: hidden;
+      min-width: 0;
+      background: #f8fafc;
+    }
+  `],
 })
 export class SupportNetworkShellComponent {}
 

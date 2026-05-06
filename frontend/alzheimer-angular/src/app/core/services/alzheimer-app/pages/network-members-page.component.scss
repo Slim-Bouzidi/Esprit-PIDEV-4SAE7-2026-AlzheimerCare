@@ -1,127 +1,167 @@
 @import './support-network-portal-layout.scss';
 
+/* ─── Add Member form grid ─────────────────────────────────────────────────── */
 .add-member-grid {
-  max-width: 900px;
+  max-width: 860px;
 }
 
+/* ─── Required hint ────────────────────────────────────────────────────────── */
 .form-card .required-hint {
-  font-size: 0.8rem;
-  color: #b45309;
-  margin: 0 0 0.5rem 0;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin: 0;
 }
 
+/* ─── Submit button ────────────────────────────────────────────────────────── */
 .form-card .btn-add-member {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 6px;
 }
 
 .form-card .btn-add-member::before {
   content: "+";
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 700;
+  line-height: 1;
 }
 
+/* ─── Spacer ───────────────────────────────────────────────────────────────── */
 .field-spacer {
   visibility: hidden;
 }
 
-/* ----- Members list card (doctor-alerts shell) ----- */
+/* ─── Members list card ────────────────────────────────────────────────────── */
 .members-list-card {
-  background: #fff;
-  border-radius: 18px;
-  padding: 20px;
-  margin-bottom: 18px;
-  border: none;
-  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
-  border-top: 5px solid #94a3b8;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
 }
 
 .members-list-card .card-title {
-  font-size: 1.1rem;
+  font-size: 0.9375rem;
   font-weight: 700;
-  margin: 0 0 14px;
+  margin: 0 0 20px;
   color: #0f172a;
-  padding-bottom: 12px;
+  padding-bottom: 14px;
   border-bottom: 1px solid #f1f5f9;
+  letter-spacing: -0.1px;
 }
 
 .members-list-card .action-cell {
   white-space: nowrap;
 }
 
+/* ─── Table cell content ───────────────────────────────────────────────────── */
 .member-name {
-  font-weight: 500;
-  color: var(--text-primary);
+  font-weight: 600;
+  color: #0f172a;
+  font-size: 0.875rem;
 }
 
 .cell-muted {
-  color: var(--text-secondary);
-  font-size: 0.9rem;
+  color: #94a3b8;
+  font-size: 0.8125rem;
 }
 
-/* ----- Messages & empty state ----- */
+/* ─── Messages & empty state ───────────────────────────────────────────────── */
 .msg-inline {
-  margin-bottom: 1rem;
-  padding: 0.75rem 1rem;
-  border-radius: 10px;
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.msg-success {
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.msg-error {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
 }
 
 .empty-msg {
-  margin: 0.5rem 0;
-  color: var(--text-secondary);
+  margin: 4px 0;
+  color: #94a3b8;
+  font-size: 0.875rem;
 }
 
 .empty-state {
-  padding: 1rem;
+  padding: 40px 20px;
   text-align: center;
   background: #f8fafc;
   border-radius: 10px;
-  border: 1px dashed var(--border-color);
+  border: 1px dashed #e2e8f0;
+  color: #94a3b8;
+  font-size: 0.875rem;
 }
 
+/* ─── Skills multi-select ──────────────────────────────────────────────────── */
 .form-select-multiple {
-  min-height: 6.5rem;
-  padding: 0.5rem 0.6rem;
-  border-radius: 12px;
+  min-height: 110px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  height: auto;
+  line-height: 1.6;
+}
+
+.form-select-multiple option {
+  padding: 4px 6px;
+  border-radius: 4px;
+  font-size: 0.875rem;
 }
 
 .skills-hint {
-  margin: 0.35rem 0 0;
-  font-size: 0.8rem;
-  color: var(--text-secondary);
+  margin: 4px 0 0;
+  font-size: 0.75rem;
+  color: #94a3b8;
 }
 
+/* ─── Textarea ─────────────────────────────────────────────────────────────── */
 .form-textarea {
-  min-height: 120px;
+  min-height: 90px;
   resize: vertical;
+  height: auto;
+  padding: 10px 12px;
+  line-height: 1.5;
 }
 
+/* ─── Skills cell ──────────────────────────────────────────────────────────── */
 .skills-cell {
-  max-width: 14rem;
+  max-width: 200px;
 }
 
 .skill-badge {
-  display: inline-block;
-  background: #e3f2fd;
-  padding: 3px 6px;
-  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  background: #eff6ff;
+  color: #1d4ed8;
+  padding: 2px 8px;
+  border-radius: 9999px;
   margin-right: 4px;
-  margin-bottom: 4px;
-  font-size: 12px;
+  margin-bottom: 3px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
 
+/* ─── Phone input group ────────────────────────────────────────────────────── */
 .phone-input-group {
   display: grid;
-  grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr);
-  gap: 0.6rem;
-  align-items: center;
+  grid-template-columns: minmax(160px, 1fr) minmax(160px, 1fr);
+  gap: 8px;
+  align-items: start;
 }
 
-.phone-country-select {
-  width: 100%;
-}
-
+/* ─── Country dropdown ─────────────────────────────────────────────────────── */
 .country-dropdown {
   position: relative;
 }
@@ -133,19 +173,25 @@
   justify-content: space-between;
   text-align: left;
   cursor: pointer;
-  background: #fff;
+  background: #ffffff;
+  padding: 0 12px;
+  gap: 6px;
 }
 
 .country-trigger-main {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  margin-right: 0.6rem;
+  flex: 1;
+  font-size: 0.875rem;
+  color: #0f172a;
 }
 
 .country-trigger-arrow {
-  color: var(--text-secondary);
+  color: #94a3b8;
   transition: transform 0.15s ease;
+  font-size: 0.75rem;
+  flex-shrink: 0;
 }
 
 .country-trigger-arrow.open {
@@ -154,25 +200,31 @@
 
 .country-dropdown-menu {
   position: absolute;
-  z-index: 15;
-  top: calc(100% + 0.25rem);
+  z-index: 50;
+  top: calc(100% + 4px);
   left: 0;
   right: 0;
-  max-height: 220px;
+  max-height: 200px;
   overflow-y: auto;
-  border: 1px solid var(--border-color);
-  border-radius: 10px;
-  background: #fff;
-  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.12), 0 2px 6px rgba(15, 23, 42, 0.06);
+  scrollbar-width: thin;
+  scrollbar-color: #e2e8f0 transparent;
 }
 
 .country-dropdown-item {
   width: 100%;
   text-align: left;
   border: 0;
-  background: #fff;
-  padding: 0.5rem 0.7rem;
+  background: #ffffff;
+  padding: 8px 12px;
   cursor: pointer;
+  font-size: 0.8125rem;
+  color: #374151;
+  font-family: inherit;
+  transition: background-color 0.1s ease;
 }
 
 .country-dropdown-item:hover {
@@ -185,50 +237,65 @@
   font-weight: 600;
 }
 
+/* ─── Phone local input ────────────────────────────────────────────────────── */
 .phone-local-wrap {
   display: flex;
   align-items: center;
-  border: 1px solid var(--border-color);
+  border: 1px solid #e2e8f0;
   border-radius: 8px;
-  background: #fff;
+  background: #ffffff;
   overflow: hidden;
+  height: 38px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.phone-local-wrap:focus-within {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 .phone-prefix {
-  padding: 0.5rem 0.65rem;
+  padding: 0 10px;
   background: #f8fafc;
-  color: var(--text-primary);
+  color: #475569;
   font-weight: 600;
-  border-right: 1px solid var(--border-color);
+  font-size: 0.8125rem;
+  border-right: 1px solid #e2e8f0;
   white-space: nowrap;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
 }
 
 .phone-local-input {
-  border: 0;
-  border-radius: 0;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  height: 100%;
+  flex: 1;
+  min-width: 0;
 }
 
 .phone-local-input:focus {
-  box-shadow: none;
+  box-shadow: none !important;
+  border: 0 !important;
 }
 
 .phone-preview {
-  margin: 0.35rem 0 0 0;
-  font-size: 0.8rem;
-  color: var(--text-secondary);
+  margin: 4px 0 0;
+  font-size: 0.75rem;
+  color: #94a3b8;
 }
 
+/* ─── Responsive ───────────────────────────────────────────────────────────── */
 @media (max-width: 900px) {
   .field-spacer {
     display: none;
   }
 
   .members-list-card {
-    padding: 1.25rem;
-  }
-
-  .members-list-card .action-cell {
-    min-width: 6.4rem;
+    padding: 16px;
   }
 
   .phone-input-group {
