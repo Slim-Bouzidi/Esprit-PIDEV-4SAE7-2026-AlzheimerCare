@@ -1,0 +1,174 @@
+pipeline {
+    agent {
+        kubernetes {
+            yaml '''
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: maven
+    image: maven:3.9.6-eclipse-temurin-17
+    command: ["cat"]
+    tty: true
+    resources:
+      requests:
+        memory: "2Gi"
+        cpu: "1000m"
+      limits:
+        memory: "4Gi"
+        cpu: "2000m"
+  - name: docker
+    image: docker:latest
+    command: ["cat"]
+    tty: true
+    volumeMounts:
+    - name: docker-sock
+      mountPath: /var/run/docker.sock
+  volumes:
+  - name: docker-sock
+    hostPath:
+      path: /var/run/docker.sock
+'''
+        }
+    }
+
+    environment {
+        NEXUS_REGISTRY  = "192.168.188.128:30082"
+        NEXUS_USER      = "admin"
+        NEXUS_PASSWORD  = "admin1234"
+        SONAR_HOST_URL  = "http://192.168.188.128:30005"
+    }
+
+    stages {
+
+        stage('Login to Nexus') {
+            steps {
+                container('docker') {
+                    sh "echo ${NEXUS_PASSWORD} | docker login ${NEXUS_REGISTRY} --username ${NEXUS_USER} --password-stdin"
+                }
+            }
+        }
+
+        stage('Maven Build') {
+            steps {
+                container('maven') {
+                    dir('backend') {
+                        sh 'mvn clean install -DskipTests --batch-mode'
+                    }
+                }
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                container('maven') {
+                    withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_AUTH_TOKEN')]) {
+                        script {
+                            // Analyze Spring Boot 2 services together from parent pom
+                            def sb2Services = 'api-gateway,cognitive-service,discovery-server,patient-service,user-service'
+                            dir('backend') {
+                                sh """
+                                    mvn sonar:sonar \
+                                        -pl ${sb2Services} \
+                                        -DskipTests \
+                                        --batch-mode \
+                                        -Dsonar.host.url=${SONAR_HOST_URL} \
+                                        -Dsonar.projectKey=alzheimer-backend \
+                                        -Dsonar.projectName="Alzheimer Backend" \
+                                        -Dsonar.token=\${SONAR_AUTH_TOKEN} \
+                                        -Dsonar.qualitygate.wait=true \
+                                        -Dsonar.qualitygate.timeout=120 \
+                                        || echo "WARNING: SonarQube quality gate did not pass — review at ${SONAR_HOST_URL}"
+                                """
+                            }
+
+                            // Analyze Spring Boot 3 services independently
+                            dir('backend/AlzheimerApp') {
+                                sh """
+                                    mvn sonar:sonar \
+                                        -DskipTests \
+                                        --batch-mode \
+                                        -Dsonar.host.url=${SONAR_HOST_URL} \
+                                        -Dsonar.projectKey=alzheimer-main-app \
+                                        -Dsonar.projectName="Alzheimer Main App" \
+                                        -Dsonar.token=\${SONAR_AUTH_TOKEN} \
+                                        || echo "WARNING: SonarQube analysis for AlzheimerApp failed"
+                                """
+                            }
+
+                            dir('backend/support-network') {
+                                sh """
+                                    mvn sonar:sonar \
+                                        -DskipTests \
+                                        --batch-mode \
+                                        -Dsonar.host.url=${SONAR_HOST_URL} \
+                                        -Dsonar.projectKey=alzheimer-support-network \
+                                        -Dsonar.projectName="Alzheimer Support Network" \
+                                        -Dsonar.token=\${SONAR_AUTH_TOKEN} \
+                                        || echo "WARNING: SonarQube analysis for support-network failed"
+                                """
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Docker Build & Push') {
+            steps {
+                container('docker') {
+                    sh '''
+                        set -e
+
+                        # Spring Boot 2 services
+                        for service in user-service api-gateway cognitive-service patient-service discovery-server; do
+                            img_name="alzheimer-${service}"
+                            ctx="./backend/${service}"
+                            echo ">>> Building ${img_name} from ${ctx}"
+                            docker build -t ${NEXUS_REGISTRY}/${img_name}:latest ${ctx}
+                            docker push ${NEXUS_REGISTRY}/${img_name}:latest
+                            docker rmi ${NEXUS_REGISTRY}/${img_name}:latest || true
+                        done
+
+                        # AlzheimerApp (Spring Boot 3)
+                        echo ">>> Building alzheimer-main-app from ./backend/AlzheimerApp"
+                        docker build -t ${NEXUS_REGISTRY}/alzheimer-main-app:latest ./backend/AlzheimerApp
+                        docker push ${NEXUS_REGISTRY}/alzheimer-main-app:latest
+                        docker rmi ${NEXUS_REGISTRY}/alzheimer-main-app:latest || true
+
+                        # Support Network (Spring Boot 3)
+                        echo ">>> Building alzheimer-support-network from ./backend/support-network"
+                        docker build -t ${NEXUS_REGISTRY}/alzheimer-support-network:latest ./backend/support-network
+                        docker push ${NEXUS_REGISTRY}/alzheimer-support-network:latest
+                        docker rmi ${NEXUS_REGISTRY}/alzheimer-support-network:latest || true
+
+                        # Keycloak custom image
+                        echo ">>> Building alzheimer-keycloak from ./keycloak"
+                        docker build -t ${NEXUS_REGISTRY}/alzheimer-keycloak:latest ./keycloak
+                        docker push ${NEXUS_REGISTRY}/alzheimer-keycloak:latest
+                        docker rmi ${NEXUS_REGISTRY}/alzheimer-keycloak:latest || true
+
+                        # Free disk space on the node
+                        docker system prune -a --volumes -f || true
+                    '''
+                }
+            }
+        }
+
+        stage('Trigger Deployment') {
+            steps {
+                echo "Handing off to CD Pipeline..."
+                build job: 'alzheimer-backend-cd', wait: false
+            }
+        }
+    }
+
+    post {
+        failure {
+            echo "Backend CI pipeline FAILED. Check logs above."
+        }
+        success {
+            echo "Backend CI pipeline completed successfully."
+        }
+    }
+}

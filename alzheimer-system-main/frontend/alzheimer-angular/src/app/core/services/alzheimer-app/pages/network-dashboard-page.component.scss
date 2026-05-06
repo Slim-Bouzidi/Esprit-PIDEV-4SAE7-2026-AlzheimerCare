@@ -1,0 +1,73 @@
+@import './support-network-portal-layout.scss';
+
+.sn-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
+  gap: 16px;
+  margin-bottom: 1.5rem;
+}
+
+.mid-row {
+  align-items: stretch;
+}
+
+.sn-empty-hint {
+  margin: 0 0 12px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.ranked-list,
+.zone-list {
+  margin: 0;
+}
+
+.ranked-list {
+  padding-left: 1.35rem;
+  padding-bottom: 4px;
+}
+
+.ranked-list li,
+.zone-list li {
+  margin-bottom: 0.65rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.zone-list {
+  list-style: none;
+  padding-left: 0;
+  padding-bottom: 4px;
+}
+
+.zone-list li {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.zone-list li:last-child {
+  border-bottom: none;
+}
+
+.rank-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.rank-meta {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.zone-name {
+  color: var(--text-primary);
+}
+
+.zone-count {
+  font-weight: 700;
+  color: var(--primary-color);
+}

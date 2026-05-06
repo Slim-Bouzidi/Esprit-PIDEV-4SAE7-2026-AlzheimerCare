@@ -1,0 +1,38 @@
+import { Component, input, HostBinding } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { TooltipModule } from 'primeng/tooltip';
+import { ViewChild } from '@angular/core';
+import keycloak from '../../keycloak';
+import { UserCreateDialogComponent } from '../../features/manage-users/user-create-dialog/user-create-dialog.component';
+
+@Component({
+  selector: 'app-topbar',
+  standalone: true,
+  imports: [CommonModule, FormsModule, ButtonModule, InputTextModule, TooltipModule, UserCreateDialogComponent],
+  templateUrl: './topbar.component.html',
+  styleUrl: './topbar.component.scss',
+})
+export class TopbarComponent {
+  /** Left offset; matches `--sidebar-width` / `--sidebar-collapsed-width` from app shell */
+  sidebarOffset = input<string>('var(--sidebar-width)');
+
+  @HostBinding('style.left') get leftOffset(): string {
+    return this.sidebarOffset();
+  }
+
+  searchValue = '';
+  isAdmin = false;
+
+  constructor() {
+    this.isAdmin = keycloak.realmAccess?.roles?.includes('ADMIN') || false;
+  }
+
+  @ViewChild('createDialog') createDialog!: UserCreateDialogComponent;
+
+  onAddUser(): void {
+    this.createDialog?.show();
+  }
+}

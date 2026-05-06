@@ -1,0 +1,93 @@
+pipeline {
+    agent {
+        kubernetes {
+            yaml '''
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: node
+    image: node:20-alpine
+    command: ["cat"]
+    tty: true
+    resources:
+      requests:
+        memory: "1Gi"
+        cpu: "500m"
+      limits:
+        memory: "2Gi"
+        cpu: "1000m"
+  - name: docker
+    image: docker:latest
+    command: ["cat"]
+    tty: true
+    volumeMounts:
+    - name: docker-sock
+      mountPath: /var/run/docker.sock
+  volumes:
+  - name: docker-sock
+    hostPath:
+      path: /var/run/docker.sock
+'''
+        }
+    }
+
+    environment {
+        NEXUS_REGISTRY = "192.168.188.128:30082"
+        NEXUS_USER     = "admin"
+        NEXUS_PASSWORD = "admin1234"
+    }
+
+    stages {
+
+        stage('Login to Nexus') {
+            steps {
+                container('docker') {
+                    sh "echo ${NEXUS_PASSWORD} | docker login ${NEXUS_REGISTRY} --username ${NEXUS_USER} --password-stdin"
+                }
+            }
+        }
+
+        stage('Build Frontend') {
+            steps {
+                container('node') {
+                    dir('frontend/alzheimer-angular') {
+                        sh 'npm ci --prefer-offline || npm install'
+                        sh 'npm run build'
+                    }
+                }
+            }
+        }
+
+        stage('Docker Build & Push') {
+            steps {
+                container('docker') {
+                    sh """
+                        set -e
+                        echo ">>> Building alzheimer-frontend"
+                        docker build -t ${NEXUS_REGISTRY}/alzheimer-frontend:latest ./frontend/alzheimer-angular
+                        docker push ${NEXUS_REGISTRY}/alzheimer-frontend:latest
+                        docker rmi ${NEXUS_REGISTRY}/alzheimer-frontend:latest || true
+                        docker system prune -a --volumes -f || true
+                    """
+                }
+            }
+        }
+
+        stage('Trigger Deployment') {
+            steps {
+                echo "Handing off to CD Pipeline..."
+                build job: 'alzheimer-backend-cd', wait: false
+            }
+        }
+    }
+
+    post {
+        failure {
+            echo "Frontend pipeline FAILED. Check logs above."
+        }
+        success {
+            echo "Frontend pipeline completed successfully."
+        }
+    }
+}

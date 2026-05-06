@@ -1,0 +1,12 @@
+-- Optional one-time data migration (run manually in MySQL only when upgrading an existing DB).
+--
+-- Context: SupportMember.type is now persisted as column `member_type` instead of `type`
+-- (MySQL treats TYPE as a reserved keyword; unquoted SQL against column `type` can fail).
+--
+-- After starting AlzheimerApp once with ddl-auto=update, Hibernate adds `member_type`.
+-- If your table still has legacy column `type` with data and `member_type` is NULL, run:
+--
+-- UPDATE support_member SET member_type = `type` WHERE member_type IS NULL;
+--
+-- Then you may drop the old column when ready:
+-- ALTER TABLE support_member DROP COLUMN `type`;

@@ -1,0 +1,128 @@
+pipeline {
+    agent {
+        kubernetes {
+            yaml '''
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: kubectl
+    image: alpine/k8s:1.29.0
+    command: ["cat"]
+    tty: true
+    securityContext:
+      runAsUser: 0
+'''
+        }
+    }
+
+    stages {
+
+        stage('Ensure Namespace') {
+            steps {
+                container('kubectl') {
+                    sh '''
+                        kubectl create namespace alzheimer --dry-run=client -o yaml | kubectl apply -f -
+                        kubectl create namespace monitoring  --dry-run=client -o yaml | kubectl apply -f -
+                    '''
+                }
+            }
+        }
+
+        stage('Deploy Infrastructure') {
+            steps {
+                container('kubectl') {
+                    sh '''
+                        # Apply ConfigMaps and Secrets first
+                        kubectl apply -f k8s/namespace.yaml           || true
+                        kubectl apply -f k8s/configmap.yaml
+                        kubectl apply -f k8s/gateway-config.yaml
+                        kubectl apply -f k8s/keycloak-realm-config.yaml
+
+                        # Apply infrastructure (MySQL, RabbitMQ)
+                        kubectl apply -f k8s/infrastructure.yaml
+                    '''
+                }
+            }
+        }
+
+        stage('Deploy Application') {
+            steps {
+                container('kubectl') {
+                    sh '''
+                        # Apply all remaining manifests
+                        kubectl apply -f k8s/discovery-server.yaml
+                        kubectl apply -f k8s/keycloak.yaml
+                        kubectl apply -f k8s/microservices.yaml
+                        kubectl apply -f k8s/frontend.yaml
+
+                        # Apply monitoring stack
+                        kubectl apply -f k8s-monitoring/monitoring.yaml
+                    '''
+                }
+            }
+        }
+
+        stage('Rolling Restart') {
+            steps {
+                container('kubectl') {
+                    sh '''
+                        # Restart all app deployments to force new image pull
+                        kubectl rollout restart deployment \
+                            discovery-server \
+                            keycloak \
+                            user-service \
+                            patient-service \
+                            cognitive-service \
+                            api-gateway \
+                            alzheimerapp \
+                            support-network \
+                            frontend \
+                            -n alzheimer
+
+                        echo "Waiting for rollout to complete..."
+                        kubectl rollout status deployment/discovery-server  -n alzheimer --timeout=120s || true
+                        kubectl rollout status deployment/api-gateway        -n alzheimer --timeout=120s || true
+                        kubectl rollout status deployment/frontend           -n alzheimer --timeout=120s || true
+                    '''
+                }
+            }
+        }
+
+        stage('Verify Pods') {
+            steps {
+                container('kubectl') {
+                    sh '''
+                        echo "=== Pods in alzheimer namespace ==="
+                        kubectl get pods -n alzheimer -o wide
+
+                        echo "=== Services in alzheimer namespace ==="
+                        kubectl get svc -n alzheimer
+
+                        echo "=== Pods in monitoring namespace ==="
+                        kubectl get pods -n monitoring -o wide
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        failure {
+            echo "CD pipeline FAILED. Run: kubectl get pods -n alzheimer to diagnose."
+        }
+        success {
+            echo """
+            Deployment complete. Access points:
+              Frontend     : http://192.168.188.128:30420
+              API Gateway  : http://192.168.188.128:30080
+              Keycloak     : http://192.168.188.128:30081
+              Eureka       : http://192.168.188.128:30761
+              Nexus UI     : http://192.168.188.128:30000
+              SonarQube    : http://192.168.188.128:30005
+              Prometheus   : http://192.168.188.128:30090
+              Grafana      : http://192.168.188.128:30030
+            """
+        }
+    }
+}

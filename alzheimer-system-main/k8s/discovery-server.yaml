@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: discovery-server
+  namespace: alzheimer
+spec:
+  type: NodePort
+  ports:
+    - port: 8761
+      targetPort: 8761
+      nodePort: 30761
+  selector:
+    app: discovery-server
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: discovery-server
+  namespace: alzheimer
+spec:
+  selector:
+    matchLabels:
+      app: discovery-server
+  template:
+    metadata:
+      labels:
+        app: discovery-server
+    spec:
+      imagePullSecrets:
+      - name: nexus-creds
+      containers:
+      - name: discovery-server
+        image: 192.168.188.128:30082/alzheimer-discovery-server:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8761
+        env:
+        - name: EUREKA_CLIENT_REGISTER_WITH_EUREKA
+          value: "false"
+        - name: EUREKA_CLIENT_FETCH_REGISTRY
+          value: "false"
