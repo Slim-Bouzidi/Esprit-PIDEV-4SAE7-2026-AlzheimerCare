@@ -1,0 +1,62 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak
+  namespace: alzheimer
+spec:
+  type: NodePort
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: 30081 # You can access Keycloak on your VM_IP:30081
+  selector:
+    app: keycloak
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  namespace: alzheimer
+spec:
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+    spec:
+      imagePullSecrets:
+      - name: nexus-creds
+      containers:
+      - name: keycloak
+        image: 192.168.80.128:30082/alzheimer-keycloak:latest
+        imagePullPolicy: Always
+
+        args: ["start-dev", "--import-realm", "--db=mysql", "--db-url=jdbc:mysql://mysql:3306/keycloak", "--db-username=root", "--db-password=root"]
+
+        env:
+        - name: KC_DB
+          value: "mysql"
+        - name: KC_DB_URL
+          value: "jdbc:mysql://mysql:3306/keycloak"
+        - name: KC_DB_USERNAME
+          value: "root"
+        - name: KC_DB_PASSWORD
+          value: "root"
+        - name: KEYCLOAK_ADMIN
+          value: "admin"
+        - name: KEYCLOAK_ADMIN_PASSWORD
+          value: "admin"
+        - name: KC_HOSTNAME_STRICT
+          value: "false"
+        ports:
+        - containerPort: 8080
+
+        volumeMounts:
+        - name: realm-config
+          mountPath: /opt/keycloak/data/import
+      volumes:
+      - name: realm-config
+        configMap:
+          name: keycloak-realm-config

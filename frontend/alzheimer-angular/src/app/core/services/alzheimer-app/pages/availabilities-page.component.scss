@@ -1,0 +1,124 @@
+@import './support-network-portal-layout.scss';
+
+.member-select-row {
+  margin-bottom: 1.25rem;
+}
+
+.member-select-row .form-label {
+  display: block;
+  margin-bottom: 0.45rem;
+}
+
+.member-select-row .form-input {
+  max-width: 420px;
+}
+
+.availability-grid {
+  max-width: 900px;
+}
+
+.availability-grid .form-row-checkbox {
+  align-self: end;
+}
+
+.form-row-full {
+  grid-column: 1 / -1;
+}
+
+.form-card .required-hint {
+  font-size: 0.8rem;
+  color: #b45309;
+  margin: 0 0 0.5rem 0;
+}
+
+.form-card .btn-add-slot {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.form-card .btn-add-slot::before {
+  content: "+";
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+@media (max-width: 560px) {
+  .form-row-checkbox {
+    align-self: start;
+  }
+}
+
+/* Slots list shell + table chrome come from support-network-portal-layout */
+
+.slots-list-card .action-cell {
+  white-space: nowrap;
+}
+
+.day-badge {
+  display: inline-block;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.time-cell {
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.active-badge {
+  display: inline-block;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.active-badge.active-yes {
+  background: #f0fdf4;
+  color: #15803d;
+}
+
+.active-badge.active-no {
+  background: #f1f5f9;
+  color: var(--text-secondary);
+}
+
+/* ----- Messages & empty state ----- */
+.msg-inline {
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+}
+
+.empty-msg {
+  margin: 0.5rem 0;
+  color: var(--text-secondary);
+}
+
+.empty-state {
+  padding: 1rem;
+  text-align: center;
+  background: #f8fafc;
+  border-radius: 10px;
+  border: 1px dashed var(--border-color);
+}
+
+@media (max-width: 900px) {
+  .slots-list-card {
+    padding: 1.25rem;
+  }
+
+  .slots-list-card .action-cell {
+    min-width: 6.2rem;
+  }
+}

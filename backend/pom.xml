@@ -1,0 +1,38 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.alzheimer</groupId>
+    <artifactId>backend</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>api-gateway</module>
+        <module>cognitive-service</module>
+        <module>discovery-server</module>
+        <module>patient-service</module>
+        <module>user-service</module>
+        <module>AlzheimerApp</module>
+        <module>support-network</module>
+    </modules>
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+            <version>4.0.5</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-jpa</artifactId>
+            <version>4.0.4</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-commons</artifactId>
+            <version>5.0.1</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+</project>

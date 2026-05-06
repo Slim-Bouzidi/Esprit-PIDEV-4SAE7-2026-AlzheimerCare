@@ -1,0 +1,237 @@
+@import './support-network-portal-layout.scss';
+
+.add-member-grid {
+  max-width: 900px;
+}
+
+.form-card .required-hint {
+  font-size: 0.8rem;
+  color: #b45309;
+  margin: 0 0 0.5rem 0;
+}
+
+.form-card .btn-add-member {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.form-card .btn-add-member::before {
+  content: "+";
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.field-spacer {
+  visibility: hidden;
+}
+
+/* ----- Members list card (doctor-alerts shell) ----- */
+.members-list-card {
+  background: #fff;
+  border-radius: 18px;
+  padding: 20px;
+  margin-bottom: 18px;
+  border: none;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+  border-top: 5px solid #94a3b8;
+}
+
+.members-list-card .card-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 14px;
+  color: #0f172a;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.members-list-card .action-cell {
+  white-space: nowrap;
+}
+
+.member-name {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.cell-muted {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+/* ----- Messages & empty state ----- */
+.msg-inline {
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+}
+
+.empty-msg {
+  margin: 0.5rem 0;
+  color: var(--text-secondary);
+}
+
+.empty-state {
+  padding: 1rem;
+  text-align: center;
+  background: #f8fafc;
+  border-radius: 10px;
+  border: 1px dashed var(--border-color);
+}
+
+.form-select-multiple {
+  min-height: 6.5rem;
+  padding: 0.5rem 0.6rem;
+  border-radius: 12px;
+}
+
+.skills-hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.form-textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.skills-cell {
+  max-width: 14rem;
+}
+
+.skill-badge {
+  display: inline-block;
+  background: #e3f2fd;
+  padding: 3px 6px;
+  border-radius: 6px;
+  margin-right: 4px;
+  margin-bottom: 4px;
+  font-size: 12px;
+}
+
+.phone-input-group {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr);
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.phone-country-select {
+  width: 100%;
+}
+
+.country-dropdown {
+  position: relative;
+}
+
+.country-dropdown-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-align: left;
+  cursor: pointer;
+  background: #fff;
+}
+
+.country-trigger-main {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-right: 0.6rem;
+}
+
+.country-trigger-arrow {
+  color: var(--text-secondary);
+  transition: transform 0.15s ease;
+}
+
+.country-trigger-arrow.open {
+  transform: rotate(180deg);
+}
+
+.country-dropdown-menu {
+  position: absolute;
+  z-index: 15;
+  top: calc(100% + 0.25rem);
+  left: 0;
+  right: 0;
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
+}
+
+.country-dropdown-item {
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: #fff;
+  padding: 0.5rem 0.7rem;
+  cursor: pointer;
+}
+
+.country-dropdown-item:hover {
+  background: #f8fafc;
+}
+
+.country-dropdown-item.selected {
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+.phone-local-wrap {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.phone-prefix {
+  padding: 0.5rem 0.65rem;
+  background: #f8fafc;
+  color: var(--text-primary);
+  font-weight: 600;
+  border-right: 1px solid var(--border-color);
+  white-space: nowrap;
+}
+
+.phone-local-input {
+  border: 0;
+  border-radius: 0;
+}
+
+.phone-local-input:focus {
+  box-shadow: none;
+}
+
+.phone-preview {
+  margin: 0.35rem 0 0 0;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 900px) {
+  .field-spacer {
+    display: none;
+  }
+
+  .members-list-card {
+    padding: 1.25rem;
+  }
+
+  .members-list-card .action-cell {
+    min-width: 6.4rem;
+  }
+
+  .phone-input-group {
+    grid-template-columns: 1fr;
+  }
+}
