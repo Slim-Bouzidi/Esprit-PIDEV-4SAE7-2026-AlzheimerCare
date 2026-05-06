@@ -24,6 +24,10 @@ spec:
                         # Apply all manifests
                         kubectl apply -f k8s/ -n alzheimer
                         
+                        # Cleanup legacy resources (renamed to doctor-service)
+                        kubectl delete deployment alzheimerapp -n alzheimer --ignore-not-found
+                        kubectl delete service alzheimerapp -n alzheimer --ignore-not-found
+                        
                         # Restart deployments to pull new images
                         kubectl rollout restart deployment user-service api-gateway cognitive-service patient-service discovery-server doctor-service support-network ml-service frontend keycloak -n alzheimer
                     '''
