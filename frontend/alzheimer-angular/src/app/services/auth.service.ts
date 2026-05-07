@@ -32,7 +32,6 @@ export class AuthService {
 
   /**
    * Authenticate directly against Keycloak's token endpoint.
-   * This requires "Direct Access Grants" to be enabled on the Keycloak client.
    */
   login(email: string, password: string): Observable<TokenResponse> {
     const body = new HttpParams()
@@ -50,28 +49,74 @@ export class AuthService {
         if (error.status === 401 || error.status === 400) {
           return throwError(() => ({
             error: 'invalid_credentials',
-            error_description: 'Invalid email or password. Please try again.'
+            error_description: 'Invalid email or password.'
           } as LoginError));
         }
         return throwError(() => ({
           error: 'server_error',
-          error_description: 'Authentication service is unavailable. Please try again later.'
+          error_description: 'Authentication service is unavailable.'
         } as LoginError));
       })
     );
   }
 
   /**
-   * Initialize Keycloak runtime with tokens from direct grant login.
+   * Production-grade Keycloak Initialization.
+   * This is called by APP_INITIALIZER in app.config.ts.
    */
-  async initKeycloakWithTokens(tokens: TokenResponse): Promise<boolean> {
-    return keycloak.init({
-      onLoad: 'check-sso',
-      checkLoginIframe: false,
-      pkceMethod: 'S256',
-      token: tokens.access_token,
-      refreshToken: tokens.refresh_token,
-      idToken: tokens.id_token
-    });
+  async initKeycloak(): Promise<void> {
+    const savedToken = sessionStorage.getItem('kc_token');
+    const savedRefreshToken = sessionStorage.getItem('kc_refresh_token');
+
+    try {
+      const authenticated = await keycloak.init({
+        onLoad: undefined, // Non-blocking: allows landing page to render immediately
+        checkLoginIframe: false,
+        pkceMethod: 'S256',
+        token: savedToken || undefined,
+        refreshToken: savedRefreshToken || undefined
+      });
+
+      if (authenticated) {
+        await this.syncUser();
+      }
+    } catch (e) {
+      console.warn('Keycloak init skipped (Expected for Landing Page)', e);
+    }
+  }
+
+  /**
+   * Synchronize authenticated user with the backend user-service.
+   */
+  async syncUser(): Promise<void> {
+    if (!keycloak.authenticated || !keycloak.tokenParsed) return;
+
+    const tokenParsed = keycloak.tokenParsed as any;
+    const keycloakId = tokenParsed.sub;
+    const roles = tokenParsed.realm_access?.roles || [];
+    const email = tokenParsed.email || `${tokenParsed.preferred_username || keycloakId}@keycloak-sync.local`;
+    
+    // Map roles to backend expectations
+    const role = roles.includes('DOCTEUR') || roles.includes('DOCTOR') ? 'DOCTOR' :
+                 roles.includes('ADMIN') ? 'ADMIN' : 'PATIENT';
+
+    try {
+      const response = await fetch(`${environment.apiUrl}/users/by-keycloak-id/${keycloakId}`, {
+        headers: { Authorization: `Bearer ${keycloak.token}` }
+      });
+
+      if (response.status === 404) {
+        await fetch(`${environment.apiUrl}/users/sync`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${keycloak.token}` 
+          },
+          body: JSON.stringify({ keycloakId, email, role })
+        });
+      }
+    } catch (e) {
+      console.warn('User synchronization failed', e);
+    }
   }
 }
