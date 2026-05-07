@@ -57,8 +57,8 @@ spec:
             steps {
                 container('maven') {
                     dir('backend/cognitive-service') {
-                        // We run the tests first, then send results to Sonar
-                        sh 'mvn test sonar:sonar -Dsonar.host.url=http://sonarqube.alzheimer:9000 -Dsonar.projectKey=cognitive-service -Dsonar.projectName="Cognitive Service"'
+                        // Using the full Kubernetes service name
+                        sh 'mvn test sonar:sonar -Dsonar.host.url=http://sonarqube.alzheimer.svc.cluster.local:9000 -Dsonar.projectKey=cognitive-service -Dsonar.projectName="Cognitive Service"'
                     }
                 }
             }
