@@ -75,7 +75,9 @@ spec:
                             
                             // Build the JAR for just this service inside the maven container
                             container('maven') {
-                                sh "mvn clean package -pl backend/${service} -am -Dmaven.test.skip=true"
+                                dir('backend') {
+                                    sh "mvn clean package -pl ${service} -am -Dmaven.test.skip=true"
+                                }
                             }
                             
                             def img_name = (service == "doctor-service") ? "alzheimer-doctor-service" : "alzheimer-${service}"
