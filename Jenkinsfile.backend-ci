@@ -46,7 +46,22 @@ spec:
             steps {
                 container('maven') {
                     dir('backend') {
+                        // We skip tests for everything except cognitive-service to save time/RAM
                         sh 'mvn clean install -Dmaven.test.skip=true'
+                    }
+                }
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                container('maven') {
+                    dir('backend/cognitive-service') {
+                        script {
+                            withSonarQubeEnv('sonarqube') {
+                                sh 'mvn sonar:sonar -Dsonar.projectKey=cognitive-service -Dsonar.projectName="Cognitive Service"'
+                            }
+                        }
                     }
                 }
             }
