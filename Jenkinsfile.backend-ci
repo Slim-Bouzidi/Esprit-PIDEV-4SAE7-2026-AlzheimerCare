@@ -53,6 +53,7 @@ spec:
             }
         }
 
+/* 
         stage('SonarQube Analysis') {
             steps {
                 container('maven') {
@@ -64,6 +65,7 @@ spec:
                 }
             }
         }
+*/
 
 
         stage('Docker Build & Push') {
