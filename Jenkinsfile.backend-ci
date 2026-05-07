@@ -54,13 +54,10 @@ spec:
             steps {
                 container('docker') {
                     sh '''
-                        for service in user-service api-gateway cognitive-service patient-service discovery-server doctor-service support-network ml-service; do
+                        for service in user-service api-gateway cognitive-service patient-service discovery-server doctor-service; do
                             if [ "$service" == "doctor-service" ]; then
                                 img_name="alzheimer-doctor-service"
                                 ctx="./backend/doctor-service"
-                            elif [ "$service" == "ml-service" ]; then
-                                img_name="alzheimer-ml-service"
-                                ctx="./backend/ml-model"
                             else
                                 img_name="alzheimer-$service"
                                 ctx="./backend/$service"
@@ -70,10 +67,6 @@ spec:
                             docker rmi $NEXUS_REGISTRY/$img_name:latest || true
                         done
                         
-                        # Also build Keycloak if needed (merged into backend CI for simplicity)
-                        docker build -t $NEXUS_REGISTRY/alzheimer-keycloak:latest ./keycloak
-                        docker push $NEXUS_REGISTRY/alzheimer-keycloak:latest
-                        docker rmi $NEXUS_REGISTRY/alzheimer-keycloak:latest || true
                         
                         # Deep clean to prevent Kubernetes Eviction
                         docker system prune -a --volumes -f || true

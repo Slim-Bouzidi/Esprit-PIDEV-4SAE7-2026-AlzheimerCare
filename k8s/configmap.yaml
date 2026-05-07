@@ -8,7 +8,6 @@ data:
   SPRING_DATASOURCE_URL_PATIENT: jdbc:mysql://mysql:3306/patientdb?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
   SPRING_DATASOURCE_URL_COGNITIVE: jdbc:mysql://mysql:3306/cognitivedb?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
   SPRING_DATASOURCE_URL_APP: jdbc:mysql://mysql:3306/gestion_patients?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-  SPRING_DATASOURCE_URL_NETWORK: jdbc:mysql://mysql:3306/alzheimer_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
   RABBITMQ_HOST: rabbitmq
   EUREKA_SERVER: http://discovery-server:8761/eureka
   KEYCLOAK_ISSUER_URI: http://192.168.192.130:30081/realms/alzheimer-realm

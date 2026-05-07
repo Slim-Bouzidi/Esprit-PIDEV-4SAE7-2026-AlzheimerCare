@@ -29,7 +29,7 @@ spec:
                         kubectl delete service alzheimerapp -n alzheimer --ignore-not-found
                         
                         # Restart deployments to pull new images
-                        kubectl rollout restart deployment user-service api-gateway cognitive-service patient-service discovery-server doctor-service support-network ml-service frontend keycloak -n alzheimer
+                        kubectl rollout restart deployment user-service api-gateway cognitive-service patient-service discovery-server doctor-service frontend keycloak -n alzheimer
                     '''
                 }
             }

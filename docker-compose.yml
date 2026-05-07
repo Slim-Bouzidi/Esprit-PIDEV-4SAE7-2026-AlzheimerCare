@@ -148,24 +148,8 @@ services:
         condition: service_healthy
       patient-service:
         condition: service_started
-      ml-service:
-        condition: service_healthy
     networks:
       - alzheimer-network
-
-  ml-service:
-    build: ./backend/ml-model
-    container_name: ml-service
-    ports:
-      - "5000:5000"
-    networks:
-      - alzheimer-network
-    healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 15s
 
   doctor-service:
     build: ./backend/doctor-service
@@ -190,29 +174,6 @@ services:
     networks:
       - alzheimer-network
 
-  support-network:
-    build: ./backend/support-network
-    container_name: support-network
-    ports:
-      - "8089:8089"
-    environment:
-      - DISCOVERY_HOST=discovery-server
-      - DB_HOST=mysql
-      - DB_PORT=3306
-      - DB_USER=root
-      - DB_PASSWORD=root
-      - KEYCLOAK_HOST=keycloak
-      - KEYCLOAK_PORT=8080
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/alzheimer_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI=http://keycloak:8080/realms/alzheimer-realm/protocol/openid-connect/certs
-      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://localhost:8081/realms/alzheimer-realm
-    depends_on:
-      mysql:
-        condition: service_healthy
-      discovery-server:
-        condition: service_healthy
-    networks:
-      - alzheimer-network
 
   api-gateway:
     build: ./backend/api-gateway
