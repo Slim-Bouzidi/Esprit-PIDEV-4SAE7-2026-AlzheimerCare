@@ -11,6 +11,6 @@ data:
   SPRING_DATASOURCE_USERNAME: root
   SPRING_DATASOURCE_PASSWORD: root
   RABBITMQ_HOST: rabbitmq
-  EUREKA_SERVER: http://discovery-server:8761/eureka
+  EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
   KEYCLOAK_ISSUER_URI: http://192.168.192.130:30081/realms/alzheimer-realm
   KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/alzheimer-realm/protocol/openid-connect/certs
