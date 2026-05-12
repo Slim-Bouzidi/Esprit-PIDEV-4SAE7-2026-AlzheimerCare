@@ -7,7 +7,7 @@
 
 ## Overview
 
-This project was developed as part of the PIDEV - 3rd Year Engineering Program at **Esprit School of Engineering** (Academic Year 2025-2026).
+This project was developed as part of the PIDEV - 4th Year Engineering Program at **Esprit School of Engineering** (Academic Year 2025-2026).
 
 The **Alzheimer Risk Detection System** is a distributed microservices platform designed to provide intelligent monitoring for Alzheimer's patients. By leveraging a modern web architecture, this system assists caregivers and doctors in detecting risky situations—such as falls, wandering, or abnormal behavior patterns—in real-time.
 
@@ -70,7 +70,7 @@ graph TD
 
 ## Academic Context
 
-Developed at **Esprit School of Engineering - Tunisia** PIDEV - 3A | 2025-2026
+Developed at **Esprit School of Engineering - Tunisia** PIDEV - 4A | 2025-2026
 
 ## Getting Started
 
