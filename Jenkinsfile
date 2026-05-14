@@ -6,10 +6,8 @@ apiVersion: v1
 kind: Pod
 spec:
   containers:
-  - name: jnlp
-    image: jenkins/inbound-agent:latest
   - name: git
-    image: alpine/git:latest
+    image: alpine/k8s:1.29.0
     command: ['cat']
     tty: true
 '''
