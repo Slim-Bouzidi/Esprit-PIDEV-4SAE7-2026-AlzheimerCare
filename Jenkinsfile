@@ -1,12 +1,8 @@
 pipeline {
     agent any
     
-    options {
-        disableConcurrentBuilds()
-    }
-
     triggers {
-        pollSCM('* * * * *') // Trigered every minute to detect pushes on local VM
+        pollSCM('* * * * *')
     }
 
     stages {
@@ -19,13 +15,11 @@ pipeline {
                     
                     def backendChanged = false
                     def frontendChanged = false
-                    def keycloakChanged = false
                     def k8sChanged = false
 
                     for (file in changedFiles) {
                         if (file.startsWith('backend/') || file == 'Jenkinsfile.backend-ci') backendChanged = true
                         if (file.startsWith('frontend/') || file == 'Jenkinsfile.frontend') frontendChanged = true
-                        if (file.startsWith('keycloak/')) keycloakChanged = true
                         if (file.startsWith('k8s/')) k8sChanged = true
                     }
 
@@ -34,7 +28,7 @@ pipeline {
                         build job: 'alzheimer-frontend', wait: false
                     }
 
-                    if (backendChanged || keycloakChanged) {
+                    if (backendChanged) {
                         echo ">>> TRIGGERING BACKEND CI PIPELINE"
                         build job: 'alzheimer-backend-ci', wait: false
                     }

@@ -9,8 +9,10 @@ apiVersion: v1
 kind: Pod
 spec:
   containers:
-  - name: jnlp
-    image: jenkins/inbound-agent:3355.v388858a_47b_33-3-jdk21
+  - name: maven
+    image: maven:3.9.6-eclipse-temurin-17
+    command: ['cat']
+    tty: true
   - name: docker
     image: docker:latest
     command: ['cat']
@@ -40,33 +42,35 @@ spec:
             }
         }
 
-
-
-/* 
-        stage('SonarQube Analysis') {
+        stage('Maven Build') {
             steps {
                 container('maven') {
-                    dir('backend/cognitive-service') {
-                        withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_AUTH_TOKEN')]) {
-                            sh 'mvn test sonar:sonar -Dsonar.host.url=http://sonarqube.alzheimer.svc.cluster.local:9000 -Dsonar.projectKey=cognitive-service -Dsonar.projectName="Cognitive Service" -Dsonar.login=${SONAR_AUTH_TOKEN}'
-                        }
+                    dir('backend') {
+                        sh 'mvn clean install -Dmaven.test.skip=true'
                     }
                 }
             }
         }
-*/
-
 
         stage('Docker Build & Push') {
             steps {
                 container('docker') {
                     script {
-                        def services = ['keycloak']
+                        def services = ['user-service', 'api-gateway', 'cognitive-service', 'patient-service', 'discovery-server', 'doctor-service']
                         for (service in services) {
                             echo "Processing service: ${service}"
                             
-                            def img_name = "alzheimer-keycloak"
-                            def ctx = "./keycloak"
+                            def img_name
+                            def ctx
+                            
+                            // Build the JAR for just this service inside the maven container
+                            container('maven') {
+                                dir('backend') {
+                                    sh "mvn clean package -pl ${service} -am -Dmaven.test.skip=true"
+                                }
+                            }
+                            img_name = (service == "doctor-service") ? "alzheimer-doctor-service" : "alzheimer-${service}"
+                            ctx = "./backend/${service}"
                             
                             // Build and Push the Docker image
                             sh "docker build -t ${NEXUS_REGISTRY}/${img_name}:latest ${ctx}"
@@ -74,9 +78,6 @@ spec:
                             sh "docker rmi ${NEXUS_REGISTRY}/${img_name}:latest || true"
                         }
                     }
-                    
-                    // Final deep clean
-                    sh "docker system prune -f || true"
                 }
             }
         }
@@ -88,5 +89,4 @@ spec:
             }
         }
     }
-
 }
