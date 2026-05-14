@@ -2,7 +2,31 @@ pipeline {
     options {
         disableConcurrentBuilds()
     }
-    agent any
+    agent {
+        kubernetes {
+            yaml '''
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: node
+    image: node:20-alpine
+    command: ['cat']
+    tty: true
+  - name: docker
+    image: docker:latest
+    command: ['cat']
+    tty: true
+    volumeMounts:
+    - name: docker-sock
+      mountPath: /var/run/docker.sock
+  volumes:
+  - name: docker-sock
+    hostPath:
+      path: /var/run/docker.sock
+'''
+        }
+    }
 
     environment {
         NEXUS_REGISTRY = "192.168.192.130:30083"
@@ -12,25 +36,31 @@ pipeline {
     stages {
         stage('Login') {
             steps {
-                sh "echo ${NEXUS_PASSWORD} | docker login ${NEXUS_REGISTRY} --username admin --password-stdin"
+                container('docker') {
+                    sh "echo ${NEXUS_PASSWORD} | docker login ${NEXUS_REGISTRY} --username admin --password-stdin"
+                }
             }
         }
 
         stage('Build Frontend') {
             steps {
-                dir('frontend/alzheimer-angular') {
-                    sh 'npm install'
-                    sh 'npm run build'
+                container('node') {
+                    dir('frontend/alzheimer-angular') {
+                        sh 'npm install'
+                        sh 'npm run build'
+                    }
                 }
             }
         }
 
         stage('Docker Build & Push') {
             steps {
-                sh "docker build -t ${NEXUS_REGISTRY}/alzheimer-frontend:latest ./frontend/alzheimer-angular"
-                sh "docker push ${NEXUS_REGISTRY}/alzheimer-frontend:latest"
-                sh "docker rmi ${NEXUS_REGISTRY}/alzheimer-frontend:latest || true"
-                sh "docker system prune -a --volumes -f || true"
+                container('docker') {
+                    sh "docker build -t ${NEXUS_REGISTRY}/alzheimer-frontend:latest ./frontend/alzheimer-angular"
+                    sh "docker push ${NEXUS_REGISTRY}/alzheimer-frontend:latest"
+                    sh "docker rmi ${NEXUS_REGISTRY}/alzheimer-frontend:latest || true"
+                    sh "docker system prune -a --volumes -f || true"
+                }
             }
         }
 
