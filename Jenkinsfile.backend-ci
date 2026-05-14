@@ -9,10 +9,6 @@ apiVersion: v1
 kind: Pod
 spec:
   containers:
-  - name: maven
-    image: maven:3.9.6-eclipse-temurin-17
-    command: ['cat']
-    tty: true
   - name: docker
     image: docker:latest
     command: ['cat']
@@ -42,16 +38,7 @@ spec:
             }
         }
 
-        stage('Maven Build') {
-            steps {
-                container('maven') {
-                    dir('backend') {
-                        // We skisdp t   ests for everything except cognitive-service to save time/RAM
-                        sh 'mvn clean install -Dmaven.test.skip=true'
-                    }
-                }
-            }
-        }
+
 
 /* 
         stage('SonarQube Analysis') {
@@ -72,35 +59,16 @@ spec:
             steps {
                 container('docker') {
                     script {
-                        def services = ['user-service', 'api-gateway', 'cognitive-service', 'patient-service', 'discovery-server', 'doctor-service', 'keycloak']
+                        def services = ['keycloak']
                         for (service in services) {
                             echo "Processing service: ${service}"
                             
-                            def img_name
-                            def ctx
-                            
-                            if (service == "keycloak") {
-                                img_name = "alzheimer-keycloak"
-                                ctx = "./keycloak"
-                            } else {
-                                // Build the JAR for just this service inside the maven container
-                                container('maven') {
-                                    dir('backend') {
-                                        sh "mvn clean package -pl ${service} -am -Dmaven.test.skip=true"
-                                    }
-                                }
-                                img_name = (service == "doctor-service") ? "alzheimer-doctor-service" : "alzheimer-${service}"
-                                ctx = "./backend/${service}"
-                            }
+                            def img_name = "alzheimer-keycloak"
+                            def ctx = "./keycloak"
                             
                             // Build and Push the Docker image
                             sh "docker build -t ${NEXUS_REGISTRY}/${img_name}:latest ${ctx}"
                             sh "docker push ${NEXUS_REGISTRY}/${img_name}:latest"
-                            
-                            // DISK SAVER: Delete the JAR and target files immediately to free up space
-                            if (service != "keycloak") {
-                                sh "rm -rf ${ctx}/target"
-                            }
                             sh "docker rmi ${NEXUS_REGISTRY}/${img_name}:latest || true"
                         }
                     }
