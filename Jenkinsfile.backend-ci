@@ -46,7 +46,7 @@ spec:
             steps {
                 container('maven') {
                     dir('backend') {
-                        // We skip tests for everything except cognitive-service to save time/RAM
+                        // We skisdp t   ests for everything except cognitive-service to save time/RAM
                         sh 'mvn clean install -Dmaven.test.skip=true'
                     }
                 }
