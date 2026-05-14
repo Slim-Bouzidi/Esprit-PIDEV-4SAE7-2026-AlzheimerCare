@@ -72,26 +72,35 @@ spec:
             steps {
                 container('docker') {
                     script {
-                        def services = ['user-service', 'api-gateway', 'cognitive-service', 'patient-service', 'discovery-server', 'doctor-service']
+                        def services = ['user-service', 'api-gateway', 'cognitive-service', 'patient-service', 'discovery-server', 'doctor-service', 'keycloak']
                         for (service in services) {
                             echo "Processing service: ${service}"
                             
-                            // Build the JAR for just this service inside the maven container
-                            container('maven') {
-                                dir('backend') {
-                                    sh "mvn clean package -pl ${service} -am -Dmaven.test.skip=true"
-                                }
-                            }
+                            def img_name
+                            def ctx
                             
-                            def img_name = (service == "doctor-service") ? "alzheimer-doctor-service" : "alzheimer-${service}"
-                            def ctx = "./backend/${service}"
+                            if (service == "keycloak") {
+                                img_name = "alzheimer-keycloak"
+                                ctx = "./keycloak"
+                            } else {
+                                // Build the JAR for just this service inside the maven container
+                                container('maven') {
+                                    dir('backend') {
+                                        sh "mvn clean package -pl ${service} -am -Dmaven.test.skip=true"
+                                    }
+                                }
+                                img_name = (service == "doctor-service") ? "alzheimer-doctor-service" : "alzheimer-${service}"
+                                ctx = "./backend/${service}"
+                            }
                             
                             // Build and Push the Docker image
                             sh "docker build -t ${NEXUS_REGISTRY}/${img_name}:latest ${ctx}"
                             sh "docker push ${NEXUS_REGISTRY}/${img_name}:latest"
                             
                             // DISK SAVER: Delete the JAR and target files immediately to free up space
-                            sh "rm -rf ${ctx}/target"
+                            if (service != "keycloak") {
+                                sh "rm -rf ${ctx}/target"
+                            }
                             sh "docker rmi ${NEXUS_REGISTRY}/${img_name}:latest || true"
                         }
                     }
