@@ -6,7 +6,7 @@ pipeline {
     }
 
     triggers {
-        pollSCM('* * * * *') 
+        pollSCM('* * * * *') // Triggered every minute to detect pushes on local VM
     }
 
     stages {
