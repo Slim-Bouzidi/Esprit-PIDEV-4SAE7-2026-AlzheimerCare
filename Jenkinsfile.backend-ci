@@ -2,7 +2,27 @@ pipeline {
     options {
         disableConcurrentBuilds()
     }
-    agent any
+    agent {
+        kubernetes {
+            yaml '''
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: docker
+    image: docker:latest
+    command: ['cat']
+    tty: true
+    volumeMounts:
+    - name: docker-sock
+      mountPath: /var/run/docker.sock
+  volumes:
+  - name: docker-sock
+    hostPath:
+      path: /var/run/docker.sock
+'''
+        }
+    }
 
     environment {
         NEXUS_REGISTRY = "192.168.192.130:30083"
@@ -12,7 +32,9 @@ pipeline {
     stages {
         stage('Login') {
             steps {
-                sh "echo ${NEXUS_PASSWORD} | docker login ${NEXUS_REGISTRY} --username admin --password-stdin"
+                container('docker') {
+                    sh "echo ${NEXUS_PASSWORD} | docker login ${NEXUS_REGISTRY} --username admin --password-stdin"
+                }
             }
         }
 
